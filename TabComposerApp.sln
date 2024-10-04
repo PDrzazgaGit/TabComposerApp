@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TabComposerApp.Server", "TabComposerApp.Server\TabComposerApp.Server.csproj", "{A31F412F-8DB8-4EA8-850C-BE73DF12AE5E}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "tabcomposerapp.client", "tabcomposerapp.client\tabcomposerapp.client.esproj", "{387C742E-2AF5-40D8-B7E6-90261B29F542}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A31F412F-8DB8-4EA8-850C-BE73DF12AE5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A31F412F-8DB8-4EA8-850C-BE73DF12AE5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A31F412F-8DB8-4EA8-850C-BE73DF12AE5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A31F412F-8DB8-4EA8-850C-BE73DF12AE5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{387C742E-2AF5-40D8-B7E6-90261B29F542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{387C742E-2AF5-40D8-B7E6-90261B29F542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{387C742E-2AF5-40D8-B7E6-90261B29F542}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{387C742E-2AF5-40D8-B7E6-90261B29F542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{387C742E-2AF5-40D8-B7E6-90261B29F542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{387C742E-2AF5-40D8-B7E6-90261B29F542}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA03B364-597F-4213-972E-6A484C9165C6}
+	EndGlobalSection
+EndGlobal
