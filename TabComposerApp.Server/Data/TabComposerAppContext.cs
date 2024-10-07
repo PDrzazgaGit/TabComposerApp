@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using TabComposerApp.Server.Models;
 
 namespace TabComposerApp.Server.Data
 {
-    public class TabComposerAppContext : DbContext
+    public class TabComposerAppContext : IdentityDbContext<User>
     {
-        public DbSet<User> Users = null!;
         public DbSet<Song> Songs = null!;
         public DbSet<Tabulature> Tabulatures = null!;
         public DbSet<Comment> Comments = null!;
@@ -14,6 +14,7 @@ namespace TabComposerApp.Server.Data
         
         Po wykonaniu zmian
 
+        Remove-Migration
         Add-Migration NAZWA
         Update-Database
 
@@ -29,23 +30,16 @@ namespace TabComposerApp.Server.Data
 
             modelBuilder.Entity<User>(entity => {
 
-                entity.HasKey(u => u.Id);
-
-                entity.Property(u => u.Id).ValueGeneratedOnAdd();
-                entity.Property(u => u.Username).IsRequired().HasMaxLength(30);
-                entity.Property(u => u.Email).IsRequired();
-                entity.Property(u => u.Role).IsRequired();
-                entity.Property(u => u.PasswordHash).IsRequired();
-                entity.Property(u => u.PasswordSalt).IsRequired();
                 entity.Property(u => u.Active).IsRequired();
                 entity.Property(u => u.CreatedAt).IsRequired();
-
+                
                 entity.HasMany(u => u.Songs)
                     .WithOne(s => s.User)
                     .HasForeignKey(s => s.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+                
             });
-
+            
             modelBuilder.Entity<Song>(entity => {
                 entity.HasKey(s => s.Id);
 
@@ -95,6 +89,8 @@ namespace TabComposerApp.Server.Data
                     .WithMany(s => s.Comments)
                     .HasForeignKey(c => c.SongId);
             });
+            
+            modelBuilder.HasDefaultSchema("identity");
         }
         
     }

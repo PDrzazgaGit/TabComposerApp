@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TabComposerApp.Server.Data;
 
@@ -11,9 +12,11 @@ using TabComposerApp.Server.Data;
 namespace TabComposerApp.Server.Migrations
 {
     [DbContext(typeof(TabComposerAppContext))]
-    partial class TabComposerAppContextModelSnapshot : ModelSnapshot
+    [Migration("20241007141256_CreateOtherTables")]
+    partial class CreateOtherTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,13 +208,16 @@ namespace TabComposerApp.Server.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
-                    b.Property<string>("UserId")
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId1")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Song", "identity");
                 });
@@ -394,7 +400,7 @@ namespace TabComposerApp.Server.Migrations
                 {
                     b.HasOne("TabComposerApp.Server.Models.User", "User")
                         .WithMany("Songs")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

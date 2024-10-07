@@ -6,32 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TabComposerApp.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class CreateOtherTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "User",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordSalt = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Active = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_User", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Song",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -40,21 +22,24 @@ namespace TabComposerApp.Server.Migrations
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Public = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Song", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Song_User_UserId",
-                        column: x => x.UserId,
-                        principalTable: "User",
+                        name: "FK_Song_AspNetUsers_UserId1",
+                        column: x => x.UserId1,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Comment",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -69,6 +54,7 @@ namespace TabComposerApp.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Comment_Song_SongId",
                         column: x => x.SongId,
+                        principalSchema: "identity",
                         principalTable: "Song",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -76,6 +62,7 @@ namespace TabComposerApp.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Tabulature",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -93,6 +80,7 @@ namespace TabComposerApp.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Tabulature_Song_SongId",
                         column: x => x.SongId,
+                        principalSchema: "identity",
                         principalTable: "Song",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -100,16 +88,19 @@ namespace TabComposerApp.Server.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comment_SongId",
+                schema: "identity",
                 table: "Comment",
                 column: "SongId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Song_UserId",
+                name: "IX_Song_UserId1",
+                schema: "identity",
                 table: "Song",
-                column: "UserId");
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tabulature_SongId",
+                schema: "identity",
                 table: "Tabulature",
                 column: "SongId");
         }
@@ -118,16 +109,16 @@ namespace TabComposerApp.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Comment");
+                name: "Comment",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Tabulature");
+                name: "Tabulature",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Song");
-
-            migrationBuilder.DropTable(
-                name: "User");
+                name: "Song",
+                schema: "identity");
         }
     }
 }

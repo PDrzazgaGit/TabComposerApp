@@ -11,7 +11,7 @@ namespace TabComposerApp.Server.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         #region FK
-        public int UserId { get; set; }
+        public string UserId { get; set; } = null!;
         public User User { get; set; } = null!;
         public ICollection<Tabulature> Tabulatures { get; set; } = new List<Tabulature>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
