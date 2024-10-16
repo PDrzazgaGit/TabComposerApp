@@ -34,7 +34,8 @@ export const MyOffcanvas: FC<MyOffcanvasProps> = ({
                 show={show}
                 onHide={handleClose}
                 style={{
-                    width: isMobile ? '100%' : 'auto', 
+                    width: isMobile ? '100%' : 'auto',
+                    minWidth: isMobile ? '100%' : '25%', 
                     transition: 'width 0.3s ease-in-out', 
                 }}
                 {...props}

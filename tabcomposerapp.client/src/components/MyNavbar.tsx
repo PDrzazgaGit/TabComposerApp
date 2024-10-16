@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navbar, Nav, Container, Form, InputGroup } from "react-bootstrap";
 import { MyOffcanvas } from "./MyOffcanvas";
-import { MyLoginForm } from "./MyLoginForm";
+import { AuthorizationForm } from "./AuthorizationForm";
 
 export const MyNavbar = () => {
-    
+
+    const [offcanvasTitle, setOffcanvasTitle] = useState<string>();
+
     return (
         <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
             <Container>
@@ -34,12 +37,13 @@ export const MyNavbar = () => {
                         <Nav className="me-auto ">
                             <Nav.Link as={Link} to="/about">About</Nav.Link>
                             <MyOffcanvas
-                                title="Login"
+                                title={offcanvasTitle}
                                 trigger={<Nav.Link as={Link} to="/login">Sign in</Nav.Link>}
-                                placement="end"
-                                
+                                placement="end"   
                             >
-                               <MyLoginForm/>
+                                <AuthorizationForm
+                                    updateTitle={setOffcanvasTitle}
+                                />
                             </MyOffcanvas>
                             
                         </Nav>
