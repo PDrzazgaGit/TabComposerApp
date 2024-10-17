@@ -21,9 +21,15 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
+    const [authErrorState, setAuthErrorState] = useState<string>('');
+
+    const handleErrorState = (newState: string = "") => {
+        setAuthErrorState(newState);
+    }
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-
+        let errorMessage: string = "";
         try {
             switch (formState) {
                 case FormState.SIGNUP: {
@@ -42,8 +48,11 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                     break;
             }
         } catch (error) {
-            console.error("B³¹d:", error);
+            if (error instanceof Error) errorMessage = error.message
+            else errorMessage = String(error)
+            console.error(error);
         }
+        handleErrorState(errorMessage);
     };
 
     // Funkcja prze³¹czaj¹ca tryb
@@ -151,7 +160,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 <Button className="mb-3 w-100" variant="light" type="submit">
                     {buttonText}
                 </Button>
-                <Form.Group className="d-flex justify-content-center align-items-center">
+                <Form.Group className="mb-3 d-flex justify-content-center align-items-center">
                     {text}
                     <Button variant="link" onClick={() => changeMode(
                         formState === FormState.SIGNIN ? FormState.SIGNUP : FormState.SIGNIN
@@ -163,6 +172,20 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
         );
     }
 
+    const renderError = () => {
+        if (authErrorState === "") {
+            return null;
+        }
+        return (
+            <Form.Group className="d-flex justify-content-center align-items-center">
+                <p className="alert alert-danger">
+                    {authErrorState}
+                </p>
+            
+            </Form.Group>
+        );
+    }
+
     return (
         <Form onSubmit={handleSubmit}>
             {formState !== FormState.CHANGEPSWD && renderUsernameInput()}
@@ -170,6 +193,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             {formState !== FormState.CHANGEPSWD && renderPasswordInput()}
             {formState === FormState.SIGNIN && renderForgotPasswordLink()}
             {renderActions()}
+            {renderError()}
         </Form>
     );
 };

@@ -1,34 +1,38 @@
+import axios from "axios";
 
 export const signUp = async (email: string, username: string, password: string) => {
-    const response = await fetch('https://localhost:44366/api/auth/signup', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, username, password })
-    });
+    try {
+        const response = await axios.post('https://localhost:44366/api/auth/signup', {
+            email,
+            username,
+            password
+        });
 
-    if (!response.ok) {
+        return response.data; // Zwraca odpowiedŸ z API (np. komunikat o sukcesie)
+    } catch (error) {
+        // Sprawdzanie, czy b³¹d ma odpowiedŸ z serwera
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message || 'Failed to sign up');
+        }
         throw new Error('Failed to sign up');
     }
-
-    return response.json();
 };
 
-
 export const signIn = async (username: string, password: string) => {
-    const response = await fetch('https://localhost:44366/api/auth/signin', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password })
-    });
+    try {
+        const response = await axios.post('https://localhost:44366/api/auth/signin', {
+            username,
+            password
+        });
 
-    if (!response.ok) {
-      
+        // Zwracanie tokena, jeœli logowanie zakoñczone sukcesem
+        return response.data.token;
+    } catch (error) {
+        // Obs³uga b³êdu
+        if (axios.isAxiosError(error) && error.response) {
+            // Przechwytywanie wiadomoœci z odpowiedzi serwera
+            throw new Error(error.response.data.message || 'Failed to sign in');
+        }
         throw new Error('Failed to sign in');
     }
-
-    return response.json(); 
 };
