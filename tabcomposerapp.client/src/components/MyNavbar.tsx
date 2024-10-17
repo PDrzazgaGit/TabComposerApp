@@ -5,7 +5,7 @@ import { MyOffcanvas } from "./MyOffcanvas";
 import { AuthorizationForm } from "./AuthorizationForm";
 
 export const MyNavbar = () => {
-
+    
     const [offcanvasTitle, setOffcanvasTitle] = useState<string>();
 
     return (
@@ -31,7 +31,7 @@ export const MyNavbar = () => {
                             </InputGroup.Text>
                         </InputGroup>
                     </Form>
-                    
+
                     <Nav className="ms-auto d-flex align-items-center">
 
                         <Nav className="me-auto ">
@@ -49,7 +49,7 @@ export const MyNavbar = () => {
                         </Nav>
 
                     </Nav>
-
+                    
                     
                 </Navbar.Collapse>
             </Container>
