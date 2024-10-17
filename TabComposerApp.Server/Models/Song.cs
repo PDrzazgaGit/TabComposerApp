@@ -12,7 +12,7 @@ namespace TabComposerApp.Server.Models
 
         #region FK
         public string UserId { get; set; } = null!;
-        public User User { get; set; } = null!;
+        public AppUser User { get; set; } = null!;
         public ICollection<Tabulature> Tabulatures { get; set; } = new List<Tabulature>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         #endregion

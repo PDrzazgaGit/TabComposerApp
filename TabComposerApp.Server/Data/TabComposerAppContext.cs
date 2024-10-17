@@ -4,8 +4,9 @@ using TabComposerApp.Server.Models;
 
 namespace TabComposerApp.Server.Data
 {
-    public class TabComposerAppContext : IdentityDbContext<User>
+    public class TabComposerAppContext : IdentityDbContext<AppUser>
     {
+        public DbSet<AppUser> AppUsers = null!; 
         public DbSet<Song> Songs = null!;
         public DbSet<Tabulature> Tabulatures = null!;
         public DbSet<Comment> Comments = null!;
@@ -28,7 +29,7 @@ namespace TabComposerApp.Server.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>(entity => {
+            modelBuilder.Entity<AppUser>(entity => {
 
                 entity.Property(u => u.Active).IsRequired();
                 entity.Property(u => u.CreatedAt).IsRequired();

@@ -3,8 +3,9 @@ using TabComposerApp.Server.Data;
 
 namespace TabComposerApp.Server.Models
 {
-    public class User : IdentityUser
+    public class AppUser : IdentityUser
     {
+        [PersonalData]
         public string? Description { get; set; }
 
         public DateTime CreatedAt = DateTime.UtcNow;

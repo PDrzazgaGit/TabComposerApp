@@ -1,6 +1,13 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using TabComposerApp.Server.Data;
+using TabComposerApp.Server.Extensions;
 
 using TabComposerApp.Server.Models;
 
@@ -9,44 +16,31 @@ var builder = WebApplication.CreateBuilder(args);
 #region Services
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
-
-builder.Services.AddIdentityCore<User>()
-    .AddEntityFrameworkStores<TabComposerAppContext>()
-    .AddApiEndpoints();
-
-builder.Services.AddDbContextPool<TabComposerAppContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("TabComposerDBConnection"));
-});
+builder.Services.AddSwaggerExplorer().
+                 InjectDbContext(builder.Configuration)
+                .AddIdentityHandlersStores()
+                .ConfigureIdentityOptions()
+                .AddIdentityAuth(builder.Configuration);
 
 #endregion
 
 var app = builder.Build();
 
+app.ConfigureSwaggerExplorer()
+   .ConfigureCORS(builder.Configuration)
+   .AddIdentityAuthMiddlewares();
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-}
-
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
-app.MapIdentityApi<User>();
+app.MapGroup("/api")
+   .MapIdentityApi<AppUser>();
 
 app.Run();
+
