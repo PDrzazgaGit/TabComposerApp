@@ -12,7 +12,23 @@ export const signUp = async (email: string, username: string, password: string) 
     } catch (error) {
         // Sprawdzanie, czy b³¹d ma odpowiedŸ z serwera
         if (axios.isAxiosError(error) && error.response) {
-            throw new Error(error.response.data.message || 'Failed to sign up');
+            const serverErrors = error.response.data; // Zak³adamy, ¿e server zwraca tablicê obiektów b³êdów
+            const formattedErrors: { email?: string[]; username?: string[]; password?: string[] } = {};
+
+            // Przechodzimy przez b³êdy i organizujemy je wed³ug pól
+            serverErrors.forEach((err: { code: string; description: string }) => {
+                if (err.code.includes("Email")) {
+                    formattedErrors.email = formattedErrors.email || [];
+                    formattedErrors.email.push(err.description);
+                } else if (err.code.includes("UserName")) {
+                    formattedErrors.username = formattedErrors.username || [];
+                    formattedErrors.username.push(err.description);
+                } else if (err.code.includes("Password")) {
+                    formattedErrors.password = formattedErrors.password || [];
+                    formattedErrors.password.push(err.description);
+                }
+            });
+            throw formattedErrors;
         }
         throw new Error('Failed to sign up');
     }

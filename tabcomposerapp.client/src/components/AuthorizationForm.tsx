@@ -21,15 +21,35 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
-    const [authErrorState, setAuthErrorState] = useState<string>('');
+    const [formErrors, setFormErrors] = useState<{ email?: string[]; username?: string[]; password?: string[] }>({
+        email: [],
+        username: [],
+        password: []
+    });
 
-    const handleErrorState = (newState: string = "") => {
-        setAuthErrorState(newState);
-    }
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        let errorMessage: string = "";
+
+        // Reset 
+        setFormErrors({ email: [], username: [], password: [] });
+
+        const errors: { email?: string[]; username?: string[]; password?: string[] } = {};
+        if (formState === FormState.SIGNUP && !email) {
+            errors.email = ['Email is required.'];
+        }
+        if (!username) {
+            errors.username = ['Username is required.'];
+        }
+        if (!password) {
+            errors.password = ['Password is required.'];
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+
         try {
             switch (formState) {
                 case FormState.SIGNUP: {
@@ -37,7 +57,6 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                     console.log("Signed up:", signUpResponse);
                     break;
                 }
-                   
                 case FormState.SIGNIN: {
                     const token = await signIn(username, password);
                     console.log("Signed in:", token);
@@ -48,16 +67,21 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                     break;
             }
         } catch (error) {
-            if (error instanceof Error) errorMessage = error.message
-            else errorMessage = String(error)
-            console.error(error);
+            if (typeof error === 'object' && error !== null) {
+                setFormErrors(error); // Ustawiamy b³êdy w stanie
+            } else {
+                console.error('An unexpected error occurred:', error);
+            }
         }
-        handleErrorState(errorMessage);
     };
 
     // Funkcja prze³¹czaj¹ca tryb
     const changeMode = (newState: FormState) => {
         setFormState(newState);
+        setFormErrors({ email: [], username: [], password: [] });
+        setEmail("");
+        setPassword("");
+        setUsername("");
     };
 
     useEffect(() => {
@@ -74,7 +98,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             default:
                 updateTitle("Welcome!");
         }
-    });
+    }, [FormState.CHANGEPSWD, FormState.SIGNIN, FormState.SIGNUP, formState, updateTitle]);
 
     const renderEmailInput = () => (
         <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -87,10 +111,17 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 type="email"
                 placeholder="Enter email"
                 value={email}
-                onChange={ (e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
+                isInvalid={formErrors.email && formErrors.email.length > 0}
             />
+            <Form.Control.Feedback type="invalid">
+                {formErrors.email && formErrors.email.map((error, index) => (
+                    <div key={index}>{error}</div>
+                ))}
+            </Form.Control.Feedback>
         </Form.Group>
     );
+
 
     const renderPasswordInput = () => (
         <Form.Group className="mb-3" controlId="formBasicPassword">
@@ -98,23 +129,37 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             <Form.Control
                 type="password"
                 placeholder="Password"
-                value={password}               
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                isInvalid={formErrors.password && formErrors.password.length > 0}
             />
+            <Form.Control.Feedback type="invalid">
+                {formErrors.password && formErrors.password.map((error, index) => (
+                    <div key={index}>{error}</div>
+                ))}
+            </Form.Control.Feedback>
         </Form.Group>
     );
 
+
     const renderUsernameInput = () => (
-        < Form.Group className = "mb-3" controlId = "formBasicUsername" >
+        <Form.Group className="mb-3" controlId="formBasicUsername">
             <Form.Label>Username</Form.Label>
             <Form.Control
                 type="text"
                 placeholder="Enter username"
-                value={username}                 
+                value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                isInvalid={formErrors.username && formErrors.username.length > 0}
             />
-        </Form.Group >
+            <Form.Control.Feedback type="invalid">
+                {formErrors.username && formErrors.username.map((error, index) => (
+                    <div key={index}>{error}</div>
+                ))}
+            </Form.Control.Feedback>
+        </Form.Group>
     );
+
 
     const renderForgotPasswordLink = () => (
         <Form.Group className="mb-3 d-flex justify-content-center align-items-center">
@@ -172,20 +217,6 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
         );
     }
 
-    const renderError = () => {
-        if (authErrorState === "") {
-            return null;
-        }
-        return (
-            <Form.Group className="d-flex justify-content-center align-items-center">
-                <p className="alert alert-danger">
-                    {authErrorState}
-                </p>
-            
-            </Form.Group>
-        );
-    }
-
     return (
         <Form onSubmit={handleSubmit}>
             {formState !== FormState.CHANGEPSWD && renderUsernameInput()}
@@ -193,7 +224,6 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             {formState !== FormState.CHANGEPSWD && renderPasswordInput()}
             {formState === FormState.SIGNIN && renderForgotPasswordLink()}
             {renderActions()}
-            {renderError()}
         </Form>
     );
 };
