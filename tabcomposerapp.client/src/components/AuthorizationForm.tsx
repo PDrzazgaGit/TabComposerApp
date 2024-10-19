@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { signUp, signIn } from '../api/AuthService';
+import { apiErrorFormatter } from '../api/ApiErrorFormatter';
 
 interface AuthorizationFormProps {
     updateTitle: (newTutle: string) => void;
@@ -67,11 +68,20 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                     break;
             }
         } catch (error) {
+
+            /*
             if (typeof error === 'object' && error !== null) {
                 setFormErrors(error); // Ustawiamy b³êdy w stanie
             } else {
                 console.error('An unexpected error occurred:', error);
             }
+            */
+            const errors = apiErrorFormatter(error, {
+                email: "Email",
+                username: "UserName",
+                password: "Password"
+            })
+            setFormErrors(errors);
         }
     };
 
