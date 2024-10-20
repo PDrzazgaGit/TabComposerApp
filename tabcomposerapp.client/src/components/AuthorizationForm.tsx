@@ -79,7 +79,8 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             const errors = apiErrorFormatter(error, {
                 email: "Email",
                 username: "UserName",
-                password: "Password"
+                password: "Password",
+                message: "message"
             })
             setFormErrors(errors);
         }
