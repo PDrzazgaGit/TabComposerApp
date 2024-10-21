@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Navbar, Nav, Container, Form, InputGroup } from "react-bootstrap";
+import { Navbar, Nav, Container, Form, InputGroup, Button } from "react-bootstrap";
 import { MyOffcanvas } from "./MyOffcanvas";
 import { AuthorizationForm } from "./AuthorizationForm";
+import {useAuth } from "./../context/AuthContext"
+
+
 
 export const MyNavbar = () => {
-    
+
+    const { user, signOut } = useAuth();
+
     const [offcanvasTitle, setOffcanvasTitle] = useState<string>();
 
     return (
@@ -36,15 +41,27 @@ export const MyNavbar = () => {
 
                         <Nav className="me-auto ">
                             <Nav.Link as={Link} to="/about">About</Nav.Link>
-                            <MyOffcanvas
-                                title={offcanvasTitle}
-                                trigger={<Nav.Link as={Link} to="/login">Sign in</Nav.Link>}
-                                placement="end"   
-                            >
-                                <AuthorizationForm
-                                    updateTitle={setOffcanvasTitle}
-                                />
-                            </MyOffcanvas>
+                            {user === null && (
+                                <MyOffcanvas
+                                    title={offcanvasTitle}
+                                    trigger={<Nav.Link>Sign in</Nav.Link>}
+                                    placement="end"
+                                >
+                                    <AuthorizationForm updateTitle={setOffcanvasTitle} />
+                                </MyOffcanvas>
+                            ) || user !== null && (
+                                <MyOffcanvas
+                                    title={"Hello " + user.username}
+                                    trigger={<Nav.Link>My Account</Nav.Link>}
+                                    placement="end"
+                                >
+                                    some manage account component
+                                    <Button onClick={ signOut }>
+                                        Sign Out
+                                    </Button>
+                                </MyOffcanvas>
+                            )}
+                           
                             
                         </Nav>
 

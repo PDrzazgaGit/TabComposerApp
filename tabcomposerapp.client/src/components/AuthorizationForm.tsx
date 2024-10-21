@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { signUp, signIn } from '../api/AuthService';
 import { apiErrorFormatter } from '../api/ApiErrorFormatter';
+import { useAuth } from '../context/AuthContext'
 
 interface AuthorizationFormProps {
     updateTitle: (newTutle: string) => void;
@@ -22,10 +22,13 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
-    const [formErrors, setFormErrors] = useState<{ email?: string[]; username?: string[]; password?: string[] }>({
+    const { signIn, signUp } = useAuth();
+
+    const [formErrors, setFormErrors] = useState<{ email?: string[]; username?: string[]; password?: string[]; message?: string[] }>({
         email: [],
         username: [],
-        password: []
+        password: [],
+        message: []
     });
 
 
@@ -54,13 +57,11 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
         try {
             switch (formState) {
                 case FormState.SIGNUP: {
-                    const signUpResponse = await signUp(email, username, password);
-                    console.log("Signed up:", signUpResponse);
-                    break;
+                    await signUp(email, username, password);
+                    //break; // usun¹æ w celu automatycznego zalogowania
                 }
                 case FormState.SIGNIN: {
-                    const token = await signIn(username, password);
-                    console.log("Signed in:", token);
+                    await signIn(username, password);
                     break;
                 }
                 case FormState.CHANGEPSWD:
@@ -68,14 +69,6 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                     break;
             }
         } catch (error) {
-
-            /*
-            if (typeof error === 'object' && error !== null) {
-                setFormErrors(error); // Ustawiamy b³êdy w stanie
-            } else {
-                console.error('An unexpected error occurred:', error);
-            }
-            */
             const errors = apiErrorFormatter(error, {
                 email: "Email",
                 username: "UserName",
@@ -222,7 +215,12 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                         formState === FormState.SIGNIN ? FormState.SIGNUP : FormState.SIGNIN
                     )}>
                         {buttonLinkText}
-                    </Button>
+                    </Button>  
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    {formErrors.message && formErrors.message.map((error, index) => (
+                        <div className="alert alert-danger text-center" role="alert" key={index}>{error}</div>
+                    ))}
                 </Form.Group>
             </>
         );

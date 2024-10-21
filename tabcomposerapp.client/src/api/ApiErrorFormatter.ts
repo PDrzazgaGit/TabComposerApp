@@ -55,9 +55,7 @@ export const apiErrorFormatter = (
         }
         
     } else {
-        // Jeœli to nie jest b³¹d axiosa, mo¿esz dodaæ ogóln¹ obs³ugê dla innych typów b³êdów
         formattedErrors.unknown = ['Unexpected error occurred'];
     }
-    console.log(formattedErrors);
     return formattedErrors;
 }
