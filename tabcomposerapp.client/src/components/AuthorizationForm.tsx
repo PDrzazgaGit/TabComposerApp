@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { apiErrorFormatter } from '../api/ApiErrorFormatter';
-import { useAuth } from '../context/AuthContext'
+//import { apiErrorFormatter } from '../api/ApiErrorFormatter';
+import { useAuthContext } from '../context/useAuthContext'
+import { useErrorContext } from '../context/useErrorContext';
 
 interface AuthorizationFormProps {
     updateTitle: (newTutle: string) => void;
@@ -21,68 +22,34 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     const [email, setEmail] = useState<string>('');
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [remember, setRemember] = useState<boolean>(false);
 
-    const { signIn, signUp } = useAuth();
+    const { signIn, signUp } = useAuthContext(); 
 
-    const [formErrors, setFormErrors] = useState<{ email?: string[]; username?: string[]; password?: string[]; message?: string[] }>({
-        email: [],
-        username: [],
-        password: [],
-        message: []
-    });
-
+    const { formErrors, clearFormErrors } = useErrorContext();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-
-        // Reset 
-        setFormErrors({ email: [], username: [], password: [] });
-
-        const errors: { email?: string[]; username?: string[]; password?: string[] } = {};
-        if (formState === FormState.SIGNUP && !email) {
-            errors.email = ['Email is required.'];
-        }
-        if (!username) {
-            errors.username = ['Username is required.'];
-        }
-        if (!password) {
-            errors.password = ['Password is required.'];
-        }
-
-        if (Object.keys(errors).length > 0) {
-            setFormErrors(errors);
-            return;
-        }
-
-        try {
-            switch (formState) {
-                case FormState.SIGNUP: {
-                    await signUp(email, username, password);
-                    //break; // usun¹æ w celu automatycznego zalogowania
-                }
-                case FormState.SIGNIN: {
-                    await signIn(username, password);
-                    break;
-                }
-                case FormState.CHANGEPSWD:
-                    // TODO
-                    break;
+        clearFormErrors();
+        switch (formState) {
+            case FormState.SIGNUP: {
+                await signUp(email, username, password);
+                break;
             }
-        } catch (error) {
-            const errors = apiErrorFormatter(error, {
-                email: "Email",
-                username: "UserName",
-                password: "Password",
-                message: "message"
-            })
-            setFormErrors(errors);
+            case FormState.SIGNIN: {
+                await signIn(username, password, remember);
+                break;
+            }
+            case FormState.CHANGEPSWD:
+                // TODO
+                break;
         }
     };
 
     // Funkcja prze³¹czaj¹ca tryb
     const changeMode = (newState: FormState) => {
         setFormState(newState);
-        setFormErrors({ email: [], username: [], password: [] });
+        clearFormErrors();
         setEmail("");
         setPassword("");
         setUsername("");
@@ -102,7 +69,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             default:
                 updateTitle("Welcome!");
         }
-    }, [FormState.CHANGEPSWD, FormState.SIGNIN, FormState.SIGNUP, formState, updateTitle]);
+    }, [FormState.CHANGEPSWD, FormState.SIGNIN, FormState.SIGNUP, formState, updateTitle, clearFormErrors]);
 
     const renderEmailInput = () => (
         <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -145,6 +112,16 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
         </Form.Group>
     );
 
+    const renderRememberMeCheckBox = () => (
+        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+            <Form.Check
+                type="checkbox"
+                label="Remember me"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+            />
+        </Form.Group>
+    );
 
     const renderUsernameInput = () => (
         <Form.Group className="mb-3" controlId="formBasicUsername">
@@ -209,6 +186,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 <Button className="mb-3 w-100" variant="light" type="submit">
                     {buttonText}
                 </Button>
+                
                 <Form.Group className="mb-3 d-flex justify-content-center align-items-center">
                     {text}
                     <Button variant="link" onClick={() => changeMode(
@@ -231,6 +209,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             {formState !== FormState.CHANGEPSWD && renderUsernameInput()}
             {formState !== FormState.SIGNIN && renderEmailInput()}
             {formState !== FormState.CHANGEPSWD && renderPasswordInput()}
+            {formState === FormState.SIGNIN && renderRememberMeCheckBox()}
             {formState === FormState.SIGNIN && renderForgotPasswordLink()}
             {renderActions()}
         </Form>

@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { Navbar, Nav, Container, Form, InputGroup, Button } from "react-bootstrap";
 import { MyOffcanvas } from "./MyOffcanvas";
 import { AuthorizationForm } from "./AuthorizationForm";
-import {useAuth } from "./../context/AuthContext"
+import { useAuthContext } from "./../context/useAuthContext"
 
 
 
 export const MyNavbar = () => {
 
-    const { user, signOut } = useAuth();
+    const { user, signOut } = useAuthContext();
 
     const [offcanvasTitle, setOffcanvasTitle] = useState<string>();
 
