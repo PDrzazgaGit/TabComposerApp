@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { MyNavbar } from './components/MyNavbar';
-import { About, Home } from './components/pages';
+import { About, Home, Song } from './components/pages';
 import { AuthProvider } from "./context/AuthProvider";
 import { ErrorProvider } from "./context/ErrorProvider";
 import { AuthRoute } from "./components/AuthRoute";
@@ -14,6 +14,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="/play" element={<Song />} />
                     <Route element={<AuthRoute />}>
                         <Route path="/account"></Route>
                     </Route>

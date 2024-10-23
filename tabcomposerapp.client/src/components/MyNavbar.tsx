@@ -40,6 +40,7 @@ export const MyNavbar = () => {
                     <Nav className="ms-auto d-flex align-items-center">
 
                         <Nav className="me-auto ">
+                            <Nav.Link as={Link} to="/play">Test</Nav.Link>
                             <Nav.Link as={Link} to="/about">About</Nav.Link>
                             {user === null && (
                                 <MyOffcanvas
