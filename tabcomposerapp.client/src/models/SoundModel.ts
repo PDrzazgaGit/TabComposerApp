@@ -1,7 +1,14 @@
 import { Notation } from './NotationModel'
 
-export interface ISound {
-    readonly frequency: number,
-    readonly notation: Notation,
-    readonly octave: number
+export class Sound {
+    public constructor(
+        public readonly frequency: number,
+        public readonly notation: Notation,
+        public readonly octave: number
+    ) { }
+
+    public getName(): string {
+        return Notation[this.notation];
+    }
 }
+

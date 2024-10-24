@@ -1,4 +1,4 @@
-import { ISound } from "./../models/SoundModel";
+import { Sound } from "./../models/SoundModel";
 import { Notation } from "./../models/NotationModel";
 
 export class MusicScale {
@@ -22,13 +22,13 @@ export class MusicScale {
         [Notation.B]: 2
     };
 
-    public static getSound(notation: Notation, octave: number): ISound {
+    public static getSound(notation: Notation, octave: number): Sound {
         const frequency = MusicScale.calculateFrequency(notation, octave);
-        const sound: ISound = { frequency, notation, octave };
+        const sound: Sound = new Sound(frequency, notation, octave);
         return sound;
     }
 
-    private static calculateFrequency(notation: Notation, octave: number): number {
+    protected static calculateFrequency(notation: Notation, octave: number): number {
         const semitoneDifference = this.SEMITONES_FROM_A4[notation] + (octave - this.A4_OCTAVE) * this.SEMITONES_IN_OCTAVE;
         return this.A4_FREQUENCY * Math.pow(2, semitoneDifference / this.SEMITONES_IN_OCTAVE);
     }

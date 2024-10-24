@@ -1,38 +1,48 @@
-import { ISound } from "./SoundModel";
-
-enum ETuning {
-    EStandard,
-    EFlat,
-    DStandard,
-    DFlat,
-    DropD,
-    CStandard,
-    CFlat,
-    DropC,
-}
+import { Sound } from "./";
+import { Dictionary } from "./../structures";
 
 export interface ITuning {
-    strings: ISound[];
+    //readonly strings: Sound[];
+    getName(): string;
+    getSounds(): Sound[];
+    getStrings(): number[];
+    getStringSound(stringNumber: number): Sound;
+    readonly stringCount: number;
 }
-
 export class Tuning implements ITuning {
 
-    strings: ISound[];
+    private name: string = "";
+    public readonly stringCount: number;
 
-    public static ETuning = ETuning;
-    constructor(tuning: ETuning) {
-        this.strings = this.getTuning(tuning);
+    public constructor(public readonly strings: Dictionary<number, Sound>) {
+        this.stringCount = strings.keysLength();
+        if (this.stringCount !== 0) {
+            strings.values().reverse().forEach(sound => {
+                this.name += sound.getName();
+            })
+        } else {
+            throw new Error("Tuning must contain at least one sound.");
+        }
     }
 
-    private getTuning(tuning: ETuning): ISound[] {
-        switch (tuning) {
-            case ETuning.EStandard:
+    public getName(): string {
+        return this.name;
+    }
 
-                break;
-            default:
+    public getStringSound(stringNumber: number): Sound {
+        const sound: Sound | undefined = this.strings?.get(stringNumber);
 
-                break;
+        if (sound) {
+            return sound;
         }
-        return [];
+        throw new Error("There is no string with number " + stringNumber + ".");
+    }
+
+    public getStrings(): number[] {
+        return this.strings.keys();
+    }
+
+    public getSounds(): Sound[] {
+        return this.strings.values();
     }
 }
