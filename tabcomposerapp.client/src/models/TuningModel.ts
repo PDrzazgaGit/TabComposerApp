@@ -6,7 +6,9 @@ export interface ITuning {
     getName(): string;
     getSounds(): Sound[];
     getStrings(): number[];
+    getStringsCount(): number;
     getStringSound(stringNumber: number): Sound;
+    forEach(callback: (key: number, value: Sound) => void): void;
     readonly stringCount: number;
 }
 export class Tuning implements ITuning {
@@ -42,7 +44,15 @@ export class Tuning implements ITuning {
         return this.strings.keys();
     }
 
+    public getStringsCount() {
+        return this.strings.keysLength();
+    }
+
     public getSounds(): Sound[] {
         return this.strings.values();
+    }
+
+    public forEach(callback: (key: number, value:Sound) => void): void {
+        this.strings.forEach(callback);
     }
 }

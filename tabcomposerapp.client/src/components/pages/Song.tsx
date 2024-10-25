@@ -1,49 +1,48 @@
-import { MusicScale, TuningFactory } from "./../../services";
-import { ITuning, Sound, Notation, Measure, Tabulature } from "./../../models";
-import { FretBoard } from "./../../structures";
+import { MusicScale, TuningFactory, GuitarScale, Fretboard } from "./../../services";
+import { ITuning, Sound, Notation, IMeasure, Tabulature, NoteDuration } from "./../../models";
+//import { FretBoard } from "./../../structures";
 
 export const Song = () => {
 
     const tuning: ITuning = TuningFactory.EStandardTuning();
+    const measure: IMeasure = new Fretboard(100, 4, 4, tuning);
 
-    const strings: FretBoard<Sound> = new FretBoard(6);
-    strings.add(1, MusicScale.getSound(Notation.E, 1));
-    strings.add(2, MusicScale.getSound(Notation.E, 2));
-    strings.add(3, MusicScale.getSound(Notation.E, 3));
-    strings.add(4, MusicScale.getSound(Notation.E, 4));
-    strings.add(5, MusicScale.getSound(Notation.E, 5));
+    measure.putNote(3, 1, NoteDuration.Eighth)
+    measure.putNote(3, 1, NoteDuration.Quarter)
+    
+   
 
-    const tabulature: Tabulature = new Tabulature(tuning);
-    const measure: Measure = new Measure(tabulature, 100);
-    measure.putNote(0, 6);
-    measure.putNote(1, 6);
-    measure.putNote(2, 6);
-    measure.putNote(3, 6);
-    measure.putNote(4, 6);
-    measure.putNote(5, 6);
-    measure.putNote(6, 6);
-    measure.putNote(7, 6);
-    measure.putNote(8, 6);
-    measure.putNote(9, 6);
-    measure.putNote(10, 6);
-    measure.putNote(11, 6);
-    measure.putNote(12, 6);
-    measure.putNote(13, 6);
+    console.log(measure);
 
-    measure.strings.forEach((num, note) => {
-        let notes: string = "";
-        for (let i = 0; i < note.length; i++) {
-            notes += note[i].getName() + " ";
-        }
+    //const notes = GuitarScale.findCorrespondingNotes(MusicScale.getSound(Notation.E, 4), tuning);
 
-        console.log(`${num} : ${notes}`)
+    /*
+
+    const notes = GuitarScale.findCorrespondingNotes(GuitarScale.getNote(0, tuning.getStringSound(1)), tuning);
+
+    notes.forEach((string, note) => {
+        console.log(`${string} : ${note.fret}`)
     })
 
-    console.log();
+    */
+
+   // const baseSoundA:Sound = MusicScale.getSound(Notation.G, 3);
+    //const refSoundA: Sound = MusicScale.getSound(Notation.E, 2);
+
+   // const computedFret = GuitarScale.findNoteOnString(baseSoundA, refSoundA).fret;
+
+    //console.log(computedFret);
+
+    //console.log();
     /*
     measure.strings.forEach(6, note => {
         console.log(note.getName());
     })
     */
+
+   // const x: number = 1 / 32;
+
+  //  console.log(1/x)
+
     return <></>;
 }
