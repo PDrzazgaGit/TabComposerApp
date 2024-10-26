@@ -11,4 +11,8 @@ export class Tabulature implements ITabulature {
     public forEach(callback: (measure: IMeasure) => void): void {
         this.measures.forEach(callback);
     }
+
+    public addMeasure(measure: IMeasure): void {
+        this.measures.push(measure);
+    }
 }

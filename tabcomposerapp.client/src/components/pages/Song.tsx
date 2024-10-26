@@ -1,18 +1,36 @@
 import { MusicScale, TuningFactory, GuitarScale, Fretboard } from "./../../services";
-import { ITuning, Sound, Notation, IMeasure, Tabulature, NoteDuration } from "./../../models";
+import { ITuning, Sound, Notation, IMeasure, Tabulature, NoteDuration, Note } from "./../../models";
 //import { FretBoard } from "./../../structures";
 
 export const Song = () => {
 
-    const tuning: ITuning = TuningFactory.EStandardTuning();
-    const measure: IMeasure = new Fretboard(100, 4, 4, tuning);
-
-    measure.putNote(3, 1, NoteDuration.Eighth)
-    measure.putNote(3, 1, NoteDuration.Quarter)
     
-   
+    const tuning: ITuning = TuningFactory.EStandardTuning();
+    const measure: IMeasure = new Fretboard(120, 6, 8, tuning);
+    const tab = new Tabulature(tuning);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    measure.pushNote(3, 1, NoteDuration.Quarter)
+    measure.pushNote(3, 1, NoteDuration.Quarter)
+    measure.pushNote(3, 1, NoteDuration.Quarter)
+    measure.pushNote(3, 1, NoteDuration.Quarter)
 
-    console.log(measure);
+ 
+    /*
+    measure.forEach((_, notes) => {
+        const durations: (number | undefined)[] =
+        notes.map(note => {
+            if (note instanceof Note) {
+                return note.getTimeStampMs();
+            } else
+                return undefined;
+        })
+        console.log(durations);
+    });
+   
+    */
+    //console.log(measure);
 
     //const notes = GuitarScale.findCorrespondingNotes(MusicScale.getSound(Notation.E, 4), tuning);
 
