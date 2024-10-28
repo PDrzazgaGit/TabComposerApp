@@ -1,9 +1,9 @@
-import { Dictionary } from './../structures';
-import { ITuning, Note, NoteDuration, Sound, IMeasure } from './../models';
-import { GuitarScale } from './';
+import { Dictionary } from '../structures';
+import { ITuning, Note, NoteDuration, Sound, IMeasure } from '../models';
+import { GuitarScale } from '.';
 
 const MINUTE_IN_MS: number = 60000;
-export class Fretboard extends Dictionary<number, (Note | boolean)[]> implements IMeasure {
+export class Measure extends Dictionary<number, (Note | boolean)[]> implements IMeasure {
     private slotsPerMeasure: number;
     private slotDurationMs: number;
 

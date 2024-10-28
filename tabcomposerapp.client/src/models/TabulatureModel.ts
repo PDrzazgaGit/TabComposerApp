@@ -15,4 +15,8 @@ export class Tabulature implements ITabulature {
     public addMeasure(measure: IMeasure): void {
         this.measures.push(measure);
     }
+
+    public getMeasure(index: number): IMeasure | undefined {
+        return this.measures[index];
+    }
 }

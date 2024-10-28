@@ -1,4 +1,4 @@
-import { MusicScale, TuningFactory, GuitarScale, Fretboard } from "./../../services";
+import { MusicScale, TuningFactory, GuitarScale, Measure } from "./../../services";
 import { ITuning, Sound, Notation, IMeasure, Tabulature, NoteDuration, Note } from "./../../models";
 //import { FretBoard } from "./../../structures";
 
@@ -6,7 +6,7 @@ export const Song = () => {
 
     
     const tuning: ITuning = TuningFactory.EStandardTuning();
-    const measure: IMeasure = new Fretboard(120, 6, 8, tuning);
+    const measure: IMeasure = new Measure(120, 6, 8, tuning);
     const tab = new Tabulature(tuning);
     tab.addMeasure(measure);
     tab.addMeasure(measure);
@@ -16,7 +16,7 @@ export const Song = () => {
     measure.pushNote(3, 1, NoteDuration.Quarter)
     measure.pushNote(3, 1, NoteDuration.Quarter)
 
- 
+    console.log(measure);
     /*
     measure.forEach((_, notes) => {
         const durations: (number | undefined)[] =
