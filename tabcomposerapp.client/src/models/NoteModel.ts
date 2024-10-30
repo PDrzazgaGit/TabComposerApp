@@ -9,8 +9,15 @@ export enum NoteDuration {
     Thirtytwo = 1 / 32
 }
 
-export class Note extends Sound {
-    public readonly fret: number;
+
+export interface INote {
+    readonly fret: number;
+    readonly noteDuration: NoteDuration;
+    getTimeStampMs(): number;
+    getEndTimeStampMs(): number;
+}
+export class Note extends Sound implements INote {
+    public fret: number;
     public readonly noteDuration: NoteDuration;
     private timeStamp: number;
     constructor(
@@ -56,10 +63,8 @@ export class Note extends Sound {
     }
 
     public getTimeStampMs(): number { return this.timeStamp; }
+
+    public getEndTimeStampMs(): number {return this.timeStamp + this.durationMs }
 }
 
-/*
 
-Œwietnie! Teraz wyt³umaczê CI jak dzia³a moja klasa Fretboard i co jest do poprawki. Przechowuje ona nuty w tablicy podzielonej na 32 kawa³ki (zak³adam, ¿e najmniejsza jednostka nutowa to 1/32). Tablica zawiera wartoœci Note | boolean. Przyk³ad (dla tablicy podzielonej na 16 kawa³ków, dla 32 bêdzie analogicznie): takt.kontener[n-ta struna] = note (ósemka), false, true, true, note (czwórka), false, false, false, note (ósemka), false, true, true, note(czwórka), false, false, false. O co chodzi? Note to dŸwiêk, nuta, która posiada swoj¹ d³ugoœæ w milisekundach oraz zapis muzyczny (Whole = 1, Half = 1/2, Quarter = 1/4 itd..). Pole true w tablicy to takie, gdzie mo¿na wstawiæ nutê. Pole false to takie gdzie nie mo¿na wstawiæ nuty (byæ mo¿e inny dŸwiêk jest odgrywany). Zauwa¿, ¿e w przyk³adzie który ci da³em, ka¿da nuta wskakuje na "swoje miejsce", tj. 
-
-*/
