@@ -2,12 +2,12 @@ import { useState, useEffect, ReactNode } from 'react';
 import { signUpApi, signInApi } from '../api/AuthService';
 import { getUserProfileApi } from '../api/UserService';
 import { User, AuthContext } from './AuthContext';
-import { useErrorContext } from './useErrorContext';
+import { useError } from './../hooks/useError';
 import { apiErrorFormatter } from '../api/ApiErrorFormatter';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
-    const { setFormErrors } = useErrorContext();
+    const { setFormErrors } = useError();
 
     const [user, setUser] = useState<User | null>(null);
 

@@ -1,5 +1,12 @@
 import { MusicScale, TuningFactory, GuitarScale, Measure } from "./../../services";
 import { ITuning, Sound, Notation, IMeasure, Tabulature, NoteDuration, INote } from "./../../models";
+import { Table } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
+//import './../../styles/TabulatureView.css';
+import { NoteView } from './../NoteView';
+import { MeasureProvider } from './../../context/MeasureProvider';
+import { useMeasure } from './../../hooks/useMeasure';
+import { MeasureView } from "../MeasureView";
 //import { FretBoard } from "./../../structures";
 
 export const Song = () => {
@@ -9,8 +16,8 @@ export const Song = () => {
     const measure: IMeasure = new Measure(120, 4, 4, tuning);
     const tab = new Tabulature(tuning);
     tab.addMeasure(measure);
-    tab.addMeasure(measure);
-    tab.addMeasure(measure);
+   // tab.addMeasure(measure);
+    //tab.addMeasure(measure);
     /*
     measure.pushNote(3, 1, NoteDuration.Quarter)
     measure.pushNote(3, 1, NoteDuration.Quarter)
@@ -20,8 +27,33 @@ export const Song = () => {
 
     measure.putNote(3, 1, 0, NoteDuration.Quarter)
     measure.putNote(3, 1, 500, NoteDuration.Quarter)
-    const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
+    //const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
     measure.putNote(3, 1, 1500, NoteDuration.Quarter)
+
+    measure.putNote(3, 2, 0, NoteDuration.Quarter)
+    measure.putNote(3, 2, 500, NoteDuration.Quarter)
+   // const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
+    measure.putNote(3, 2, 1500, NoteDuration.Quarter)
+
+    measure.putNote(3, 3, 0, NoteDuration.Quarter)
+    measure.putNote(3, 3, 500, NoteDuration.Quarter)
+  //  const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
+    measure.putNote(3, 3, 1500, NoteDuration.Quarter)
+
+    measure.putNote(3, 4, 0, NoteDuration.Quarter)
+    measure.putNote(3, 4, 500, NoteDuration.Quarter)
+  //  const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
+    measure.putNote(3, 4, 1500, NoteDuration.Quarter)
+
+    measure.putNote(3, 5, 0, NoteDuration.Quarter)
+    measure.putNote(3, 5, 500, NoteDuration.Quarter)
+  //  const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
+    measure.putNote(3, 5, 1500, NoteDuration.Quarter)
+
+    measure.putNote(3, 6, 0, NoteDuration.Quarter)
+    measure.putNote(3, 6, 500, NoteDuration.Quarter)
+    //const sixteenth: INote = measure.putNote(3, 1, 1000, NoteDuration.Sixteenth)!
+    measure.putNote(3, 6, 1500, NoteDuration.Quarter)
 
     //console.log(measure.changeNoteTimeStamp(sixteenth, 1, 1375));
 
@@ -30,8 +62,8 @@ export const Song = () => {
    // measure.changeTempo(100);
    // measure.changeSignature(3,4);
     // measure.putNote(3, 1, 500, NoteDuration.Quarter)
-    measure.changeNoteFret(sixteenth, 1, 12);
-    console.log(sixteenth);
+   // measure.changeNoteFret(sixteenth, 1, 12);
+   // console.log(sixteenth);
 
     /*
     measure.pushNote(3, 1, NoteDuration.Quarter)
@@ -92,6 +124,12 @@ export const Song = () => {
   //  console.log(1/x)
 
     return <>
+
+        <MeasureProvider>
+            <MeasureView measure={  measure }>
+
+            </MeasureView>
+        </MeasureProvider>
         
        
     </>;

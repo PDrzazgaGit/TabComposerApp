@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 //import { apiErrorFormatter } from '../api/ApiErrorFormatter';
-import { useAuthContext } from '../context/useAuthContext'
-import { useErrorContext } from '../context/useErrorContext';
+import { useAuth } from '../hooks/useAuth'
+import { useError } from '../hooks/useError';
 
 interface AuthorizationFormProps {
     updateTitle: (newTutle: string) => void;
@@ -24,9 +24,9 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     const [password, setPassword] = useState<string>('');
     const [remember, setRemember] = useState<boolean>(false);
 
-    const { signIn, signUp } = useAuthContext(); 
+    const { signIn, signUp } = useAuth(); 
 
-    const { formErrors, clearFormErrors } = useErrorContext();
+    const { formErrors, clearFormErrors } = useError();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();

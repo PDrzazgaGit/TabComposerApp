@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthContext } from './../context/useAuthContext';
+import { useAuth } from './../hooks/useAuth';
 
 export const AuthRoute: React.FC = () => {
-    const { user } = useAuthContext();
+    const { user } = useAuth();
 
     if (!user) {
         return <Navigate to="/login" replace />;

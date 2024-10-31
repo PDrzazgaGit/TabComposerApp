@@ -17,17 +17,5 @@ export class TabulatureManager {
         return this.tabulature.getMeasure(index);
     }
 
-    public getTabulaturePrintedString(): string {
-        const tab: string[] = [];
-        this.tabulature.forEach(measure => {
-            measure.forEach((number, notes) => {
-                notes.forEach(mayNote => {
-                    if (mayNote instanceof Note) {
-                        tab[number] += mayNote.fret.toString();
-                    }
-                })
-            })
-        })
-        return "";
-    }
+
 }

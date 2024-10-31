@@ -1,8 +1,8 @@
 import { useContext } from 'react';
-import { SongContext } from './SongContext'
+import { MeasureContext } from './../context/MeasureContext'
 
-export const useSongContext = () => {
-    const context = useContext(SongContext);
+export const useMeasure = () => {
+    const context = useContext(MeasureContext);
     if (!context) {
         throw new Error('useSongContext must be used within an SongProvider');
     }

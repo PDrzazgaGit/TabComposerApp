@@ -1,7 +1,8 @@
 import { NoteDuration, INote } from "./"
 
 export interface IMeasure {
-    readonly tempo: number
+    readonly frets: number;
+    readonly tempo: number;
     readonly numerator: number;
     readonly denominator: number;
     readonly measureDurationMs: number;

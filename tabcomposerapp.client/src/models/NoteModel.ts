@@ -11,10 +11,15 @@ export enum NoteDuration {
 
 
 export interface INote {
+    readonly frequency: number,
+    readonly notation: Notation,
+    readonly octave: number,
     readonly fret: number;
     readonly noteDuration: NoteDuration;
     getTimeStampMs(): number;
     getEndTimeStampMs(): number;
+    getDurationMs(): number;
+    getName(): string;
 }
 export class Note extends Sound implements INote {
     public fret: number;
