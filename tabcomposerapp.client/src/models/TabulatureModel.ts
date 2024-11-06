@@ -2,6 +2,7 @@ import { ITuning, IMeasure } from "./";
 
 export interface ITabulature {
     readonly tuning: ITuning;
+    forEach(callback: (measure: IMeasure) => void): void
 }
 
 export class Tabulature implements ITabulature {

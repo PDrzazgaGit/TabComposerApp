@@ -8,6 +8,7 @@ import { MeasureProvider } from './../../context/MeasureProvider';
 import { useMeasure } from './../../hooks/useMeasure';
 import { MeasureView } from "../MeasureView";
 import { ComponentA, ComponentB } from "../Test";
+import {TabulatureView } from "../TabulatureView"
 //import { FretBoard } from "./../../structures";
 
 export const Song = () => {
@@ -16,6 +17,7 @@ export const Song = () => {
     const tuning: ITuning = TuningFactory.EStandardTuning();
     const measure: IMeasure = new Measure(120, 4, 4, tuning);
     const tab = new Tabulature(tuning);
+    tab.addMeasure(measure);
     tab.addMeasure(measure);
    // tab.addMeasure(measure);
     //tab.addMeasure(measure);
@@ -135,37 +137,8 @@ export const Song = () => {
   */
 
     return (
-        <ComponentA maxItemsPerRow={4}>
-            <MeasureProvider>
-                <MeasureView measure={measure}>
+        <TabulatureView tabulature={tab}>
 
-                </MeasureView>
-            </MeasureProvider>
-            <MeasureProvider>
-                <MeasureView measure={measure}>
-
-                </MeasureView>
-            </MeasureProvider>
-            <MeasureProvider>
-                <MeasureView measure={measure}>
-
-                </MeasureView>
-            </MeasureProvider>
-            <MeasureProvider>
-                <MeasureView measure={measure}>
-
-                </MeasureView>
-            </MeasureProvider>
-            <MeasureProvider>
-                <MeasureView measure={measure}>
-
-                </MeasureView>
-            </MeasureProvider>
-            <MeasureProvider>
-                <MeasureView measure={measure}>
-
-                </MeasureView>
-            </MeasureProvider>
-        </ComponentA>
+        </TabulatureView>
     );
 }

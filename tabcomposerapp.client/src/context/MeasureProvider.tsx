@@ -1,10 +1,10 @@
-import { useState, useMemo, ReactNode } from 'react';
+import { useState, ReactNode } from 'react';
 import { MeasureContext } from './MeasureContext';
 import { IMeasure, INote } from '../models';
 
-export const MeasureProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const MeasureProvider: React.FC<{ children: ReactNode; initialMeasure: IMeasure }> = ({ children, initialMeasure }) => {
 
-    const [measure, setMeasure] = useState<IMeasure | null>(null)
+    const [measure] = useState<IMeasure | null>(initialMeasure);
 
     const changeFret = (note: INote, stringId: number, fret: number): void => {
         if (measure) {
@@ -14,20 +14,14 @@ export const MeasureProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     const frets = measure?.frets;
 
-    /*
-    const value = useMemo(
-        () => ({
-            measure,
-            setMeasure,
-            changeFret
-        }),
-        [changeFret, measure]
-    )
-    */
+    const getMeasure = () => {
+        if(measure)
+            return measure;
+        throw new Error("Measure has not been initialized.");
+    }
 
     const value = {
-        measure,
-        setMeasure,
+        getMeasure,
         changeFret,
         frets
     }

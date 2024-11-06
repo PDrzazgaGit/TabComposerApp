@@ -1,12 +1,12 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
-interface ComponentAProps {
+interface TabulatureContainer {
     children: React.ReactNode;
     maxItemsPerRow: number; // Maksymalna liczba komponentów w jednym wierszu
 }
 
-export const ComponentA: React.FC<ComponentAProps> = ({ children, maxItemsPerRow }) => {
+export const TabulatureContainer: React.FC<TabulatureContainer> = ({ children, maxItemsPerRow }) => {
     // Liczymy liczbê dzieci w komponencie A
     const childrenArray = React.Children.toArray(children);
 
@@ -36,5 +36,5 @@ export const ComponentA: React.FC<ComponentAProps> = ({ children, maxItemsPerRow
         rows.push(<Row key="last" style={{ margin: 0 }}>{currentRow} </Row>);
     }
 
-    return <Container>{rows}</Container>;
+    return <Container className="p-0 m-0">{rows}</Container>;
 };
