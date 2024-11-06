@@ -7,6 +7,7 @@ import { NoteView } from './../NoteView';
 import { MeasureProvider } from './../../context/MeasureProvider';
 import { useMeasure } from './../../hooks/useMeasure';
 import { MeasureView } from "../MeasureView";
+import { ComponentA, ComponentB } from "../Test";
 //import { FretBoard } from "./../../structures";
 
 export const Song = () => {
@@ -123,14 +124,48 @@ export const Song = () => {
 
   //  console.log(1/x)
 
-    return <>
+  /*
 
-        <MeasureProvider>
+   <MeasureProvider>
             <MeasureView measure={  measure }>
 
             </MeasureView>
         </MeasureProvider>
-        
-       
-    </>;
+
+  */
+
+    return (
+        <ComponentA maxItemsPerRow={4}>
+            <MeasureProvider>
+                <MeasureView measure={measure}>
+
+                </MeasureView>
+            </MeasureProvider>
+            <MeasureProvider>
+                <MeasureView measure={measure}>
+
+                </MeasureView>
+            </MeasureProvider>
+            <MeasureProvider>
+                <MeasureView measure={measure}>
+
+                </MeasureView>
+            </MeasureProvider>
+            <MeasureProvider>
+                <MeasureView measure={measure}>
+
+                </MeasureView>
+            </MeasureProvider>
+            <MeasureProvider>
+                <MeasureView measure={measure}>
+
+                </MeasureView>
+            </MeasureProvider>
+            <MeasureProvider>
+                <MeasureView measure={measure}>
+
+                </MeasureView>
+            </MeasureProvider>
+        </ComponentA>
+    );
 }
