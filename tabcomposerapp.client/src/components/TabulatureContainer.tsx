@@ -36,5 +36,5 @@ export const TabulatureContainer: React.FC<TabulatureContainer> = ({ children, m
         rows.push(<Row key="last" style={{ margin: 0 }}>{currentRow} </Row>);
     }
 
-    return <Container className="p-0 m-0">{rows}</Container>;
+    return <Container className="">{rows}</Container>;
 };

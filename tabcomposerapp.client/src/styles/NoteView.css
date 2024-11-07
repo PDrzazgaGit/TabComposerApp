@@ -1,12 +1,11 @@
 .note-container {
     position: relative;
     display: inline-block;
-    margin: 5px;
 }
 
 .note-square {
-    width: 30px;
-    height: 30px;
+    width: 1em;
+    height: 1em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,7 +13,7 @@
     cursor: text;
     user-select: none; /* Zablokuj zaznaczanie tekstu */
     color: white;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: bold;
 }
 
@@ -23,7 +22,7 @@
     background: transparent;
     color: black; /* Ustaw kolor tekstu na czarny */
     text-align: center;
-    font-size: 18px;
+    font-size: 15px;
     outline: none;
     width: 100%;
     padding: 0; /* Usuwamy padding */

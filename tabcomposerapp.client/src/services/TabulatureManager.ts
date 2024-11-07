@@ -1,5 +1,5 @@
 import { Tabulature, IMeasure, ITuning, Note } from './../models'
-import { Measure } from './';
+import { MeasureService } from './';
 
 export class TabulatureManager {
     private readonly tabulature: Tabulature;
@@ -9,7 +9,7 @@ export class TabulatureManager {
     }
 
     public addMeasure(tempo: number, numerator: number, denominator: number) {
-        const measure: Measure = new Measure(tempo, numerator, denominator, this.tabulature.tuning, this.frets);
+        const measure: MeasureService = new MeasureService(tempo, numerator, denominator, this.tabulature.tuning, this.frets);
         this.tabulature.addMeasure(measure);
     }
 

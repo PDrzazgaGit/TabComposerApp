@@ -2,29 +2,35 @@ import { TabulatureContainer } from "./TabulatureContainer"
 import { ITabulature } from "../models"
 import { MeasureView } from "./MeasureView";
 import { MeasureProvider } from "../context/MeasureProvider"
+import { MeasureLabel } from "./MeasureLabel";
+import { useEffect, useMemo, useState } from "react";
+import { useTabulature } from "../hooks/useTabulature";
 
 interface TabulatureViewProps {
-    tabulature: ITabulature;
+   // tabulature: ITabulature;
 }
 
-export const TabulatureView: React.FC<TabulatureViewProps> = ({ tabulature }) => {
+export const TabulatureView: React.FC<TabulatureViewProps> = () => {
 
-    const measures: JSX.Element[] = [];
+    const { getTabulature, lastTempo , setLastTempo } = useTabulature();
 
-    tabulature.forEach(measure => {
-        measures.push(
-            <MeasureProvider initialMeasure={ measure }>
-                <MeasureView>
+    const tabulature = useMemo(() => getTabulature(), [getTabulature]);
 
-                </MeasureView>
-            </MeasureProvider>
-        )
-    });
-    
 
     return (
-        <TabulatureContainer maxItemsPerRow={ 4 } >
-            { measures }
-      </TabulatureContainer>
+        <TabulatureContainer maxItemsPerRow={4} >
+            {tabulature.map((measure, index) => {
+                setLastTempo(measure.tempo);
+                return (
+                    <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
+                        <MeasureLabel/>
+                        <MeasureView/>
+                    </MeasureProvider>
+                )
+                
+            })
+            
+            }
+        </TabulatureContainer>
   );
 }

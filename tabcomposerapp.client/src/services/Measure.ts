@@ -1,9 +1,9 @@
-import { ITuning, Note, NoteDuration, Sound, IMeasure } from '../models';
+import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause } from '../models';
 import { GuitarScale } from '.';
 
 const MINUTE_IN_MS: number = 60000;
 
-export class Measure extends Map<number, Note[]> implements IMeasure {
+export class MeasureService extends Map<number, (Note | Pause)[]> implements IMeasure {
 
     public measureDurationMs: number;
     private wholeNoteDurationMs: number;
@@ -31,7 +31,7 @@ export class Measure extends Map<number, Note[]> implements IMeasure {
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
 
         tuning.forEach((stringId: number) => {
-            this.set(Number(stringId), new Array<Note>());
+            this.set(Number(stringId), new Array<Note>());     
         });
     }
 
@@ -212,7 +212,7 @@ export class Measure extends Map<number, Note[]> implements IMeasure {
         stringNotes.push(note);
         return note;
     }
-
+    
     public pushNote(
         fret: number,
         stringId: number,
@@ -226,10 +226,56 @@ export class Measure extends Map<number, Note[]> implements IMeasure {
         const lastNote = stringNotes[stringNotes.length - 1];
         const timeStamp = lastNote ? lastNote.getTimeStampMs() + lastNote.getDurationMs() : 0;
 
-        if (this.isWithinMeasure(timeStamp, note.getDurationMs())) {
-            return this.putNote(fret, stringId, timeStamp, noteDuration);
-        }
+        const canPutNote: boolean = this.canPutNote(stringNotes, timeStamp, noteDuration);
 
-        return undefined; 
+        if (!canPutNote) {
+            return undefined;
+        }
+        note.setTimeStampMs(timeStamp);
+        stringNotes.push(note);
+        return note;
+    }
+
+    public putPause(stringId: number, timeStamp: number, noteDuration: NoteDuration = NoteDuration.Quarter) {
+        if (timeStamp < 0) {
+            throw new Error("Timestamp must be grater than 0.");
+        }
+        const pause = new Pause(noteDuration);
+        const pauseDurationMs = this.calculateNoteDurationMs(noteDuration);
+        pause.setDurationMs(pauseDurationMs);
+
+        const stringNotes = this.get(stringId);
+
+        if (!stringNotes) return undefined;
+
+        const canPutNote: boolean = this.canPutNote(stringNotes, timeStamp, noteDuration);
+
+        if (!canPutNote) {
+            return undefined;
+        }
+        pause.setTimeStampMs(timeStamp);
+        stringNotes.push(pause);
+        return pause;
+    }
+
+    public pushPause(stringId: number, noteDuration: NoteDuration = NoteDuration.Quarter): Pause | undefined {
+        const stringNotes = this.get(stringId);
+        if (!stringNotes) return undefined;
+
+        const pause = new Pause(noteDuration);
+        const pauseDurationMs = this.calculateNoteDurationMs(noteDuration); // U¿ycie wartoœci enum
+        pause.setDurationMs(pauseDurationMs);
+
+        const lastNote = stringNotes[stringNotes.length - 1];
+        const timeStamp = lastNote ? lastNote.getTimeStampMs() + lastNote.getDurationMs() : 0;
+
+        const canPutNote: boolean = this.canPutNote(stringNotes, timeStamp, noteDuration);
+
+        if (!canPutNote) {
+            return undefined;
+        }
+        pause.setTimeStampMs(timeStamp);
+        stringNotes.push(pause);
+        return pause;
     }
 }

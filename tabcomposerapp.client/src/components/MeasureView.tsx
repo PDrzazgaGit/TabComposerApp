@@ -1,44 +1,31 @@
 import { useEffect, useMemo, useCallback } from "react";
-import { IMeasure, INote, NoteDuration } from "../models";
-import { TuningFactory } from "../services";
+import {  INote  } from "../models";
 import {useMeasure } from "./../hooks/useMeasure"
-import { Measure } from "./../services/Measure"
-import { NoteView } from "./NoteView";
 import { StringContainer } from "./StringContainer";
 
+interface MeasureViewProps {
+    //measureId: number;
+}
 
-export const MeasureView = () => {
+export const MeasureView: React.FC<MeasureViewProps> = () => {
 
     const { getMeasure } = useMeasure();
-
-    //const noteComponents: JSX.Element[] = [];
+    const measure = getMeasure();
 
     const stringComponents: JSX.Element[] = [];
 
-    getMeasure().forEach((notes: INote[], stringId: number) => {
+    measure.forEach((notes: INote[], stringId: number) => {
         stringComponents.push(
-            <StringContainer stringId={stringId} notes={notes}>
-
-            </StringContainer>
+            <StringContainer key={stringId} stringId={stringId} notes={notes} />
         );
     });
-    /*
-    // U¿ycie forEach do renderowania NoteView dla ka¿dej nuty
-    getMeasure().forEach((notes: INote[], stringId: number) => {
-        notes.forEach((note) => {
-            noteComponents.push(
-                <NoteView note={note} stringId={stringId} />
-            );
-            noteComponents.push(<span >-</span>);
-        });
-        noteComponents.push(<br />);
-    });
-    */
 
-    
     return (
         <>
-            { stringComponents } 
+            <div style={{ borderRight: "2px solid grey" }}/*onClick={() => { alert(measureId) } }*/>                        
+                {stringComponents}  
+            </div>
         </>
+       
     );
 }

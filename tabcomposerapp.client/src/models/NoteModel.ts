@@ -1,4 +1,4 @@
-import { Sound, Notation } from "./";
+import { Sound, Notation, IPause } from "./";
 
 export enum NoteDuration {
     Whole = 1,
@@ -9,19 +9,21 @@ export enum NoteDuration {
     Thirtytwo = 1 / 32
 }
 
+export enum NoteKind {
+    Note,
+    Pause
+}
 
-export interface INote {
+export interface INote extends IPause{
+    readonly kind: NoteKind;
     readonly frequency: number,
     readonly notation: Notation,
     readonly octave: number,
     readonly fret: number;
-    readonly noteDuration: NoteDuration;
-    getTimeStampMs(): number;
-    getEndTimeStampMs(): number;
-    getDurationMs(): number;
-    getName(): string;
 }
+
 export class Note extends Sound implements INote {
+    public readonly kind: NoteKind;
     public fret: number;
     public readonly noteDuration: NoteDuration;
     private timeStamp: number;
@@ -58,6 +60,7 @@ export class Note extends Sound implements INote {
             this.noteDuration = noteDuration;
             this.timeStamp = 0;
         }
+        this.kind = NoteKind.Note;
     }
 
     public setTimeStampMs(timeStampMs: number): void {

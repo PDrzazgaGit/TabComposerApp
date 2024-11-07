@@ -1,4 +1,4 @@
-import { NoteDuration, INote } from "./"
+import { NoteDuration, INote, IPause } from "./"
 
 export interface IMeasure {
     readonly frets: number;
@@ -15,4 +15,6 @@ export interface IMeasure {
     changeTempo(tempo: number): void;
     changeNoteTimeStamp(note: INote, stringId: number, timeStamp: number): boolean
     changeNoteFret(note: INote, stringId: number, fret: number): void
+    pushPause(stringId: number, noteDuration: NoteDuration): IPause | undefined;
+    putPause(stringId: number, timeStamp: number ,noteDuration: NoteDuration): IPause | undefined;
 }

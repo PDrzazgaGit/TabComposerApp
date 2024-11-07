@@ -2,7 +2,8 @@ import { ITuning, IMeasure } from "./";
 
 export interface ITabulature {
     readonly tuning: ITuning;
-    forEach(callback: (measure: IMeasure) => void): void
+    forEach(callback: (measure: IMeasure) => void): void;
+    map<U>(callback: (measure: IMeasure, index: number, array: IMeasure[]) => U): U[];
 }
 
 export class Tabulature implements ITabulature {
@@ -11,6 +12,10 @@ export class Tabulature implements ITabulature {
 
     public forEach(callback: (measure: IMeasure) => void): void {
         this.measures.forEach(callback);
+    }
+
+    public map<U>(callback: (measure: IMeasure, index: number, array: IMeasure[]) => U): U[] {
+        return this.measures.map(callback);
     }
 
     public addMeasure(measure: IMeasure): void {

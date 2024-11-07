@@ -8,9 +8,11 @@ export class GuitarScale extends MusicScale {
         if (fret < 0) {
             throw new Error("Fret cannot be less than zero.");
         }
+       
         let notation: Notation = base.notation;
         let octave: number = base.octave;
         let frequency: number = base.frequency;
+
         if (fret > 0) {
             notation = ((notation + fret) % 12);
             octave += (fret / 12) | 0;  // | 0 oznacza uciêcie czêœci u³amkowej

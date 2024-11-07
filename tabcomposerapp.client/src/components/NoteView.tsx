@@ -16,11 +16,11 @@ export const NoteView: React.FC<NoteViewProps> = ({ note, stringId }) => {
     const [isEditing, setIsEditing] = useState(false); // Stan do œledzenia, czy edytujemy
 
     //const stringId = stringId;
-    const { changeFret, frets } = useMeasure();
+    const { changeFret, getMaxFrets } = useMeasure();
 
-    const maxFrets = frets ? frets : 99;
+    const maxFrets: number = getMaxFrets();
 
-    const inputId = `fret-input-${uuidv4()}`;
+    const inputId = `fret-${uuidv4()}`;
 
     // Funkcja do obs³ugi zmiany wartoœci fret
     const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,17 +34,21 @@ export const NoteView: React.FC<NoteViewProps> = ({ note, stringId }) => {
 
     // Funkcja do obs³ugi zmiany nuty po naciœniêciu Enter
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            if (fret === '') {
-                setFret('0');
-            }
-
-            const fretValue = Math.min(Math.max(Number(fret), 0), maxFrets); // Ogranicz do 1-99
-            changeFret(note, stringId, fretValue);
-           // note.fret = fretValue; // Zaktualizuj fret w obiekcie nuty
-            setIsEditing(false); // Wy³¹cz tryb edycji
+        if (event.key === 'Enter') { 
+            handleSave();
         }
     };
+
+    const handleSave = () => {
+        if (fret === '') {
+            setFret('0'); // Ustaw fret na '0', gdy pole jest puste
+            changeFret(note, stringId, 0);
+        } else {
+            const fretValue = Math.min(Math.max(Number(fret), 0), maxFrets); // Ogranicz do 1-99
+            changeFret(note, stringId, fretValue);
+        }
+        setIsEditing(false)
+    }
 
     // Funkcja do w³¹czenia trybu edycji
     const handleInputClick = () => {
@@ -70,12 +74,7 @@ export const NoteView: React.FC<NoteViewProps> = ({ note, stringId }) => {
                     onChange={handleFretChange}
                     onKeyDown={handleKeyDown}
                     className="note-input" // U¿yj klasy CSS dla inputu
-                    onBlur={() => {
-                        if (fret === '') {
-                            setFret('0'); // Ustaw fret na '0', gdy pole jest puste
-                        }
-                        setIsEditing(false)
-                    }} // Wy³¹cz tryb edycji po opuszczeniu pola
+                    onBlur={handleSave} // Wy³¹cz tryb edycji po opuszczeniu pola
                 />
             </div>
         </div>

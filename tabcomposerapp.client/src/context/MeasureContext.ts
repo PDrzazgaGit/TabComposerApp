@@ -1,9 +1,10 @@
 import { createContext } from 'react';
-import { IMeasure, INote } from '../models/'
+import { IMeasure, INote, ITuning } from '../models/'
 interface MeasureContextType {
-    //measure: IMeasure | null;
-    frets: number | undefined;
-    //setMeasure: (measure: IMeasure | null) => void;
+    measureId: number;
+    setMeasureId: (newId: number) => void;
+    getMaxFrets: () => number;
+    getMeasureDurationMs: () => number;
     getMeasure: () => IMeasure;
     changeFret: (note: INote, stringId: number, fret: number) => void;
 }
