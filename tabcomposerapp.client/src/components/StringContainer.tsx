@@ -50,15 +50,7 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId, note
                                         left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em )`, // Pozycjonowanie nuty (nuta ma szerokoœæ 1 em dlatego przesuwam w lewo aby œrodek by³ w odpowiednim miejscu)
                                     }}
                                 >
-                                    {
-                                        note.kind === NoteKind.Note && (
-                                            <NoteView note={note as INote} stringId={stringId} />
-                                        
-                                        ) || (
-                                            <PauseView pause={note as IPause} stringId={stringId} />
-                                        )
-                                    }
-                                    
+                                    <NoteView note={note} stringId={stringId} />
                                 </div>
                             ))}
                     </div>
