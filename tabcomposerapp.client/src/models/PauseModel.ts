@@ -10,7 +10,7 @@ export interface IPause {
 
 export class Pause extends Note implements IPause {
     public override readonly kind: NoteKind;
-    constructor(public readonly noteDuration: NoteDuration = NoteDuration.Quarter, noteDurationMs: number = 500) {
+    constructor(public noteDuration: NoteDuration = NoteDuration.Quarter, noteDurationMs: number = 500) {
         super(-1, 0, -1, -1, noteDurationMs);
         this.kind = NoteKind.Pause;
     }

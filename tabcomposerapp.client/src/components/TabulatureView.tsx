@@ -12,7 +12,7 @@ interface TabulatureViewProps {
 
 export const TabulatureView: React.FC<TabulatureViewProps> = () => {
 
-    const { getTabulature, lastTempo , setLastTempo } = useTabulature();
+    const { getTabulature } = useTabulature();
 
     const tabulature = useMemo(() => getTabulature(), [getTabulature]);
 
@@ -20,7 +20,6 @@ export const TabulatureView: React.FC<TabulatureViewProps> = () => {
     return (
         <TabulatureContainer maxItemsPerRow={4} >
             {tabulature.map((measure, index) => {
-                setLastTempo(measure.tempo);
                 return (
                     <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
                         <MeasureLabel/>

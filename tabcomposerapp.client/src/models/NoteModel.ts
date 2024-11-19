@@ -25,7 +25,7 @@ export interface INote extends IPause{
 export class Note extends Sound implements INote {
     public readonly kind: NoteKind;
     public fret: number;
-    public readonly noteDuration: NoteDuration;
+    public noteDuration: NoteDuration;
     private timeStamp: number;
     constructor(
         sound: Sound,

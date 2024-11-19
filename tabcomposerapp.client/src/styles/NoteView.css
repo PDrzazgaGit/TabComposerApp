@@ -17,6 +17,22 @@
     font-weight: bold;
 }
 
+.pause-select {
+    -webkit-appearance: none; /* Ukrywa strza³kê w przegl¹darkach WebKit */
+    -moz-appearance: none; /* Ukrywa strza³kê w Firefoksie */
+    appearance: none; /* Ukrywa strza³kê w nowoczesnych przegl¹darkach */
+    border: none;
+    background: transparent;
+    color: black;
+    text-align: center;
+    font-size: 15px;
+    outline: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    caret-color: transparent; /* Ukrycie kursora */
+}
+
 .note-input {
     border: none;
     background: transparent;

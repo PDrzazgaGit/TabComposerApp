@@ -8,8 +8,12 @@ export const MeasureLabel = () => {
     const measure = useMemo(() => getMeasure(), [getMeasure]);
 
     return (
-        <>
-            {measureId } <span>&#9833; = { measure.tempo } </span>
-        </>
+        <div className="d-flex align-items-center justify-content-between px-3">
+            <span>{measureId}</span>
+            <div>
+                <span>{measure.numerator}\{measure.denominator}</span>
+                <span> &#9833; = {measure.tempo} </span>
+            </div>
+        </div>
     );
 }

@@ -26,14 +26,14 @@ export const TabulatureContainer: React.FC<TabulatureContainer> = ({ children, m
 
         // Je¿eli osi¹gniemy maksymaln¹ liczbê komponentów w wierszu, przechodzimy do nowego wiersza
         if (currentRow.length === maxItemsPerRow) {
-            rows.push(<Row key={index} style={{ margin: 0 }}>{currentRow}</Row>);
+            rows.push(<Row className="mb-3" key={index} >{currentRow}</Row>);
             currentRow = [];
         }
     });
 
     // Jeœli zosta³y komponenty w currentRow, dodajemy je do ostatniego wiersza
     if (currentRow.length > 0) {
-        rows.push(<Row key="last" style={{ margin: 0 }}>{currentRow} </Row>);
+        rows.push(<Row className="mb-3" key="last">{currentRow} </Row>);
     }
 
     return <Container className="">{rows}</Container>;

@@ -1,6 +1,6 @@
 import { useState, ReactNode } from 'react';
 import { MeasureContext } from './MeasureContext';
-import { IMeasure, INote } from '../models';
+import { IMeasure, INote, IPause, NoteDuration } from '../models';
 
 interface MeasureProviderProps {
     children: ReactNode;
@@ -34,6 +34,13 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         measure.changeNoteFret(note, stringId, fret);
     }
 
+    const changeNoteDuration = (note: INote | IPause, newDuration: NoteDuration, stringId: number): boolean => {
+        if (!measure) {
+            throw new Error("Measure has not been initialized.");
+        }
+        return measure.changeNoteDuration(note, newDuration, stringId);
+    }
+
     const getMeasure = (): IMeasure => {
         if(measure)
             return measure;
@@ -46,7 +53,8 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         getMaxFrets,
         getMeasureDurationMs,
         changeFret,
-        getMeasure
+        getMeasure,
+        changeNoteDuration
     }
     
     return (

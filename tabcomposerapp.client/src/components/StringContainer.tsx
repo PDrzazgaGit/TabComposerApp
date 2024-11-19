@@ -3,6 +3,7 @@ import { useMeasure } from "../hooks/useMeasure";
 import { useTabulature } from "../hooks/useTabulature";
 import { INote, IPause, NoteKind } from "../models";
 import { NoteView } from "./NoteView";
+import { PauseView } from "./PauseView";
 import './../styles/StringContainer.css';
 
 interface StringContainerProps {
@@ -38,9 +39,9 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId, note
                 <div style={{ flex: "1 1 auto", position: "relative", height: "100%" }}>
           
                     <div className="string-line" />
-                    <div className="position-relative">
+                    <div className="position-relative ms-3 me-3">
                         {notes
-                            .filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
+                            //.filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
                             .map((note, index) => (
                                 <div
                                     key={index}
@@ -49,7 +50,15 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId, note
                                         left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em )`, // Pozycjonowanie nuty (nuta ma szerokoœæ 1 em dlatego przesuwam w lewo aby œrodek by³ w odpowiednim miejscu)
                                     }}
                                 >
-                                    <NoteView note={note} stringId={stringId} />
+                                    {
+                                        note.kind === NoteKind.Note && (
+                                            <NoteView note={note as INote} stringId={stringId} />
+                                        
+                                        ) || (
+                                            <PauseView pause={note as IPause} stringId={stringId} />
+                                        )
+                                    }
+                                    
                                 </div>
                             ))}
                     </div>

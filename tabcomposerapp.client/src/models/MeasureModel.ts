@@ -15,6 +15,7 @@ export interface IMeasure {
     changeTempo(tempo: number): void;
     changeNoteTimeStamp(note: INote, stringId: number, timeStamp: number): boolean
     changeNoteFret(note: INote, stringId: number, fret: number): void
+    changeNoteDuration(note: INote | IPause, newDuration: NoteDuration, stringId: number): boolean;
     pushPause(stringId: number, noteDuration: NoteDuration): IPause | undefined;
     putPause(stringId: number, timeStamp: number ,noteDuration: NoteDuration): IPause | undefined;
 }

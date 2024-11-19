@@ -108,6 +108,36 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
     }
 
+    public changeNoteDuration(note: Note | Pause, newDuration: NoteDuration, stringId: number): boolean {
+        const stringNotes: Note[] = this.get(stringId)!;
+        const foundNote = stringNotes.find(n => n === note);
+        if (foundNote) {
+            const newDurationMs: number = this.calculateNoteDurationMs(newDuration);
+            const noteIndex: number = stringNotes.indexOf(foundNote);
+
+            if (!this.isWithinMeasure(foundNote.getTimeStampMs(), newDurationMs)) {
+                return false;
+            }
+
+            if (noteIndex === stringNotes.length - 1) {
+                console.log("ostatni");
+                foundNote.noteDuration = newDuration;
+                foundNote.setDurationMs(this.calculateNoteDurationMs(newDuration));
+                return true;
+            } else {
+                console.log("nie ostatni");
+                const existingStart = stringNotes[noteIndex + 1].getTimeStampMs();
+                if (foundNote.getTimeStampMs() + newDurationMs > existingStart) {
+                    return false;
+                }
+                foundNote.noteDuration = newDuration;
+                foundNote.setDurationMs(this.calculateNoteDurationMs(newDuration));
+                return true;
+            }
+        }
+        return false;
+    }
+
     public changeSignature(numerator: number, denominator: number): void {
         if (numerator <= 0) {
             throw new Error("Numerator must be a positive integer.");

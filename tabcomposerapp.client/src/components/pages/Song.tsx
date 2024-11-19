@@ -22,16 +22,18 @@ export const Song = () => {
     let measure: IMeasure = new MeasureService(120, 4, 4, tuning);
     measure.pushNote(0, 6, NoteDuration.Quarter);
     measure.pushNote(3, 6, NoteDuration.Quarter);
-    measure.pushNote(5, 6, NoteDuration.Eighth);
-    measure.pushNote(5, 6, NoteDuration.Eighth);
-    measure.pushNote(5, 6, NoteDuration.Eighth);
-    measure.pushNote(5, 6, NoteDuration.Eighth);
-    tab.addMeasure(measure);
-    tab.addMeasure(measure);
+   // measure.pushNote(3, 6, NoteDuration.Quarter);
+    measure.pushPause(6, NoteDuration.Quarter);
+   // measure.pushNote(5, 6, NoteDuration.Eighth);
+   // measure.pushNote(5, 6, NoteDuration.Eighth);
+   // measure.pushNote(5, 6, NoteDuration.Eighth);
+
 
    // measure.pushNote(5, 6, NoteDuration.Eighth);
     //measure.pushNote(5, 6, NoteDuration.Quarter);
-    //const pause = measure.pushPause(6, NoteDuration.Eighth)!;
+    const pause = measure.pushPause(6, NoteDuration.Quarter)!;
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
     //console.log(pause.getName());
     measure = new MeasureService(100, 3, 4, tuning);
     measure.pushNote(0, 6, NoteDuration.Quarter);
@@ -39,11 +41,15 @@ export const Song = () => {
     measure.pushNote(5, 6, NoteDuration.Eighth);
     tab.addMeasure(measure);
     tab.addMeasure(measure);
-
-
-
-   
-    
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
+    tab.addMeasure(measure);
     tab.addMeasure(measure);
     if (!tabulature) {
         setTab(tab);
