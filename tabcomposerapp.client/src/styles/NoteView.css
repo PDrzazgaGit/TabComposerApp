@@ -15,6 +15,7 @@
     color: white;
     font-size: 15px;
     font-weight: bold;
+    background-color: #FFFFFF;
 }
 
 .pause-select {
@@ -43,5 +44,20 @@
     width: 100%;
     padding: 0; /* Usuwamy padding */
     margin: 0; /* Usuwamy margin */
+    cursor: pointer; /* WskaŸnik kursora jak dla przycisku */
+    caret-color: transparent; /* Ukryj kursor */
+}
+
+.note-input-button {
+    border: none;
+    background: transparent;
+    color: black; /* Tekst w kolorze czarnym */
+    text-align: center;
+    font-size: 15px;
+    outline: none; /* Usuñ obramowanie przy focuse */
+    width: 100%; /* Dostosuj szerokoœæ, jeœli potrzebne */
+    padding: 0; /* Usuñ padding */
+    margin: 0; /* Usuñ margin */
+    cursor: pointer; /* WskaŸnik kursora jak dla przycisku */
     caret-color: transparent; /* Ukryj kursor */
 }

@@ -14,7 +14,7 @@ export const TabulatureView: React.FC<TabulatureViewProps> = () => {
 
     const { getTabulature } = useTabulature();
 
-    const tabulature = useMemo(() => getTabulature(), [getTabulature]);
+    const tabulature = getTabulature();
 
 
     return (

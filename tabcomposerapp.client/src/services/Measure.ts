@@ -108,7 +108,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
     }
 
-    public changeNoteDuration(note: Note | Pause, newDuration: NoteDuration, stringId: number): boolean {
+    public changeNoteDuration1(note: Note | Pause, newDuration: NoteDuration, stringId: number): boolean {
         const stringNotes: Note[] = this.get(stringId)!;
         const foundNote = stringNotes.find(n => n === note);
         if (foundNote) {
@@ -132,11 +132,88 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
                 }
                 foundNote.noteDuration = newDuration;
                 foundNote.setDurationMs(this.calculateNoteDurationMs(newDuration));
+
+                foundNote.setTimeStampMs(foundNote.getTimeStampMs() + 100); // tylko testy
                 return true;
             }
         }
         return false;
     }
+
+    private getMeasureEndTimeMs(startTimeMs: number): number {
+        return Math.ceil(startTimeMs / this.measureDurationMs) * this.measureDurationMs;
+    }
+
+    public changeNoteDuration(
+        note: Note | Pause,
+        newDuration: NoteDuration,
+        stringId: number
+    ): boolean {
+        const stringNotes: Note[] = this.get(stringId)!;
+        const foundNote = stringNotes.find(n => n === note);
+        if (foundNote) {
+            const newDurationMs: number = this.calculateNoteDurationMs(newDuration);
+            const noteIndex: number = stringNotes.indexOf(foundNote);
+            const oldDurationMs = foundNote.getDurationMs();
+
+            if (!this.isWithinMeasure(foundNote.getTimeStampMs(), newDurationMs)) {
+                return false;
+            }
+
+            if (noteIndex === stringNotes.length - 1) {
+                console.log("ostatni");
+                foundNote.noteDuration = newDuration;
+                foundNote.setDurationMs(newDurationMs);
+                return true;
+            } else {
+                console.log("nie ostatni");
+                const existingStart = stringNotes[noteIndex + 1].getTimeStampMs();
+
+                if (newDurationMs < oldDurationMs) {
+                    // Skracamy nutê - przesuwamy pozosta³e nuty w lewo
+                    const timeDiff = oldDurationMs - newDurationMs;
+                    foundNote.noteDuration = newDuration;
+                    foundNote.setDurationMs(newDurationMs);
+
+                    for (let i = noteIndex + 1; i < stringNotes.length; i++) {
+                        stringNotes[i].setTimeStampMs(stringNotes[i].getTimeStampMs() - timeDiff);
+                    }
+
+                    return true;
+                } else {
+                    // Wyd³u¿amy nutê - sprawdzamy, czy przesuniêcie siê zmieœci w takcie
+                    const timeDiff = newDurationMs - oldDurationMs;
+                    const measureEnd = this.getMeasureEndTimeMs(foundNote.getTimeStampMs());
+
+                    // Sprawdzamy, czy wszystkie nuty zmieszcz¹ siê w takcie po przesuniêciu
+                    let canFit = true;
+                    for (let i = noteIndex + 1; i < stringNotes.length; i++) {
+                        const newStartTime = stringNotes[i].getTimeStampMs() + timeDiff;
+                        if (newStartTime >= measureEnd) {
+                            canFit = false;
+                            break;
+                        }
+                    }
+
+                    if (canFit) {
+                        // Zmieniamy d³ugoœæ nuty i przesuwamy pozosta³e
+                        foundNote.noteDuration = newDuration;
+                        foundNote.setDurationMs(newDurationMs);
+
+                        for (let i = noteIndex + 1; i < stringNotes.length; i++) {
+                            stringNotes[i].setTimeStampMs(stringNotes[i].getTimeStampMs() + timeDiff);
+                        }
+
+                        return true;
+                    } else {
+                        return false; // Nie mo¿na zmieœciæ pozosta³ych nut
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     public changeSignature(numerator: number, denominator: number): void {
         if (numerator <= 0) {

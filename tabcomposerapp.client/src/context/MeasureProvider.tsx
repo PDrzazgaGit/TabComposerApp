@@ -47,6 +47,15 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         throw new Error("Measure has not been initialized.");
     }
 
+    const getStringNotes = (stringId: number): INote[] => {
+        if (!measure)  
+            throw new Error("Measure has not been initialized.");
+        const notes: INote[] = measure.getNotes(stringId);
+        if (!notes)
+            throw new Error("Measure do not have such string: " + stringId + ".");
+        return notes;
+    }
+
     const value = {
         measureId,
         setMeasureId,
@@ -54,7 +63,8 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         getMeasureDurationMs,
         changeFret,
         getMeasure,
-        changeNoteDuration
+        changeNoteDuration,
+        getStringNotes
     }
     
     return (

@@ -6,6 +6,7 @@ interface MeasureContextType {
     getMaxFrets: () => number;
     getMeasureDurationMs: () => number;
     getMeasure: () => IMeasure;
+    getStringNotes: (stringId: number) => INote[];
     changeFret: (note: INote, stringId: number, fret: number) => void;
     changeNoteDuration: (note: INote | IPause, newDuration: NoteDuration, stringId: number) => boolean;
 }

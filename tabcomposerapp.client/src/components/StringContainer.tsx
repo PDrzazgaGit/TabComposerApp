@@ -1,32 +1,22 @@
 import { useMemo } from "react";
 import { useMeasure } from "../hooks/useMeasure";
 import { useTabulature } from "../hooks/useTabulature";
-import { INote, IPause, NoteKind } from "../models";
 import { NoteView } from "./NoteView";
-import { PauseView } from "./PauseView";
 import './../styles/StringContainer.css';
 
 interface StringContainerProps {
     stringId: number;
-    notes: (INote | IPause)[];
 }
 
-export const StringContainer: React.FC<StringContainerProps> = ({ stringId, notes }) => {
+export const StringContainer: React.FC<StringContainerProps> = ({ stringId }) => {
 
-    const { getMeasureDurationMs, measureId } = useMeasure();  
+    const { measureId, getStringNotes } = useMeasure();  
 
     const { getTabulatureTuning } = useTabulature();
 
     const stringLetter = useMemo(() => {
         return getTabulatureTuning().getStringSound(stringId).getName()
     }, [getTabulatureTuning, stringId])
-
-    const measureDuration = useMemo(() => getMeasureDurationMs(), [getMeasureDurationMs]);
-
-    const calculatePosition = (timestamp: number, containerWidth: number) => {
-        return (timestamp / measureDuration) * containerWidth;
-    };
-
 
     return (
         <>
@@ -40,16 +30,10 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId, note
           
                     <div className="string-line" />
                     <div className="position-relative ms-3 me-3">
-                        {notes
+                        {getStringNotes(stringId)
                             //.filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
                             .map((note, index) => (
-                                <div
-                                    key={index}
-                                    style={{
-                                        position: "absolute",
-                                        left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em )`, // Pozycjonowanie nuty (nuta ma szerokoœæ 1 em dlatego przesuwam w lewo aby œrodek by³ w odpowiednim miejscu)
-                                    }}
-                                >
+                                <div key={index} >
                                     <NoteView note={note} stringId={stringId} />
                                 </div>
                             ))}

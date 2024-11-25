@@ -14,9 +14,9 @@ export const MeasureView: React.FC<MeasureViewProps> = () => {
 
     const stringComponents: JSX.Element[] = [];
 
-    measure.forEach((notes: INote[], stringId: number) => {
+    measure.forEach((_, stringId: number) => {
         stringComponents.push(
-            <StringContainer key={stringId} stringId={stringId} notes={notes} />
+            <StringContainer key={stringId} stringId={stringId} />
         );
     });
 
