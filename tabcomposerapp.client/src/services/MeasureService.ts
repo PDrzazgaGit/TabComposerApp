@@ -7,14 +7,14 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
 
     public measureDurationMs: number;
     private wholeNoteDurationMs: number;
-
     constructor(
         public tempo: number,
         public numerator: number,
         public denominator: number,
         private readonly tuning: ITuning,
         public readonly frets: number = 24
-    ) {
+    )
+    {
         if (tempo <= 0) {
             throw new Error("Tempo must be a positive integer.");
         }
@@ -33,6 +33,14 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         tuning.forEach((stringId: number) => {
             this.set(Number(stringId), new Array<Note>());     
         });
+    }
+
+    public clone(): MeasureService {
+        const measure: MeasureService = new MeasureService(this.tempo, this.numerator, this.denominator, this.tuning, this.frets);
+        this.forEach((notes, stringId) => {
+            measure.set(Number(stringId), notes);
+        })
+        return measure;
     }
 
     private assembleNote(
@@ -108,42 +116,6 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
     }
 
-    public changeNoteDuration1(note: Note | Pause, newDuration: NoteDuration, stringId: number): boolean {
-        const stringNotes: Note[] = this.get(stringId)!;
-        const foundNote = stringNotes.find(n => n === note);
-        if (foundNote) {
-            const newDurationMs: number = this.calculateNoteDurationMs(newDuration);
-            const noteIndex: number = stringNotes.indexOf(foundNote);
-
-            if (!this.isWithinMeasure(foundNote.getTimeStampMs(), newDurationMs)) {
-                return false;
-            }
-
-            if (noteIndex === stringNotes.length - 1) {
-                console.log("ostatni");
-                foundNote.noteDuration = newDuration;
-                foundNote.setDurationMs(this.calculateNoteDurationMs(newDuration));
-                return true;
-            } else {
-                console.log("nie ostatni");
-                const existingStart = stringNotes[noteIndex + 1].getTimeStampMs();
-                if (foundNote.getTimeStampMs() + newDurationMs > existingStart) {
-                    return false;
-                }
-                foundNote.noteDuration = newDuration;
-                foundNote.setDurationMs(this.calculateNoteDurationMs(newDuration));
-
-                foundNote.setTimeStampMs(foundNote.getTimeStampMs() + 100); // tylko testy
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private getMeasureEndTimeMs(startTimeMs: number): number {
-        return Math.ceil(startTimeMs / this.measureDurationMs) * this.measureDurationMs;
-    }
-
     public changeNoteDuration(
         note: Note | Pause,
         newDuration: NoteDuration,
@@ -161,42 +133,29 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
             }
 
             if (noteIndex === stringNotes.length - 1) {
-                console.log("ostatni");
                 foundNote.noteDuration = newDuration;
                 foundNote.setDurationMs(newDurationMs);
                 return true;
             } else {
-                console.log("nie ostatni");
-                const existingStart = stringNotes[noteIndex + 1].getTimeStampMs();
-
-                if (newDurationMs < oldDurationMs) {
-                    // Skracamy nutê - przesuwamy pozosta³e nuty w lewo
-                    const timeDiff = oldDurationMs - newDurationMs;
+                const timeDiff: number = Math.abs(oldDurationMs - newDurationMs);
+                if (newDurationMs < oldDurationMs) { // shorten note
                     foundNote.noteDuration = newDuration;
                     foundNote.setDurationMs(newDurationMs);
-
                     for (let i = noteIndex + 1; i < stringNotes.length; i++) {
                         stringNotes[i].setTimeStampMs(stringNotes[i].getTimeStampMs() - timeDiff);
                     }
-
                     return true;
-                } else {
-                    // Wyd³u¿amy nutê - sprawdzamy, czy przesuniêcie siê zmieœci w takcie
-                    const timeDiff = newDurationMs - oldDurationMs;
-                    const measureEnd = this.getMeasureEndTimeMs(foundNote.getTimeStampMs());
-
-                    // Sprawdzamy, czy wszystkie nuty zmieszcz¹ siê w takcie po przesuniêciu
+                } else {                // make note longer
                     let canFit = true;
                     for (let i = noteIndex + 1; i < stringNotes.length; i++) {
                         const newStartTime = stringNotes[i].getTimeStampMs() + timeDiff;
-                        if (newStartTime >= measureEnd) {
+                        if (newStartTime + stringNotes[i].getDurationMs() > this.measureDurationMs) {
                             canFit = false;
                             break;
                         }
                     }
-
                     if (canFit) {
-                        // Zmieniamy d³ugoœæ nuty i przesuwamy pozosta³e
+
                         foundNote.noteDuration = newDuration;
                         foundNote.setDurationMs(newDurationMs);
 
@@ -206,12 +165,142 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
 
                         return true;
                     } else {
-                        return false; // Nie mo¿na zmieœciæ pozosta³ych nut
+                        return false; // cant fit
                     }
                 }
             }
         }
         return false;
+    }
+
+    public deleteNote(note: Note | Pause, stringId: number) {
+        const stringNotes = this.get(stringId);
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+        const index = stringNotes.findIndex(item => item === note);
+
+        if (index === -1) {
+            throw new Error("Note does not exist.");
+        }
+
+        if (index != stringNotes.length - 1) { // check if last, if not shift
+            const durationToShift = note.getDurationMs();
+            for (let i = index + 1; i < stringNotes.length; i++) {
+                stringNotes[i].setTimeStampMs(stringNotes[i].getTimeStampMs() - durationToShift);
+            }
+        }
+        stringNotes.splice(index, 1);
+        this.set(Number(stringId), stringNotes);
+    }
+
+    public moveNoteRight(note: Note | Pause, stringId: number, interval: NoteDuration = note.noteDuration): boolean {
+        const stringNotes = this.get(stringId);
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+
+        const index = stringNotes.findIndex(item => item === note);
+        if (index === -1) {
+            throw new Error("Note does not exist.");
+        }
+
+        const intervalMs = this.calculateNoteDurationMs(interval);
+        let newStartTime = note.getTimeStampMs() + intervalMs;
+
+        if (newStartTime + note.getDurationMs() > this.measureDurationMs) {
+            return false;
+        }
+
+        if (index !== stringNotes.length - 1) {
+
+            const newEndTime = note.getEndTimeStampMs() + intervalMs;
+
+
+            const isCollision = stringNotes.some((otherNote, i) => {
+                if (i !== index) {
+
+                    const otherNoteEnd = otherNote.getEndTimeStampMs();
+                    const otherNoteStart = otherNote.getTimeStampMs();
+
+                    return (
+                        (newStartTime < otherNoteEnd && newEndTime > otherNoteStart) || // Nak³adanie siê
+                        (newStartTime >= otherNoteStart && newEndTime <= otherNoteEnd) || // Zawieranie siê w innej nucie
+                        (newStartTime <= otherNoteStart && newEndTime >= otherNoteEnd)    // Ca³kowite obejmowanie innej nuty
+                    );
+                }
+                return false;
+            });
+
+            if (isCollision) {
+                //return false;
+                const rightNote = stringNotes[index + 1];
+                if (rightNote.getDurationMs() === note.getDurationMs()) {
+                    newStartTime = rightNote.getTimeStampMs();
+                    rightNote.setTimeStampMs(note.getTimeStampMs());
+                } else {
+                    //return false;
+                    newStartTime = note.getTimeStampMs() + rightNote.getDurationMs();
+                    rightNote.setTimeStampMs(note.getTimeStampMs());
+                }
+                stringNotes[index + 1] = note;
+                stringNotes[index] = rightNote;
+            }
+        }
+        note.setTimeStampMs(newStartTime);
+        return true;
+    }
+
+    public moveNoteLeft(note: Note | Pause, stringId: number, interval: NoteDuration = note.noteDuration): boolean {
+        const stringNotes = this.get(stringId);
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+
+        const index = stringNotes.findIndex(item => item === note);
+        if (index === -1) {
+            throw new Error("Note does not exist.");
+        }
+
+        const intervalMs = this.calculateNoteDurationMs(interval);
+        let newStartTime = note.getTimeStampMs() - intervalMs;
+        if (newStartTime < 0) {
+            return false;
+        }
+
+        if (index !== 0) {
+            
+            const newEndTime = note.getEndTimeStampMs() - intervalMs;
+            const isCollision = stringNotes.some((otherNote, i) => {
+
+                if (i !== index) {
+                    const otherNoteEnd = otherNote.getEndTimeStampMs();
+                    const otherNoteStart = otherNote.getTimeStampMs();
+                    return (
+                        (newStartTime < otherNoteEnd && newEndTime > otherNoteStart) || // Nak³adanie siê
+                        (newStartTime >= otherNoteStart && newEndTime <= otherNoteEnd) || // Zawieranie siê w innej nucie
+                        (newStartTime <= otherNoteStart && newEndTime >= otherNoteEnd)    // Ca³kowite obejmowanie innej nuty
+                    );
+                }
+                return false;
+            });
+
+            if (isCollision) {
+                const leftNote = stringNotes[index - 1];
+                if (leftNote.getDurationMs() === note.getDurationMs()) {
+                    newStartTime = leftNote.getTimeStampMs();
+                    leftNote.setTimeStampMs(note.getTimeStampMs());                    
+                } else {
+                    //return false;
+                    newStartTime = leftNote.getTimeStampMs();
+                    leftNote.setTimeStampMs(newStartTime + note.getDurationMs());
+                }
+                stringNotes[index - 1] = note;
+                stringNotes[index] = leftNote;
+            }
+        }
+        note.setTimeStampMs(newStartTime);
+        return true;
     }
 
 

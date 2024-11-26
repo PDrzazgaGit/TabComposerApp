@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {  INote  } from "../models";
 import {useMeasure } from "./../hooks/useMeasure"
 import { StringContainer } from "./StringContainer";
@@ -9,16 +9,17 @@ interface MeasureViewProps {
 
 export const MeasureView: React.FC<MeasureViewProps> = () => {
 
-    const { getMeasure } = useMeasure();
-    const measure = getMeasure();
+    const { measure } = useMeasure();
 
-    const stringComponents: JSX.Element[] = [];
-
-    measure.forEach((_, stringId: number) => {
-        stringComponents.push(
-            <StringContainer key={stringId} stringId={stringId} />
-        );
-    });
+    const stringComponents = useMemo(() => {
+        const components: JSX.Element[] = [];
+        if (measure) {
+            measure.forEach((_, stringId: number) => {
+                components.push(<StringContainer key={stringId} stringId={stringId} />);
+            });
+        }
+        return components;
+    }, [measure]); 
 
     return (
         <>

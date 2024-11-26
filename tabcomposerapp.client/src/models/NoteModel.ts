@@ -20,6 +20,7 @@ export interface INote extends IPause{
     readonly notation: Notation,
     readonly octave: number,
     readonly fret: number;
+    clone(): Note;
 }
 
 export class Note extends Sound implements INote {
@@ -68,6 +69,12 @@ export class Note extends Sound implements INote {
             throw new Error("Timestamp must be grater than 0.")
         }
         this.timeStamp = timeStampMs;
+    }
+
+    public clone(): Note {
+        const note: Note = new Note(this, this.fret, this.getDurationMs(), this.noteDuration);
+        note.setTimeStampMs(this.getTimeStampMs());
+        return note;
     }
 
     public getTimeStampMs(): number { return this.timeStamp; }

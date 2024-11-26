@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useCallback } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { ITabulature, ITuning } from '../models';
 
@@ -9,27 +9,15 @@ interface TabulatureProviderProps {
 
 export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children, initialTabulature }) => {
 
-    const [tabulature] = useState<ITabulature | null>(initialTabulature);
+    const [tabulature, setTabulature] = useState<ITabulature>(initialTabulature);
 
-    const [lastTempo, setLastTempo] = useState<number>(0);
-
-    const getTabulature = () => {
-        if (!tabulature)
-            throw new Error("Tabulature has not been initialized");
-        return tabulature;
-    }
-
-    const getTabulatureTuning = (): ITuning => {
-        if (!tabulature)
-            throw new Error("Tabulature has not been initialized");
-        return tabulature.tuning; 
-    }
+    const updateTabulature = useCallback((newTabulature: ITabulature) => {
+        setTabulature(newTabulature); // Mo¿liwoœæ aktualizacji tabulatury
+    }, []);
 
     const value = {
-        lastTempo,
-        setLastTempo,
-        getTabulature,
-        getTabulatureTuning
+        tabulature,
+        updateTabulature
     }
 
     return (

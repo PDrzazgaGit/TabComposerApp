@@ -34,20 +34,6 @@
     caret-color: transparent; /* Ukrycie kursora */
 }
 
-.note-input {
-    border: none;
-    background: transparent;
-    color: black; /* Ustaw kolor tekstu na czarny */
-    text-align: center;
-    font-size: 15px;
-    outline: none;
-    width: 100%;
-    padding: 0; /* Usuwamy padding */
-    margin: 0; /* Usuwamy margin */
-    cursor: pointer; /* Wskaünik kursora jak dla przycisku */
-    caret-color: transparent; /* Ukryj kursor */
-}
-
 .note-input-button {
     border: none;
     background: transparent;

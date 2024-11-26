@@ -1,10 +1,8 @@
 import { createContext } from 'react';
-import { ITabulature, ITuning } from '../models'
+import { ITabulature } from '../models'
 interface TabulatureContextType {
-    lastTempo: number;
-    setLastTempo: (tempo: number) => void;
-    getTabulature: () => ITabulature;
-    getTabulatureTuning: () => ITuning;
+    tabulature: ITabulature;
+    updateTabulature: (newTabulature: ITabulature) => void;
 }
 
 export const TabulatureContext = createContext<TabulatureContextType | undefined>(undefined);

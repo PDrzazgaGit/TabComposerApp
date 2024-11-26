@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useMeasure } from "../hooks/useMeasure";
 import { useTabulature } from "../hooks/useTabulature";
 import { NoteView } from "./NoteView";
@@ -10,17 +10,34 @@ interface StringContainerProps {
 
 export const StringContainer: React.FC<StringContainerProps> = ({ stringId }) => {
 
-    const { measureId, getStringNotes } = useMeasure();  
+    const { measureId, measure, addNote } = useMeasure();  
 
-    const { getTabulatureTuning } = useTabulature();
+    const { tabulature } = useTabulature();
 
-    const stringLetter = useMemo(() => {
-        return getTabulatureTuning().getStringSound(stringId).getName()
-    }, [getTabulatureTuning, stringId])
+    const notes = useMemo(() => {
+        console.log(stringId);
+        if (measure) {
+            return measure.getNotes(stringId);
+        }
+        return [];
+    }, [measure, stringId]); 
 
+    const stringLetter = tabulature.tuning.getStringSound(stringId).getName();
+
+    const calculatePosition = useCallback(
+        (timestamp: number, containerWidth: number): number => {
+            return (timestamp / measure.measureDurationMs) * containerWidth;
+        },
+        [measure]
+    );
+
+    const handleAddNote = () => {
+        addNote(stringId);
+    }
+    
     return (
         <>
-            <div className="w-100 d-flex align-items-center" style={{ height: "1.5em" }}>
+            <div onDoubleClick={handleAddNote} className="w-100 d-flex align-items-center" style={{ height: "1.5em" }}>
 
                 {measureId === 0 && (
                     <div style={{ flex: "0 0 auto", minWidth: "1em" }}>{stringLetter}</div>
@@ -30,10 +47,15 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId }) =>
           
                     <div className="string-line" />
                     <div className="position-relative ms-3 me-3">
-                        {getStringNotes(stringId)
+                        {notes
                             //.filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
                             .map((note, index) => (
-                                <div key={index} >
+                                <div key={index}
+                                    style={{
+                                        position: "absolute",
+                                        left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`
+                                    }}
+                                >
                                     <NoteView note={note} stringId={stringId} />
                                 </div>
                             ))}

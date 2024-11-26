@@ -1,5 +1,4 @@
 export * from "./NotationModel";
-export * from "./SongModel";
 export * from "./SoundModel";
 export * from "./TuningModel";
 export * from "./NoteModel";

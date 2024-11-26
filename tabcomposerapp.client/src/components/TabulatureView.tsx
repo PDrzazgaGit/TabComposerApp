@@ -12,13 +12,10 @@ interface TabulatureViewProps {
 
 export const TabulatureView: React.FC<TabulatureViewProps> = () => {
 
-    const { getTabulature } = useTabulature();
-
-    const tabulature = getTabulature();
-
+    const { tabulature } = useTabulature();
 
     return (
-        <TabulatureContainer maxItemsPerRow={4} >
+        <TabulatureContainer maxItemsPerRow={3} >
             {tabulature.map((measure, index) => {
                 return (
                     <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>

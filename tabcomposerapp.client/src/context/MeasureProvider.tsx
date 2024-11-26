@@ -1,6 +1,8 @@
 import { useState, ReactNode } from 'react';
 import { MeasureContext } from './MeasureContext';
-import { IMeasure, INote, IPause, NoteDuration } from '../models';
+import { IMeasure, INote, IPause, Note, NoteDuration } from '../models';
+import { useTabulature } from '../hooks/useTabulature';
+
 
 interface MeasureProviderProps {
     children: ReactNode;
@@ -10,9 +12,11 @@ interface MeasureProviderProps {
 
 export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, initialMeasure, initialMeasureId }) => {
 
-    const [measure] = useState<IMeasure | null>(initialMeasure);
+    const [measure, setMeasure] = useState<IMeasure>(initialMeasure);
 
     const [measureId, setMeasureId] = useState<number>(initialMeasureId);
+
+    const { tabulature } = useTabulature();
 
     const getMaxFrets = (): number => {
         if (measure) {
@@ -31,20 +35,25 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         if (!measure) {
             throw new Error("Measure has not been initialized.");
         }
-        measure.changeNoteFret(note, stringId, fret);
+        //const newNote = note.clone();
+        //measure.changeNoteFret(note, stringId, fret);
+        const updatedMeasure: IMeasure = measure.clone();
+        updatedMeasure.changeNoteFret(note, stringId, fret);
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
     }
 
     const changeNoteDuration = (note: INote | IPause, newDuration: NoteDuration, stringId: number): boolean => {
         if (!measure) {
             throw new Error("Measure has not been initialized.");
         }
-        return measure.changeNoteDuration(note, newDuration, stringId);
-    }
-
-    const getMeasure = (): IMeasure => {
-        if(measure)
-            return measure;
-        throw new Error("Measure has not been initialized.");
+        const updatedMeasure: IMeasure = measure.clone();
+        if (updatedMeasure.changeNoteDuration(note, newDuration, stringId)) {
+            tabulature.updateTablature(measure, updatedMeasure);
+            setMeasure(updatedMeasure);
+            return true;
+        }
+        return false;
     }
 
     const getStringNotes = (stringId: number): INote[] => {
@@ -56,15 +65,75 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return notes;
     }
 
+    const deleteNote = (note: INote | IPause, stringId: number) => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        const updatedMeasure: IMeasure = measure.clone();
+        measure.deleteNote(note, stringId);
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
+    }
+
+    const moveNoteRight = (note: INote | IPause, stringId: number, interval?: NoteDuration): boolean => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        const updatedMeasure: IMeasure = measure.clone();
+        if (!measure.moveNoteRight(note, stringId, interval))
+            return false;
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
+        return true;
+    }
+
+    const moveNoteLeft = (note: INote | IPause, stringId: number, interval?: NoteDuration): boolean => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        const updatedMeasure: IMeasure = measure.clone();
+        if (!measure.moveNoteLeft(note, stringId, interval))
+            return false;
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
+        return true;
+    }
+
+    const addPause = (stringId: number, noteDuration?: NoteDuration): boolean => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        const updatedMeasure: IMeasure = measure.clone();
+        if (measure.pushPause(stringId, noteDuration ? noteDuration : NoteDuration.Quarter)) {
+            tabulature.updateTablature(measure, updatedMeasure);
+            setMeasure(updatedMeasure);
+            return true;
+        }
+        return false;
+    }
+
+    const addNote = (stringId: number, noteDuration?: NoteDuration): boolean => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        const updatedMeasure: IMeasure = measure.clone();
+        if (measure.pushNote(0, stringId, noteDuration)) {
+            tabulature.updateTablature(measure, updatedMeasure);
+            setMeasure(updatedMeasure);
+            return true;
+        }
+        return false;
+    }
+
     const value = {
+        measure,
         measureId,
         setMeasureId,
         getMaxFrets,
         getMeasureDurationMs,
         changeFret,
-        getMeasure,
         changeNoteDuration,
-        getStringNotes
+        getStringNotes,
+        deleteNote,
+        moveNoteRight,
+        moveNoteLeft,
+        addPause,
+        addNote
     }
     
     return (

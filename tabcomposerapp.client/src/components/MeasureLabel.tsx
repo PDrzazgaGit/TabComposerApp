@@ -1,11 +1,8 @@
 import { useMeasure } from "../hooks/useMeasure";
-import { useMemo } from "react";
 
 export const MeasureLabel = () => {
 
-    const { getMeasure, measureId } = useMeasure();
-
-    const measure = useMemo(() => getMeasure(), [getMeasure]);
+    const { measure, measureId } = useMeasure();
 
     return (
         <div className="d-flex align-items-center justify-content-between px-3">
