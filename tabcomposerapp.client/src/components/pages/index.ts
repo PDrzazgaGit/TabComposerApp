@@ -1,3 +1,3 @@
 export * from "./Home";
 export * from "./About";
-export * from "./Song";
+export * from "./Editor";

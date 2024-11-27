@@ -3,6 +3,7 @@ import { useMeasure } from "../hooks/useMeasure";
 import { useTabulature } from "../hooks/useTabulature";
 import { NoteView } from "./NoteView";
 import './../styles/StringContainer.css';
+import { NoteEditorView } from "./NoteEditorView";
 
 interface StringContainerProps {
     stringId: number;
@@ -32,7 +33,8 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId }) =>
     );
 
     const handleAddNote = () => {
-        addNote(stringId);
+       // console.log("eheh")
+       // addNote(stringId);
     }
     
     return (
@@ -56,7 +58,7 @@ export const StringContainer: React.FC<StringContainerProps> = ({ stringId }) =>
                                         left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`
                                     }}
                                 >
-                                    <NoteView note={note} stringId={stringId} />
+                                    <NoteEditorView note={note} stringId={stringId} />
                                 </div>
                             ))}
                     </div>

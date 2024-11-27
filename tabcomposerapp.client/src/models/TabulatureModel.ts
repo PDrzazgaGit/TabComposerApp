@@ -9,8 +9,11 @@ export interface ITabulature {
 }
 
 export class Tabulature implements ITabulature {
+
+   
+
     private readonly measures: IMeasure[] = [];
-    public constructor(public readonly tuning: ITuning) { }
+    public constructor(public readonly tuning: ITuning, public title: string = "Untilted track") { }
 
     public forEach(callback: (measure: IMeasure) => void): void {
         this.measures.forEach(callback);
