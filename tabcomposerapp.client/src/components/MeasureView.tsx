@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from "react";
 import {  INote  } from "../models";
 import {useMeasure } from "./../hooks/useMeasure"
 import { StringEditorView } from "./StringEditorView";
+import { StringView } from "./StringView";
 
 interface MeasureViewProps {
     //measureId: number;

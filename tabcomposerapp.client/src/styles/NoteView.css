@@ -12,32 +12,12 @@
     border-radius: 10px;
     cursor: text;
     user-select: none; /* Zablokuj zaznaczanie tekstu */
-    color: white;
     font-size: 15px;
-    font-weight: bold;
-    background-color: #FFFFFF;
-}
-
-.pause-select {
-    -webkit-appearance: none; /* Ukrywa strza³kê w przegl¹darkach WebKit */
-    -moz-appearance: none; /* Ukrywa strza³kê w Firefoksie */
-    appearance: none; /* Ukrywa strza³kê w nowoczesnych przegl¹darkach */
-    border: none;
-    background: transparent;
-    color: black;
-    text-align: center;
-    font-size: 15px;
-    outline: none;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    caret-color: transparent; /* Ukrycie kursora */
 }
 
 .note-input-button {
     border: none;
     background: transparent;
-    color: black; /* Tekst w kolorze czarnym */
     text-align: center;
     font-size: 15px;
     outline: none; /* Usuñ obramowanie przy focuse */

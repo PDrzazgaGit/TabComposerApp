@@ -15,7 +15,9 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onNot
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
- 
+
+    const [isHovered, setIsHovered] = useState(false);
+
     const [noteId] = useState<string>(`note-${uuidv4()}`);
 
     const [noteValue, setNoteValue] = useState<string>(
@@ -43,9 +45,21 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onNot
             ref={ref}
             className="note-container"
             onClick={onClick} 
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{
+                backgroundColor: 'white',//isHovered ? '#28a745' : 'white', // Dla lepszego efektu wizualnego
+                borderRadius: '2em', // Zaokr¹glenie naro¿ników
+            }}
         >
             <div className="note-square">
-                <button id={noteId} className="note-input-button">
+                <button
+                    id={noteId}
+                    className="note-input-button"
+                    style={{
+                        color: isHovered ? '#17a2b8' : 'black',
+                    }}
+                >
                     {noteValue}
                 </button>
             </div>

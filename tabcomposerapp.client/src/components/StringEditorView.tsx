@@ -19,6 +19,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
     const [pauseDuration, setPauseDuration] = useState<NoteDuration>(NoteDuration.Quarter);
 
+    const [isHovered, setIsHovered] = useState(false);
+
     const { measureId, measure, addNote, addPause } = useMeasure();  
 
     const { tabulature } = useTabulature();
@@ -48,22 +50,22 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                 break;
             case NoteKind.Pause:
                 console.log("Hello")
-                addPause(stringId, noteDuration);
+                addPause(stringId, pauseDuration);
                 break;
         }
     }
 
-    const handleSetNoteDuration = (noteDuration: NoteDuration) =>{
-        if (measure.canPushNote(stringId, noteDuration)) {
-            setNoteDuration(noteDuration)
+    const handleSetNoteDuration = (nD: NoteDuration) =>{
+        if (measure.canPushNote(stringId, nD)) {
+            setNoteDuration(nD)
         } else {
 
         }
     }
 
-    const handleSetPauseDuration = (pauseDuration: NoteDuration) => {
-        if (measure.canPushNote(stringId, pauseDuration)) {
-            setPauseDuration(pauseDuration)
+    const handleSetPauseDuration = (pD: NoteDuration) => {
+        if (measure.canPushNote(stringId, pD)) {
+            setPauseDuration(pD)
         } else {
 
         }
@@ -76,19 +78,24 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             <Popover.Header as="h3">String {`${stringSound.getName()}${stringSound.octave}`}</Popover.Header>
             <Popover.Body >
                 <InputGroup className="d-flex column mb-3">
-                    <Dropdown as={ButtonGroup}>
+                    <Dropdown
+                        as={ButtonGroup}
+                        drop="end"
+                       
+                    >
                         <Button
                             variant="light"
                             onClick={() => handleAddItem(NoteKind.Note)}
                         >
-                            Add {`${noteRepresentationMap[noteDuration]}`}
+                            New {`${noteRepresentationMap[noteDuration]}`}
 
                         </Button>
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
+                      
                         <Dropdown.Menu>
                             {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
                                 <Dropdown.Item
-                                    key={key + "_duration"}
+                                    key={key + "_note_duration"}
                                     onClick={() => handleSetNoteDuration(key as unknown as NoteDuration)}
                                 >
                                     {symbol}
@@ -99,19 +106,23 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     </Dropdown>
                 </InputGroup>
                 <InputGroup className="d-flex column">
-                    <Dropdown as={ButtonGroup}>
+                    <Dropdown
+                        as={ButtonGroup}
+                        drop="end"
+                       
+                    >
                         <Button
                             variant="light"
                             onClick={() => handleAddItem(NoteKind.Pause)}
                         >
-                            Add {`${pauseRepresentationMap[pauseDuration]}`}
+                            New {`${pauseRepresentationMap[pauseDuration]}`}
 
                         </Button>
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
                         <Dropdown.Menu>
                             {Object.entries(pauseRepresentationMap).map(([key, symbol]) => (
                                 <Dropdown.Item
-                                    key={key + "_duration"}
+                                    key={key + "_pause_duration"}
                                     onClick={() => handleSetPauseDuration(key as unknown as NoteDuration)}
                                 >
                                     {symbol}
@@ -134,22 +145,36 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             placement="bottom-start"
             overlay={renderPopover}
             onEnter={handleEnter}
-           // container={document.body} 
             rootClose
         >
-            
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-100 d-flex align-items-center"
-                style={{ height: "1.5em" }}>
+                className="w-100 d-flex align-items-center"     
+                style={{ height: "1.5em" } }
+            >
+
 
                 {measureId === 0 && (
                     <div style={{ flex: "0 0 auto", minWidth: "1em" }}>{stringSound.getName()}</div>
                 )}
 
-                <div style={{ flex: "1 1 auto", position: "relative", height: "100%" }}>
+                <div
+                    style={{
+                        flex: "1 1 auto",
+                        position: "relative",
+                        height: "100%",
+                    }}
+                    
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
           
-                    <div className="string-line" />
+                    <div
+                        className="string-line"
+                        style={{
+                            borderColor: isHovered ? '#17a2b8' : 'black'
+                        }}
+                    />
                     <div className="position-relative ms-3 me-3">
                         {notes
                             //.filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
@@ -163,9 +188,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                                     <NoteEditorView note={note} stringId={stringId} />
                                 </div>
                             ))}
-                    </div>
-                    
-                    
+                    </div>      
                 </div>
             </div>
         </OverlayTrigger>

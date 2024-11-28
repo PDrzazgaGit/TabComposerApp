@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { INote, NoteDuration, NoteKind, IPause } from '../models';
 import { useMeasure } from '../hooks/useMeasure';
-import { FormControl, InputGroup, OverlayTrigger, Popover, Button } from 'react-bootstrap';
+import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { pauseRepresentationMap, noteRepresentationMap } from "../utils/noteUtils";
@@ -102,6 +102,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                     <DropdownButton
                         title={`Duration: ${NoteDuration[selectedDuration]}`}
                         variant="light"
+                        drop="down-centered"
                     >
                        
                         {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
@@ -115,42 +116,43 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                     </DropdownButton>
                 </InputGroup>
 
-                <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center gap-1 ">
-                    <Button
-                        className="flex-grow-1"
-                        variant="light"
-                        onClick={handleMoveLeft}
-                    >
-                        <i className="bi bi-arrow-left fs-5"></i>
-                    </Button>
-
-                    <Button
-                        className="flex-grow-1"
-                        variant="light"
-                        onClick={handleMoveRight}
-                    >
-                        <i className="bi bi-arrow-right fs-5"></i>
-                    </Button>
-                </InputGroup>
-
                 <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >
-                    <DropdownButton
+                    <Dropdown
                         title={`Move: ${NoteDuration[selectedInterval]}`}
                         variant="light"
+                        as={ButtonGroup}
+                        drop="down-centered"
                     >
-                       
-                        {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
-                            <Dropdown.Item
-                                key={key + "_interval"}
-                                onClick={() => {
-                                    console.log(key as unknown as NoteDuration)
-                                    setSelectedInterval(key as unknown as NoteDuration)
-                                }}
-                            >
-                                {symbol}
-                            </Dropdown.Item>
-                        ))}
-                    </DropdownButton>
+                        <Button
+                            variant="light"
+                            onClick={handleMoveLeft}
+                            className="flex-grow-1"
+                        >
+                            <i className="bi bi-arrow-left"></i>
+                        </Button>
+                        
+                        <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
+                        <Dropdown.Menu>
+                            {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
+                                <Dropdown.Item
+                                    key={key + "_interval"}
+                                    onClick={() => {
+                                        console.log(key as unknown as NoteDuration)
+                                        setSelectedInterval(key as unknown as NoteDuration)
+                                    }}
+                                >
+                                    {symbol}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                        <Button
+                            variant="light"
+                            onClick={handleMoveRight}
+                            className="flex-grow-1"
+                        >
+                            <i className="bi bi-arrow-right"></i>
+                        </Button>
+                    </Dropdown>
                 </InputGroup>
 
                 <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center">
@@ -175,13 +177,12 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             trigger="click"
             placement="bottom"
             overlay={renderPopover}
-            rootClose
-            //show={show} // Zarz¹dzanie widocznoœci¹ popovera
-            //onToggle={handleToggle}
+            rootClose 
             onEnter={handleEnter }
             >
             <div
                 onClick={(e) => e.stopPropagation()}
+                
             >
                 <NoteView
                     note={note}
