@@ -100,7 +100,9 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         if (!measure)
             throw new Error("Measure has not been initialized.")
         const updatedMeasure: IMeasure = measure.clone();
+        console.log(noteDuration);
         if (measure.pushPause(stringId, noteDuration ? noteDuration : NoteDuration.Quarter)) {
+           
             tabulature.updateTablature(measure, updatedMeasure);
             setMeasure(updatedMeasure);
             return true;

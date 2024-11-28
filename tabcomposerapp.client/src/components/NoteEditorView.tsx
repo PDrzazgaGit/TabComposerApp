@@ -82,7 +82,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     };
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
-        <Popover id={"popover_" + noteId} {...props}>
+        <Popover id={"popover_" + noteId} {...props} onClick={ (e) => e.stopPropagation()}>
             <Popover.Header as="h3">Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}</Popover.Header>
             <Popover.Body className="">
                 {isNote(note) && (
@@ -103,7 +103,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         title={`Duration: ${NoteDuration[selectedDuration]}`}
                         variant="light"
                     >
-                        <Dropdown.Item ></Dropdown.Item>
+                       
                         {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
                             <Dropdown.Item
                                 key={key + "_duration"}
@@ -138,7 +138,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         title={`Move: ${NoteDuration[selectedInterval]}`}
                         variant="light"
                     >
-                        <Dropdown.Item ></Dropdown.Item>
+                       
                         {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
                             <Dropdown.Item
                                 key={key + "_interval"}
@@ -166,13 +166,30 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         </Popover>
     )
 
+    const handleEnter = () => {
+        document.body.click();
+    }
+
     return (
-        <OverlayTrigger trigger="click" placement="bottom" overlay={renderPopover} rootClose>
-            <NoteView
-                note={note}
-                onGenerateId={handleGenerateId}
-                onNoteValue={handleNoteValue}
-            /> 
+        <OverlayTrigger
+            trigger="click"
+            placement="bottom"
+            overlay={renderPopover}
+            rootClose
+            //show={show} // Zarz¹dzanie widocznoœci¹ popovera
+            //onToggle={handleToggle}
+            onEnter={handleEnter }
+            >
+            <div
+                onClick={(e) => e.stopPropagation()}
+            >
+                <NoteView
+                    note={note}
+                    onGenerateId={handleGenerateId}
+                    onNoteValue={handleNoteValue}
+                /> 
+            </div>
+            
         </OverlayTrigger>
     );
 };
