@@ -432,6 +432,18 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return note;
     }
 
+    public canPushNote(stringId: number, noteDuration: NoteDuration): boolean {
+        const stringNotes = this.get(stringId);
+
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+
+        const lastNote = stringNotes[stringNotes.length - 1];
+        const timeStamp = lastNote ? lastNote.getTimeStampMs() + lastNote.getDurationMs() : 0;
+        return this.canPutNote(stringNotes, timeStamp, noteDuration);;
+    }
+
     public putPause(stringId: number, timeStamp: number, noteDuration: NoteDuration = NoteDuration.Quarter) {
         if (timeStamp < 0) {
             throw new Error("Timestamp must be grater than 0.");

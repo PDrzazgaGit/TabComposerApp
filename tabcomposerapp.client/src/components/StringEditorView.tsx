@@ -7,6 +7,7 @@ import { NoteEditorView } from "./NoteEditorView";
 import { Button, ButtonGroup, Dropdown, DropdownButton, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { Note, NoteDuration, NoteKind, Sound } from "../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
+import { v4 as uuidv4 } from 'uuid';
 
 interface StringEditorViewProps {
     stringId: number;
@@ -14,9 +15,9 @@ interface StringEditorViewProps {
 
 export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) => {
 
-    const [noteKind, setNoteKind] = useState<NoteKind>(NoteKind.Note);
-
     const [noteDuration, setNoteDuration] = useState<NoteDuration>(NoteDuration.Quarter);
+
+    const [pauseDuration, setPauseDuration] = useState<NoteDuration>(NoteDuration.Quarter);
 
     const { measureId, measure, addNote, addPause } = useMeasure();  
 
@@ -52,15 +53,29 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         }
     }
 
-    const handleEnter = () => {
-        document.body.click();
+    const handleSetNoteDuration = (noteDuration: NoteDuration) =>{
+        if (measure.canPushNote(stringId, noteDuration)) {
+            setNoteDuration(noteDuration)
+        } else {
+
+        }
+    }
+
+    const handleSetPauseDuration = (pauseDuration: NoteDuration) => {
+        if (measure.canPushNote(stringId, pauseDuration)) {
+            setPauseDuration(pauseDuration)
+        } else {
+
+        }
     }
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
-        <Popover {...props}>
+        <Popover id={`${stringId}_${uuidv4()}`} onClick={(e) => e.stopPropagation()} {...props}
+            //style={{ position: "static" }}
+        >
             <Popover.Header as="h3">String {`${stringSound.getName()}${stringSound.octave}`}</Popover.Header>
             <Popover.Body >
-                <InputGroup className="d-flex column">
+                <InputGroup className="d-flex column mb-3">
                     <Dropdown as={ButtonGroup}>
                         <Button
                             variant="light"
@@ -74,7 +89,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                             {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
                                 <Dropdown.Item
                                     key={key + "_duration"}
-                                    onClick={() => setNoteDuration(key as unknown as NoteDuration)}
+                                    onClick={() => handleSetNoteDuration(key as unknown as NoteDuration)}
                                 >
                                     {symbol}
                                 </Dropdown.Item>
@@ -89,7 +104,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                             variant="light"
                             onClick={() => handleAddItem(NoteKind.Pause)}
                         >
-                            Add {`${pauseRepresentationMap[noteDuration]}`}
+                            Add {`${pauseRepresentationMap[pauseDuration]}`}
 
                         </Button>
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
@@ -97,31 +112,21 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                             {Object.entries(pauseRepresentationMap).map(([key, symbol]) => (
                                 <Dropdown.Item
                                     key={key + "_duration"}
-                                    onClick={() => setNoteDuration(key as unknown as NoteDuration)}
+                                    onClick={() => handleSetPauseDuration(key as unknown as NoteDuration)}
                                 >
                                     {symbol}
                                 </Dropdown.Item>
                             ))}
                         </Dropdown.Menu>
-
                     </Dropdown>
                 </InputGroup>
             </Popover.Body>
         </Popover>
     )
 
-    /*
-    <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center" >
-                    <DropdownButton
-                        title={`Add ${NoteKind[noteKind]}`}
-                        variant="light"
-                    >
-                        <Dropdown.Item className="w-50" onClick={() => setNoteKind(NoteKind.Note)}/>
-                        <Dropdown.Item ></Dropdown.Item>
-                        
-                    </DropdownButton>
-                </InputGroup>
-    */
+    const handleEnter = () => {
+        document.body.click();
+    };
     
     return (
         <OverlayTrigger
@@ -129,6 +134,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             placement="bottom-start"
             overlay={renderPopover}
             onEnter={handleEnter}
+           // container={document.body} 
             rootClose
         >
             

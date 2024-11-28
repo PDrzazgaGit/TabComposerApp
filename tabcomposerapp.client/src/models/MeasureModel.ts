@@ -22,4 +22,5 @@ export interface IMeasure {
     clone(): IMeasure;
     moveNoteRight(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
     moveNoteLeft(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
+    canPushNote(stringId: number, noteDuration: NoteDuration): boolean;
 }

@@ -122,6 +122,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return false;
     }
 
+
     const value = {
         measure,
         measureId,
