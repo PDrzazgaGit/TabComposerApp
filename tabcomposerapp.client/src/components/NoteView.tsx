@@ -6,12 +6,11 @@ import './../styles/NoteView.css';
 
 interface NoteViewProps {
     note: INote | IPause;
-    onNoteValue?: (value: string) => void;
     onGenerateId?: (id: string) => void;
     onClick?: () => void; 
 }
 
-export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onNoteValue, onGenerateId, onClick }, ref) => {
+export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGenerateId, onClick }, ref) => {
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
@@ -19,20 +18,6 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onNot
     const [isHovered, setIsHovered] = useState(false);
 
     const [noteId] = useState<string>(`note-${uuidv4()}`);
-
-    const [noteValue, setNoteValue] = useState<string>(
-        isNote(note) ? note.fret.toString() : pauseRepresentationMap[note.noteDuration]
-    );
-
-
-
-    useEffect(() => {
-        setNoteValue(isNote(note) ? note.fret.toString() : pauseRepresentationMap[note.noteDuration]);
-        if (onNoteValue) {
-            onNoteValue(noteValue);
-        }
-    }, [note, noteValue, onNoteValue]);
-
     
     useEffect(() => {
         if (onGenerateId) {
@@ -60,7 +45,7 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onNot
                         color: isHovered ? '#17a2b8' : 'black',
                     }}
                 >
-                    {noteValue}
+                    {isNote(note) ? note.fret.toString() : pauseRepresentationMap[note.noteDuration]}
                 </button>
             </div>
         </div>

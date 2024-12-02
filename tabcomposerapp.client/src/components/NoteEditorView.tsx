@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { INote, NoteDuration, NoteKind, IPause } from '../models';
 import { useMeasure } from '../hooks/useMeasure';
 import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup } from 'react-bootstrap';
@@ -7,6 +7,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import { pauseRepresentationMap, noteRepresentationMap } from "../utils/noteUtils";
 import './../styles/NoteView.css';
 import { NoteView } from './NoteView';
+import { useError } from '../hooks/useError';
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
@@ -20,26 +21,20 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
      
     const [noteId, setNoteId] = useState<string | null>(null);
 
-    const [noteValue, setNoteValue] = useState<string>("");
-
-    const [selectedDuration, setSelectedDuration] = useState<NoteDuration>(note.noteDuration);
+   // const [selectedDuration, setSelectedDuration] = useState<NoteDuration>(note.noteDuration);
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
     const { changeFret, getMaxFrets, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft } = useMeasure();
 
+    const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
+
     const maxFrets: number = getMaxFrets();
 
-    useEffect(() => {
-        setSelectedDuration(note.noteDuration);
-    }, [note, noteValue, selectedInterval])
+   // useEffect(() => setSelectedDuration(note.noteDuration), [note, measure]);
 
     const handleGenerateId = (id: string) => {
         setNoteId(id);
-    };
-
-    const handleNoteValue = (value: string) => {
-        setNoteValue(value);
     };
 
     const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +46,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const handleDurationChange = (duration: NoteDuration) => {
         if (changeNoteDuration(note, duration, stringId)) {
-            setSelectedInterval(note.noteDuration);
+            clearNoteEditorErrors();
+        } else {
+            setNoteEditorErrors({ ['noteDuration']: [noteRepresentationMap[duration] + " is too long"] })
         }
     };
 
@@ -61,14 +58,24 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     }
 
     const handleMoveRight = () => {     
-        if (moveNoteRight(note, stringId, selectedInterval))
+        if (moveNoteRight(note, stringId, selectedInterval)) {
             document.body.click();
+            clearNoteEditorErrors();
+        } else {
+            setNoteEditorErrors({ ['moveNote']: ["Can't move right."] })
+        }
+            
 
     }
 
     const handleMoveLeft = () => {
-        if (moveNoteLeft(note, stringId, selectedInterval))
+        if (moveNoteLeft(note, stringId, selectedInterval)) {
             document.body.click();
+            clearNoteEditorErrors();
+        } else {
+            setNoteEditorErrors({ ['moveNote']: ["Can't move left."] })
+        }
+            
     }
 
     const saveChanges = (newFret: number) => {
@@ -90,7 +97,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         <InputGroup.Text>Fret</InputGroup.Text>
                         <FormControl
                             type="number"
-                            value={noteValue}
+                            value={note.fret}
                             onChange={handleFretChange}
                             min={0}
                             max={maxFrets}
@@ -100,7 +107,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
                 <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center" >
                     <DropdownButton
-                        title={`Duration: ${NoteDuration[selectedDuration]}`}
+                        title={`Duration: ${NoteDuration[note.noteDuration]}`}
                         variant="light"
                         drop="down-centered"
                     >
@@ -115,7 +122,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         ))}
                     </DropdownButton>
                 </InputGroup>
+                {noteEditorErrors["noteDuration"] && (
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                        <div className="text-danger">
+                            {noteEditorErrors["noteDuration"]}
+                        </div>
 
+                    </InputGroup>
+                )}
                 <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >
                     <Dropdown
                         title={`Move: ${NoteDuration[selectedInterval]}`}
@@ -126,9 +140,12 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         <Button
                             variant="light"
                             onClick={handleMoveLeft}
-                            className="flex-grow-1"
+                            className="flex-grow-1 d-flex align-items-center jutify-content-center column"
                         >
-                            <i className="bi bi-arrow-left"></i>
+                            <div className="flex-grow-1">
+                                {isNote(note) ? noteRepresentationMap[selectedInterval] : pauseRepresentationMap[selectedInterval]}
+                            </div>
+                            <i className="bi bi-arrow-left flex-grow-1"></i>                         
                         </Button>
                         
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
@@ -137,7 +154,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                 <Dropdown.Item
                                     key={key + "_interval"}
                                     onClick={() => {
-                                        console.log(key as unknown as NoteDuration)
                                         setSelectedInterval(key as unknown as NoteDuration)
                                     }}
                                 >
@@ -148,14 +164,25 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         <Button
                             variant="light"
                             onClick={handleMoveRight}
-                            className="flex-grow-1"
+                            className="flex-grow-1 d-flex align-items-center jutify-content-center column"
                         >
-                            <i className="bi bi-arrow-right"></i>
+                            <i className="bi bi-arrow-right flex-grow-1"></i>
+                            <div className="flex-grow-1">
+                                {isNote(note) ? noteRepresentationMap[selectedInterval] : pauseRepresentationMap[selectedInterval]}
+                            </div>
+                           
                         </Button>
                     </Dropdown>
                 </InputGroup>
+                {noteEditorErrors["moveNote"] && (
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                        <div className="text-danger">
+                            {noteEditorErrors["moveNote"]}
+                        </div>
 
-                <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center">
+                    </InputGroup>
+                )}
+                <InputGroup className="w-100 d-flex justify-content-center align-items-center">
                     <Button
                         className="w-100"
                         variant="danger"
@@ -170,6 +197,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const handleEnter = () => {
         document.body.click();
+        clearNoteEditorErrors();
     }
 
     return (
@@ -187,24 +215,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                 <NoteView
                     note={note}
                     onGenerateId={handleGenerateId}
-                    onNoteValue={handleNoteValue}
                 /> 
             </div>
             
         </OverlayTrigger>
     );
 };
-
-/*
-
-
-
-  <div className="note-container">
-                <div className="note-square">
-                    <button id={noteId} className="note-input-button">
-                        {noteValue}
-                    </button>
-
-                </div>
-            </div>   
-*/

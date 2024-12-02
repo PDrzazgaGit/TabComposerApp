@@ -27,7 +27,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
 
         super();
 
-        this.measureDurationMs = this.calculateMeasureDurationMs();
+        this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
 
         tuning.forEach((stringId: number) => {
@@ -73,8 +73,8 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return this.wholeNoteDurationMs * noteDuration;
     }
 
-    private calculateMeasureDurationMs(): number {
-        return (MINUTE_IN_MS / this.tempo) * (this.numerator * (4 / this.denominator));
+    private calculateMeasureDurationMs(tempo: number, numerator: number, denominator: number): number {
+        return (MINUTE_IN_MS / tempo) * (numerator * (4 / denominator));
     }
 
     private calculateWholeNoteDurationMs(): number {
@@ -303,37 +303,49 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return true;
     }
 
-
-    public changeSignature(numerator: number, denominator: number): void {
+    public changeSignature(numerator: number, denominator: number): boolean {
         if (numerator <= 0) {
             throw new Error("Numerator must be a positive integer.");
         }
         if (denominator <= 0) {
             throw new Error("Denominator must be a positive integer.");
         }
-        this.numerator = numerator;
-        this.denominator = denominator;
-        this.measureDurationMs = this.calculateMeasureDurationMs();
 
-        this.forEach((notes, string) => {
+        const newMeasureDurationMs = this.calculateMeasureDurationMs(this.tempo, numerator, denominator);
+
+        let noteLoss:boolean = false;
+
+        this.forEach((notes) => {
             const filteredNotes = notes.filter(note => {
-                return this.isWithinMeasure(note.getTimeStampMs(), note.getDurationMs());
+                return (note.getTimeStampMs() + note.getDurationMs()) <= newMeasureDurationMs;
             });
 
-            if(notes.length != filteredNotes.length)
-                this.set(string, filteredNotes);
+            if (notes.length != filteredNotes.length)
+                noteLoss = true;;
         });
+        if (noteLoss) {
+            return false;
+        }
+        this.numerator = numerator;
+        this.denominator = denominator;
+        this.measureDurationMs = newMeasureDurationMs;
+
+        return true;
     }
 
+    /*
+    do poprawy
+    */
     public changeTempo(tempo: number): void {
         if (tempo <= 0) {
             throw new Error("Tempo must be a positive integer.");
         }
-
         const tempoRatio = this.tempo / tempo;
+        console.log(tempoRatio)
+       
 
         this.tempo = tempo;
-        this.measureDurationMs = this.calculateMeasureDurationMs();
+        this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
         this.forEach((notes) => {
             notes.forEach(note => {
@@ -343,6 +355,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
                 note.setDurationMs(durationMs * tempoRatio);
             });
         });
+        console.log(this.getNotes(6))
     }
 
     public getNotes(stringId: number): Note[] {

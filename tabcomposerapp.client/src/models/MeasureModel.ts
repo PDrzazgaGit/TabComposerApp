@@ -11,7 +11,7 @@ export interface IMeasure {
     getNotes(stringId: number): INote[];
     forEach(callback: (notes: INote[], stringId: number,) => void): void;
     canPutNote(stringId: number, timeStamp: number, noteDuration: NoteDuration): boolean
-    changeSignature(numerator: number, denominator: number): void;
+    changeSignature(numerator: number, denominator: number): boolean;
     changeTempo(tempo: number): void;
     changeNoteTimeStamp(note: INote, stringId: number, timeStamp: number): boolean
     changeNoteFret(note: INote, stringId: number, fret: number): void

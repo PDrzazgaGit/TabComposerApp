@@ -1,13 +1,15 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { useMeasure } from "../hooks/useMeasure";
 import { useTabulature } from "../hooks/useTabulature";
 import { NoteView } from "./NoteView";
 import './../styles/StringView.css';
 import { NoteEditorView } from "./NoteEditorView";
-import { Button, ButtonGroup, Dropdown, DropdownButton, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { Button, ButtonGroup, Dropdown, DropdownButton, FormControl, InputGroup, OverlayTrigger, Popover, Tooltip } from "react-bootstrap";
 import { Note, NoteDuration, NoteKind, Sound } from "../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
+import { useError } from "../hooks/useError";
+import Feedback from "react-bootstrap/esm/Feedback";
 
 interface StringEditorViewProps {
     stringId: number;
@@ -25,10 +27,11 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
     const { tabulature } = useTabulature();
 
+    const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
+
     const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
 
     const notes = useMemo(() => {
-        console.log(stringId);
         if (measure) {
             return measure.getNotes(stringId);
         }
@@ -46,28 +49,37 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     const handleAddItem = (kind: NoteKind) => {
         switch (kind) {
             case NoteKind.Note:
-                addNote(stringId, noteDuration);
+                if (!addNote(stringId, noteDuration)) {
+                    setStringEditorErrors({ ['noteDuration']: ["Cannot add note"] });
+                } else {
+                    clearStringEditorErrors();
+                }
                 break;
             case NoteKind.Pause:
-                console.log("Hello")
-                addPause(stringId, pauseDuration);
+                if (!addPause(stringId, pauseDuration)) {
+                    setStringEditorErrors({ ['pauseDuration']: ["Cannot add pause"] });
+                } else {
+                    clearStringEditorErrors();
+                }
                 break;
         }
     }
 
-    const handleSetNoteDuration = (nD: NoteDuration) =>{
+    const handleSetNoteDuration = (nD: NoteDuration) => {
         if (measure.canPushNote(stringId, nD)) {
             setNoteDuration(nD)
+            clearStringEditorErrors();
         } else {
-
+            setStringEditorErrors({ ['noteDuration']: [noteRepresentationMap[nD] + " is too long"] });
         }
     }
 
-    const handleSetPauseDuration = (pD: NoteDuration) => {
+    const handleSetPauseDuration = (pD: NoteDuration) => {  
         if (measure.canPushNote(stringId, pD)) {
             setPauseDuration(pD)
+            clearStringEditorErrors();
         } else {
-
+            setStringEditorErrors({ ['pauseDuration']: [pauseRepresentationMap[pD] + " is too long"] });
         }
     }
 
@@ -77,7 +89,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         >
             <Popover.Header as="h3">String {`${stringSound.getName()}${stringSound.octave}`}</Popover.Header>
             <Popover.Body >
-                <InputGroup className="d-flex column mb-3">
+                <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
                     <Dropdown
                         as={ButtonGroup}
                         drop="end"
@@ -86,11 +98,12 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                         <Button
                             variant="light"
                             onClick={() => handleAddItem(NoteKind.Note)}
+                            className="flex-grow-1"
                         >
-                            New {`${noteRepresentationMap[noteDuration]}`}
+                            {`New note ${noteRepresentationMap[noteDuration]}`}
 
                         </Button>
-                        <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
+                        <Dropdown.Toggle className="flex-grow-1" split variant="light" id="dropdown-split-basic" />
                       
                         <Dropdown.Menu>
                             {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
@@ -105,7 +118,15 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
                     </Dropdown>
                 </InputGroup>
-                <InputGroup className="d-flex column">
+                {stringEditorErrors["noteDuration"] && (
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                        <div className="text-danger">
+                            {stringEditorErrors["noteDuration"]}
+                        </div>
+                    </InputGroup>
+                )}
+                
+                <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
                     <Dropdown
                         as={ButtonGroup}
                         drop="end"
@@ -114,8 +135,9 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                         <Button
                             variant="light"
                             onClick={() => handleAddItem(NoteKind.Pause)}
+                            className="flex-grow-1"
                         >
-                            New {`${pauseRepresentationMap[pauseDuration]}`}
+                            {`New pause ${pauseRepresentationMap[pauseDuration]}`}
 
                         </Button>
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
@@ -129,14 +151,23 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                                 </Dropdown.Item>
                             ))}
                         </Dropdown.Menu>
-                    </Dropdown>
+                    </Dropdown>                    
                 </InputGroup>
+                {stringEditorErrors["pauseDuration"] && (
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                        <div className="text-danger">
+                            {stringEditorErrors["pauseDuration"]}
+                        </div>
+                        
+                    </InputGroup>
+                )}
             </Popover.Body>
         </Popover>
     )
 
     const handleEnter = () => {
         document.body.click();
+        clearStringEditorErrors();
     };
     
     return (
@@ -191,6 +222,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     </div>      
                 </div>
             </div>
+            
         </OverlayTrigger>
     );
 }

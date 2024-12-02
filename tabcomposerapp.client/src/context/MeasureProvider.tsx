@@ -35,8 +35,6 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         if (!measure) {
             throw new Error("Measure has not been initialized.");
         }
-        //const newNote = note.clone();
-        //measure.changeNoteFret(note, stringId, fret);
         const updatedMeasure: IMeasure = measure.clone();
         updatedMeasure.changeNoteFret(note, stringId, fret);
         tabulature.updateTablature(measure, updatedMeasure);
@@ -100,9 +98,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         if (!measure)
             throw new Error("Measure has not been initialized.")
         const updatedMeasure: IMeasure = measure.clone();
-        console.log(noteDuration);
         if (measure.pushPause(stringId, noteDuration ? noteDuration : NoteDuration.Quarter)) {
-           
             tabulature.updateTablature(measure, updatedMeasure);
             setMeasure(updatedMeasure);
             return true;
@@ -122,6 +118,30 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return false;
     }
 
+    const changeSignature = (numerator: number, denominator: number): boolean => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        if (measure.changeSignature(numerator, denominator)) {
+            const updatedMeasure: IMeasure = measure.clone();
+            tabulature.updateTablature(measure, updatedMeasure);
+            setMeasure(updatedMeasure);
+            console.log("Tak");
+            return true;
+        } else {
+            console.log("Nie");
+            return false;
+        }
+    }
+
+    const changeTempo = (tempo: number) => {
+        if (!measure)
+            throw new Error("Measure has not been initialized.")
+        measure.changeTempo(tempo);
+        const updatedMeasure: IMeasure = measure.clone();
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
+    }
+
 
     const value = {
         measure,
@@ -136,7 +156,9 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         moveNoteRight,
         moveNoteLeft,
         addPause,
-        addNote
+        addNote,
+        changeSignature,
+        changeTempo
     }
     
     return (

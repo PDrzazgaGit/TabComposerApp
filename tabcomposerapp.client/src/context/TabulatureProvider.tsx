@@ -1,6 +1,6 @@
 import { useState, ReactNode, useCallback } from 'react';
 import { TabulatureContext } from './TabulatureContext';
-import { ITabulature, ITuning } from '../models';
+import { ITabulature } from '../models';
 
 interface TabulatureProviderProps {
     children: ReactNode;
@@ -11,13 +11,15 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
 
     const [tabulature, setTabulature] = useState<ITabulature>(initialTabulature);
 
-    const updateTabulature = useCallback((newTabulature: ITabulature) => {
-        setTabulature(newTabulature); // Mo¿liwoœæ aktualizacji tabulatury
-    }, []);
+    const addMeasure = (tempo: number, numerator: number, denominator: number) => {
+        tabulature.addMeasure(tempo, numerator, denominator);
+        const tabulatureNew = tabulature.clone();
+        setTabulature(tabulatureNew);
+    }
 
     const value = {
         tabulature,
-        updateTabulature
+        addMeasure
     }
 
     return (
