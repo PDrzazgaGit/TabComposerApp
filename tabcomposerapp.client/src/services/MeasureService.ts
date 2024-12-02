@@ -334,7 +334,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     /*
-    do poprawy
+    do poprawy -> niech dodaj¹ siê od pocz¹tku :3 nowe nutki
     */
     public changeTempo(tempo: number): void {
         if (tempo <= 0) {
@@ -347,6 +347,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         this.tempo = tempo;
         this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
+
         this.forEach((notes) => {
             notes.forEach(note => {
                 const timeStamp = note.getTimeStampMs();
