@@ -333,9 +333,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return true;
     }
 
-    /*
-    do poprawy -> niech dodaj¹ siê od pocz¹tku :3 nowe nutki
-    */
+ 
     public changeTempo(tempo: number): void {
         if (tempo <= 0) {
             throw new Error("Tempo must be a positive integer.");
@@ -348,15 +346,18 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
 
-        this.forEach((notes) => {
-            notes.forEach(note => {
-                const timeStamp = note.getTimeStampMs();
-                const durationMs = note.getDurationMs();
-                note.setTimeStampMs(timeStamp * tempoRatio);
-                note.setDurationMs(durationMs * tempoRatio);
-            });
+        this.forEach((notes, stringId) => {
+
+            const notesData = notes.map(note => ({
+                fret: note.fret,
+                noteDuration: note.noteDuration
+            }))
+
+            this.set(Number(stringId), []);
+            notesData.forEach(note => {
+                this.pushNote(note.fret, stringId, note.noteDuration);
+            })
         });
-        console.log(this.getNotes(6))
     }
 
     public getNotes(stringId: number): Note[] {
