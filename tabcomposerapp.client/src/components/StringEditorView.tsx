@@ -5,11 +5,10 @@ import { NoteView } from "./NoteView";
 import './../styles/StringView.css';
 import { NoteEditorView } from "./NoteEditorView";
 import { Button, ButtonGroup, Dropdown, DropdownButton, FormControl, InputGroup, OverlayTrigger, Popover, Tooltip } from "react-bootstrap";
-import { Note, NoteDuration, NoteKind, Sound } from "../models";
+import { INote, IPause, NoteDuration, NoteKind, Sound } from "../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
 import { useError } from "../hooks/useError";
-import Feedback from "react-bootstrap/esm/Feedback";
 
 interface StringEditorViewProps {
     stringId: number;
@@ -31,13 +30,23 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
     const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
 
+   // const [notes, setNotes] = useState<(INote | IPause)[]>(measure.getNotes(stringId));
+
+
+    
     const notes = useMemo(() => {
         if (measure) {
             return measure.getNotes(stringId);
         }
         return [];
     }, [measure, stringId]); 
-
+    
+    /*
+    useEffect(() => {
+        setNotes(measure.getNotes(stringId));
+        console.log(notes)
+    }, [setNotes, measure, tabulature, stringId])
+    */
 
     const calculatePosition = useCallback(
         (timestamp: number, containerWidth: number): number => {

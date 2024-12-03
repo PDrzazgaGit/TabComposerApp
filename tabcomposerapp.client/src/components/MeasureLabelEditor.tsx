@@ -3,10 +3,13 @@ import { useMeasure } from "../hooks/useMeasure";
 import { useState } from "react";
 import { useError } from "../hooks/useError";
 import { MeasureLabel } from "./MeasureLabel";
+import { useTabulature } from "../hooks/useTabulature";
 
 export const MeasureLabelEditor = () => {
 
-    const { measure, measureId, changeSignature, changeTempo } = useMeasure();
+    const { measure, changeSignature, changeTempo } = useMeasure();
+
+    const { deleteMeasure } = useTabulature();
 
     const { measureEditorErrors, setMeasureEditorErrors, clearMeasureEditorErrors } = useError();
 
@@ -45,7 +48,8 @@ export const MeasureLabelEditor = () => {
     };
 
     const handleDeleteMeasure = () => {
-       // addMeasure(tempo, numerator, denominator);
+        // addMeasure(tempo, numerator, denominator);
+        deleteMeasure(measure);
     }
 
     const handleEnter = () => {

@@ -183,7 +183,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (index === -1) {
             throw new Error("Note does not exist.");
         }
-
+        
         if (index != stringNotes.length - 1) { // check if last, if not shift
             const durationToShift = note.getDurationMs();
             for (let i = index + 1; i < stringNotes.length; i++) {

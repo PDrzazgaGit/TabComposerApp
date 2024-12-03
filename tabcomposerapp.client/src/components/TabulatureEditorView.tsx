@@ -19,6 +19,7 @@ export const TabulatureEditorView: React.FC<TabulatureEditorViewProps> = () => {
     return (
         <TabulatureContainer maxItemsPerRow={3} >
             {tabulature.map((measure, index) => {
+                console.log(measure, index);
                 return (
                     <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
                         <MeasureView isEditor={true} />

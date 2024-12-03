@@ -1,6 +1,6 @@
-import { useState, ReactNode, useCallback } from 'react';
+import { useState, ReactNode } from 'react';
 import { TabulatureContext } from './TabulatureContext';
-import { ITabulature } from '../models';
+import { IMeasure, ITabulature } from '../models';
 
 interface TabulatureProviderProps {
     children: ReactNode;
@@ -17,9 +17,17 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         setTabulature(tabulatureNew);
     }
 
+    const deleteMeasure = (measure: IMeasure) => {
+        const tabulatureNew = tabulature.clone();
+        tabulatureNew.deleteMeasure(measure);
+        
+        setTabulature(tabulatureNew);
+    }
+
     const value = {
         tabulature,
-        addMeasure
+        addMeasure,
+        deleteMeasure
     }
 
     return (
