@@ -2,6 +2,7 @@ import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-
 import { useMeasure } from "../hooks/useMeasure";
 import { useState } from "react";
 import { useError } from "../hooks/useError";
+import { MeasureLabel } from "./MeasureLabel";
 
 export const MeasureLabelEditor = () => {
 
@@ -143,6 +144,19 @@ export const MeasureLabelEditor = () => {
 
         >
             <div
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <MeasureLabel isHovered={isHovered} />
+            </div>
+        </OverlayTrigger>
+        
+    );
+}
+
+/*
+
+            <div
                 className="d-flex align-items-center justify-content-between px-3"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
@@ -170,7 +184,5 @@ export const MeasureLabelEditor = () => {
                     > &#9833; = {tempo} </span>
                 </div>
             </div>
-        </OverlayTrigger>
-        
-    );
-}
+
+*/

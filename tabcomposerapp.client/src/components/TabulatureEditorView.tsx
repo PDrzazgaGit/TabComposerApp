@@ -3,6 +3,7 @@ import { ITabulature } from "../models"
 import { MeasureView } from "./MeasureView";
 import { MeasureProvider } from "../context/MeasureProvider"
 import { MeasureLabelEditor } from "./MeasureLabelEditor";
+import { MeasureLabel } from "./MeasureLabel";
 import { useEffect, useMemo, useState } from "react";
 import { useTabulature } from "../hooks/useTabulature";
 import { AddMeasureView } from "./AddMeasureView";

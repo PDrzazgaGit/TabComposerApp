@@ -50,6 +50,14 @@ export class Tabulature implements ITabulature {
         this.measures.push(measure);
     }
 
+    public deleteMeasure(measure: IMeasure) {
+        const measureIndex = this.measures.indexOf(measure);
+        if (measureIndex === -1) {
+            throw Error("Cannot delete inexisting measure");
+        }
+        this.measures.splice(measureIndex, 1);
+    }
+
     public getMeasure(index: number): IMeasure | undefined {
         return this.measures[index];
     }

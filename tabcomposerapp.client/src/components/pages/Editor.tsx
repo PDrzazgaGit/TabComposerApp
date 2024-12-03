@@ -31,12 +31,12 @@ export const Editor = () => {
 
 
     return (
-        <>
+        <div className="p-4">
             <TabulatureProvider initialTabulature={tabulature!}>
                 <TabulatureEditorView/>      
             </TabulatureProvider>
                  
-        </>
+        </div>
        
        
     );
