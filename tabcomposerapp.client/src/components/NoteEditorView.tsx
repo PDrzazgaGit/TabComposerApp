@@ -25,7 +25,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
-    const { changeFret, getMaxFrets, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets } = useMeasure();
 
     const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
 

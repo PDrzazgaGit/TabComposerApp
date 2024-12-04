@@ -36,9 +36,7 @@ export class Tabulature implements ITabulature {
     }
 
     public addMeasure(tempo: number, numerator: number, denominator: number): void {
-
         const measure: MeasureService = new MeasureService(tempo, numerator, denominator, this.tuning, this.frets);
-
         this.measures.push(measure);
     }
 

@@ -48,7 +48,6 @@ export const MeasureLabelEditor = () => {
     };
 
     const handleDeleteMeasure = () => {
-        // addMeasure(tempo, numerator, denominator);
         deleteMeasure(measure);
     }
 

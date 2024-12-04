@@ -22,8 +22,9 @@ export const TabulatureEditorView: React.FC<TabulatureEditorViewProps> = () => {
                 console.log(measure, index);
                 return (
                     <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
-                        <MeasureView isEditor={true} />
                         <MeasureLabelEditor />
+                        <MeasureView isEditor={true} />
+                        
                     </MeasureProvider>
                 )
             })}

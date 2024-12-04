@@ -1,6 +1,6 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { MeasureContext } from './MeasureContext';
-import { IMeasure, INote, IPause, Note, NoteDuration } from '../models';
+import { IMeasure, INote, IPause, NoteDuration } from '../models';
 import { useTabulature } from '../hooks/useTabulature';
 
 
@@ -17,6 +17,10 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
     const [measureId, setMeasureId] = useState<number>(initialMeasureId);
 
     const { tabulature } = useTabulature();
+
+    useEffect(() => {
+        setMeasure(initialMeasure)
+    }, [tabulature, initialMeasure])
 
     const getMaxFrets = (): number => {
         if (measure) {
