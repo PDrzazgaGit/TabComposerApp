@@ -9,9 +9,7 @@ export class Sound {
     ) { }
 
     public getName(): string {
-        if(this.notation)
-            return Notation[this.notation];
-        return String(undefined);
+        return Notation[this.notation];
     }
 
     public setDurationMs(durationMs: number): void {

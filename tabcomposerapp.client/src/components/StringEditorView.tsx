@@ -21,7 +21,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     const [pauseDuration, setPauseDuration] = useState<NoteDuration>(NoteDuration.Quarter);
 
     const [isHovered, setIsHovered] = useState(false);
-
+    
     const { measureId, measure, addNote, addPause } = useMeasure();  
 
     const { tabulature } = useTabulature();
@@ -186,6 +186,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             overlay={renderPopover}
             onEnter={handleEnter}
             rootClose
+            flip
         >
             <div
                 onClick={(e) => e.stopPropagation()}
@@ -215,20 +216,22 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                             borderColor: isHovered ? '#17a2b8' : 'black'
                         }}
                     />
+                    
                     <div className="position-relative ms-3 me-3">
                         {notes
-                            //.filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
                             .map((note, index) => (
                                 <div key={index}
                                     style={{
                                         position: "absolute",
-                                        left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`
+                                        height: "1.5em",
+                                        left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`,
                                     }}
                                 >
                                     <NoteEditorView note={note} stringId={stringId} />
                                 </div>
                             ))}
-                    </div>      
+                    </div>  
+                    
                 </div>
             </div>
             

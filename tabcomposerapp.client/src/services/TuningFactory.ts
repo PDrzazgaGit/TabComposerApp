@@ -4,32 +4,25 @@ import { MusicScale } from './MusicScale';
 
 
 export class TuningFactory {
-    public static EStandardTuning(): ITuning {
-        const sounds: Dictionary<number, Sound> = new Dictionary<number, Sound>({
+
+    public static readonly TuningList: Record<string, Record<number, Sound>> = {
+        "E-Standard": {
             6: MusicScale.getSound(Notation.E, 2),
             5: MusicScale.getSound(Notation.A, 2),
             4: MusicScale.getSound(Notation.D, 3),
             3: MusicScale.getSound(Notation.G, 3),
             2: MusicScale.getSound(Notation.B, 3),
             1: MusicScale.getSound(Notation.E, 4)
-        });
-        return new Tuning(sounds);
-    }
-
-    public static DDropTuning(): ITuning {
-        const sounds: Dictionary<number, Sound> = new Dictionary<number, Sound>({
+        },
+        "D-Drop": {
             6: MusicScale.getSound(Notation.D, 2),
             5: MusicScale.getSound(Notation.A, 2),
             4: MusicScale.getSound(Notation.D, 3),
             3: MusicScale.getSound(Notation.G, 3),
             2: MusicScale.getSound(Notation.B, 3),
             1: MusicScale.getSound(Notation.E, 4)
-        });
-        return new Tuning(sounds);
-    }
-
-    public static BStandard(): ITuning {
-        const sounds: Dictionary<number, Sound> = new Dictionary<number, Sound>({
+        },
+        "B-Standard": {
             7: MusicScale.getSound(Notation.B, 2),
             6: MusicScale.getSound(Notation.E, 2),
             5: MusicScale.getSound(Notation.A, 2),
@@ -37,12 +30,26 @@ export class TuningFactory {
             3: MusicScale.getSound(Notation.G, 3),
             2: MusicScale.getSound(Notation.B, 3),
             1: MusicScale.getSound(Notation.E, 4)
-        });
-        return new Tuning(sounds);
+        }
+
     }
 
-    public static CustomTuning(sounds: Dictionary<number, Sound>): ITuning {
+    public static EStandardTuning(): ITuning {
+        return new Tuning(new Dictionary<number, Sound>(this.TuningList["E-Standard"]));
+    }
 
-        return new Tuning(sounds);
+    public static DDropTuning(): ITuning {
+        return new Tuning(new Dictionary<number, Sound>(this.TuningList["D-Drop"]));
+    }
+
+    public static BStandard(): ITuning {
+        return new Tuning(new Dictionary<number, Sound>(this.TuningList["B-Standard"]));
+    }
+
+    public static getTuning(tuningString: string): ITuning {
+        if (this.TuningList[tuningString])
+            return new Tuning(new Dictionary<number, Sound>(this.TuningList[tuningString]));
+        else
+            throw Error(`'${tuningString}' does not exists.`)
     }
 }

@@ -11,6 +11,8 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
 
     const [tabulature, setTabulature] = useState<ITabulature>(initialTabulature);
 
+    const [measuresPerRow, setMeasuresPerRow] = useState(3);
+
     const addMeasure = (tempo: number, numerator: number, denominator: number) => {
         tabulature.addMeasure(tempo, numerator, denominator);
         const tabulatureNew = tabulature.clone();
@@ -27,7 +29,9 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     const value = {
         tabulature,
         addMeasure,
-        deleteMeasure
+        deleteMeasure,
+        measuresPerRow,
+        setMeasuresPerRow
     }
 
     return (

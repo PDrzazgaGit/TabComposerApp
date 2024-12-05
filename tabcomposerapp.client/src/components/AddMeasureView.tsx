@@ -110,7 +110,7 @@ export const AddMeasureView = () => {
                 placement="bottom"
                 overlay={renderPopover}
                 rootClose
-               // onEnter={handleEnter}
+                flip
             >
                 <Button
                     variant="light"

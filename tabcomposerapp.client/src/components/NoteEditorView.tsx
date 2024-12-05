@@ -90,7 +90,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
         <Popover id={"popover_" + noteId} {...props} onClick={ (e) => e.stopPropagation()}>
-            <Popover.Header as="h3">Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}</Popover.Header>
+            <Popover.Header as="h3">Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}</Popover.Header>
             <Popover.Body className="">
                 {isNote(note) && (
                     <InputGroup className="mb-3">
@@ -206,16 +206,18 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             placement="bottom"
             overlay={renderPopover}
             rootClose 
-            onEnter={handleEnter }
+            onEnter={handleEnter}
+            flip
             >
             <div
                 onClick={(e) => e.stopPropagation()}
-                
+                style={{
+                    height: '100%',
+                    margin: '0',
+                    padding: '0'
+                }}
             >
-                <NoteView
-                    note={note}
-                    onGenerateId={handleGenerateId}
-                /> 
+                <NoteView note={note} onGenerateId={ handleGenerateId }></NoteView>
             </div>
             
         </OverlayTrigger>

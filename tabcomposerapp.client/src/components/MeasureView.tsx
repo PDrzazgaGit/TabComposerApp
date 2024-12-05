@@ -6,17 +6,17 @@ import { StringView } from "./StringView";
 
 interface MeasureViewProps {
     isEditor?: boolean;
+    measurePerRow: number
 }
 
-export const MeasureView: React.FC<MeasureViewProps> = ({ isEditor = false }) => {
+export const MeasureView: React.FC<MeasureViewProps> = ({ isEditor = false, measurePerRow }) => {
 
-    const { measure } = useMeasure();
+    const { measure, measureId } = useMeasure();
     const { tabulature } = useTabulature(); // Odkomentowana linia
 
     const [stringComponents, setStringComponents] = useState<JSX.Element[]>([]);
 
     const generateStringComponents = useCallback(() => {
-        console.log(measure);
         const components: JSX.Element[] = [];
         if (measure) {
             measure.forEach((_, stringId: number) => {
@@ -39,9 +39,14 @@ export const MeasureView: React.FC<MeasureViewProps> = ({ isEditor = false }) =>
     return (
         <>
             <div
-                style={{
-                    borderRight: "2px solid black",
-                }}>                        
+                style={
+                    (measureId !== 0 && measureId % measurePerRow === 0) && {
+                        borderLeft: "2px solid black",
+                        borderRight: "2px solid black"
+                    } || {
+                        borderRight: "2px solid black"
+                    } 
+                }>                        
                 {stringComponents}  
             </div>
         </>

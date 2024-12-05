@@ -3,6 +3,7 @@ import { INote, NoteKind, IPause } from '../models';
 import { pauseRepresentationMap } from "../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
 import './../styles/NoteView.css';
+import { relative } from 'path';
 
 interface NoteViewProps {
     note: INote | IPause;
@@ -28,16 +29,22 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
     return (
         <div
             ref={ref}
-            className="note-container"
             onClick={onClick} 
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{
-                backgroundColor: 'white',//isHovered ? '#28a745' : 'white', // Dla lepszego efektu wizualnego
-                borderRadius: '2em', // Zaokr¹glenie naro¿ników
+                display: 'flex',
+                height: '100%',
+                padding: "0",
+                margin: '0',
+                justifyContent: "center",
+                alignItems: "center"
             }}
         >
-            <div className="note-square">
+        
+            <div
+                className="note-square"
+            >
                 <button
                     id={noteId}
                     className="note-input-button"

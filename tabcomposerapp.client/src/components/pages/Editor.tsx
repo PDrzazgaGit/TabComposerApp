@@ -1,43 +1,159 @@
-import { MusicScale, TuningFactory, GuitarScale, MeasureService } from "../../services";
-import { ITuning, Sound, Notation, IMeasure, Tabulature, NoteDuration, INote } from "../../models";
+import { TuningFactory } from "../../services";
+import { ITabulature, Tabulature } from "../../models";
 import { TabulatureProvider } from '../../context/TabulatureProvider';
 import {TabulatureEditorView } from "../TabulatureEditorView"
-import {useState } from "react"
-//import { FretBoard } from "./../../structures";
+import { Button, Card, Dropdown, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { useState } from "react";
+import { useError } from "../../hooks/useError";
 
-export const Editor = () => {
+interface EditorProps {
+    initialTabulature?: ITabulature;
+}
 
-    const [tabulature, setTab] = useState<Tabulature | null>(null);
-    
-    const tuning: ITuning = TuningFactory.EStandardTuning();
-    const tab = new Tabulature(tuning);
+export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
 
+    const [tabulature, setTabulature] = useState<ITabulature | undefined>(initialTabulature);
 
-  //  measure.pushNote(0, 6, NoteDuration.Eighth);
-  //  measure.pushNote(1, 6, NoteDuration.Eighth);
-   // measure.pushNote(2, 6, NoteDuration.Eighth);
-   // measure.pushNote(3, 6, NoteDuration.Eighth);
+    const [title, setTitle] = useState<string>('Untitled');
 
-   // tab.addMeasure(new MeasureService(120, 4, 4, tuning));
-   // tab.addMeasure(new MeasureService(120, 3, 4, tuning));
-   // tab.addMeasure(new MeasureService(120, 4, 4, tuning));
-   // tab.addMeasure(new MeasureService(120, 7, 8, tuning));
-    // tab.addMeasure(new MeasureService(120, 4, 4, tuning));
+    const [tuning, setTuning] = useState<string | undefined>();
 
+    const [maxFrets, setMaxFrets] = useState(24);
 
-    if (!tabulature) {
-        setTab(tab);
+    const { createTabulatureErrors, setCreateTabulatureErrors, clearCreateTabulatureErrors } = useError();
+
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (tabulature) {
+            setTitle(event.target.value);
+            tabulature.title = title;
+        }
     }
 
+    const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setMaxFrets(event.target.valueAsNumber);
+    }
+
+    const handleTuningChange = (tuning: string) => {
+        setTuning(tuning);
+    }
+
+    const handleCreateTabulature = () => {
+        if (tuning) {
+            clearCreateTabulatureErrors();
+            const tuningModel = TuningFactory.getTuning(tuning);
+            setTabulature(new Tabulature(tuningModel, maxFrets, title));
+        } else {
+            setCreateTabulatureErrors({["tuningNotProvided"] : ["Select tuning first"]})
+        }
+    }
+    
+    const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
+        <Popover {...props}>
+            <Popover.Header>
+                Configure Tablature
+            </Popover.Header>
+            <Popover.Body>
+                <InputGroup
+                    className="d-flex justify-content-center align-items-center column mb-3"
+                >
+                    <InputGroup.Text>Title</InputGroup.Text>
+                    <FormControl
+                        type="text"
+                        value={title}
+                        onChange={handleTitleChange}
+                    />
+                </InputGroup>
+
+                <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                    <InputGroup.Text
+                        className="flex-grow-1"
+                    >
+                        {tuning ? tuning : "Select Tuning"}
+                    </InputGroup.Text>
+                    <Dropdown
+                        drop="down-centered"
+                    >
+                        <Dropdown.Toggle
+                            className="border flex-grow-1"
+                            variant="light"
+                        ></Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {Object.entries(TuningFactory.TuningList).map(([key]) => (
+                                <Dropdown.Item
+                                    key={key}
+                                    onClick={() => handleTuningChange(key)}
+                                >
+                                    {key}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </InputGroup>
+                {createTabulatureErrors["tuningNotProvided"] && (
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                        <div className="text-danger">
+                            {createTabulatureErrors["tuningNotProvided"]}
+                        </div>
+
+                    </InputGroup>
+                )}
+                <InputGroup
+                    className="d-flex justify-content-center align-items-center column mb-3"
+                >
+                    <InputGroup.Text>Frets</InputGroup.Text>
+                    <FormControl
+                        type="number"
+                        min={12}
+                        max={30}
+                        value={maxFrets}
+                        onChange={handleChangeMaxFrets}
+                    />
+                </InputGroup>
+                <InputGroup
+                    className="d-flex justify-content-center align-items-center column"
+                >
+                    <Button
+                        className="flex-grow-1 border"
+                        variant="light"
+                        onClick={ () => handleCreateTabulature() }
+                    >
+                        Create
+                    </Button>
+                </InputGroup>
+            </Popover.Body>
+        </Popover>
+    )
+    
+    const handleEnter = () => {
+        document.body.click()
+    }
 
     return (
-        <div className="p-4">
-            <TabulatureProvider initialTabulature={tabulature!}>
-                <TabulatureEditorView/>      
-            </TabulatureProvider>
-                 
+    <div>
+            {tabulature && (
+                <TabulatureProvider initialTabulature={tabulature!}>
+                    <TabulatureEditorView />
+                </TabulatureProvider>
+            ) || (
+                <div
+                    className="d-flex justify-content-center align-items-center"
+                >
+                    <OverlayTrigger
+                        overlay={renderPopover}
+                        trigger="click"
+                        placement="bottom"
+                        onEnter={handleEnter}
+                        rootClose
+                    >
+                        <Button
+                            variant="light"
+                            className="border"
+                        >
+                            New Tablature
+                        </Button>
+                    </OverlayTrigger>
+                </div>
+            )}        
         </div>
-       
-       
     );
 }

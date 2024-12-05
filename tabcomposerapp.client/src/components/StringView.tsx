@@ -70,6 +70,7 @@ export const StringView: FC<StringViewProps> = ({
                         .map((note, index) => (
                             <div key={index}
                                 style={{
+                                    height: "1.5em",
                                     position: "absolute",
                                     left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`
                                 }}

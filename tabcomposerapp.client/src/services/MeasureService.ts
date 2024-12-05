@@ -338,9 +338,6 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (tempo <= 0) {
             throw new Error("Tempo must be a positive integer.");
         }
-        const tempoRatio = this.tempo / tempo;
-        console.log(tempoRatio)
-       
 
         this.tempo = tempo;
         this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);

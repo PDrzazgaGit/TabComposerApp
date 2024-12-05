@@ -1,27 +1,23 @@
-.note-container {
-    position: relative;
-    display: inline-block;
-}
 
 .note-square {
-    width: 1em;
-    height: 1em;
+    width: 0.75em;
+    height: 0.75em;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
     cursor: text;
     user-select: none; /* Zablokuj zaznaczanie tekstu */
-    font-size: 15px;
+    padding: 0;
+    margin: 0;
+    background-color: white;
 }
 
 .note-input-button {
     border: none;
     background: transparent;
     text-align: center;
-    font-size: 15px;
+    font-size: 1em;
     outline: none; /* Usuñ obramowanie przy focuse */
-    width: 100%; /* Dostosuj szerokoœæ, jeœli potrzebne */
     padding: 0; /* Usuñ padding */
     margin: 0; /* Usuñ margin */
     cursor: pointer; /* WskaŸnik kursora jak dla przycisku */

@@ -4,5 +4,5 @@
     left: 0; /* Linia zaczyna siê od lewej krawêdzi kontenera */
     right: 0; /* Linia rozci¹ga siê do prawej krawêdzi kontenera */
     border-top: 2px solid black; /* Gruboœæ linii */
-    transform: translateY(-50%); /* Dok³adne wyœrodkowanie w pionie */
+    transform: translateY(calc(-50% + 0.5px));
 }

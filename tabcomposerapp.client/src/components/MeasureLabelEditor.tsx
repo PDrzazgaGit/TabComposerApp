@@ -144,7 +144,7 @@ export const MeasureLabelEditor = () => {
             overlay={renderPopover}
             onEnter={ handleEnter }
             rootClose
-
+            flip
         >
             <div
                 onMouseEnter={() => setIsHovered(true)}
@@ -156,36 +156,3 @@ export const MeasureLabelEditor = () => {
         
     );
 }
-
-/*
-
-            <div
-                className="d-flex align-items-center justify-content-between px-3"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
-                <span
-                    style={{
-                        color: isHovered ? "cyan" : "black",
-                    }}
-                >
-                    {measureId}
-                </span>
-                <div>
-                    <span
-                        style={{
-                            color: isHovered ? "cyan" : "black",
-                        }}
-                    >{numerator}\{denominator}</span>
-                </div>
-
-                <div>
-                    <span
-                        style={{
-                            color: isHovered ? "cyan" : "black",
-                        }}
-                    > &#9833; = {tempo} </span>
-                </div>
-            </div>
-
-*/

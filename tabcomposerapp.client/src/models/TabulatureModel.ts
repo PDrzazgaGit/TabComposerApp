@@ -2,7 +2,10 @@ import { MeasureService } from "../services/MeasureService";
 import { ITuning, IMeasure } from "./";
 
 export interface ITabulature {
+    title: string;
+    author: string;
     readonly tuning: ITuning;
+    getLength(): number;
     forEach(callback: (measure: IMeasure) => void): void;
     map<U>(callback: (measure: IMeasure, index: number, array: IMeasure[]) => U): U[];
     find(callback: (measure: IMeasure) => boolean): IMeasure | undefined;
@@ -15,7 +18,11 @@ export interface ITabulature {
 export class Tabulature implements ITabulature {
 
     private measures: IMeasure[] = [];
-    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track") { }
+    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown") { }
+
+    public getLength(): number {
+        return this.measures.length;
+    }
 
     public clone(): ITabulature {
         const clone = new Tabulature(this.tuning, this.frets, this.title);
