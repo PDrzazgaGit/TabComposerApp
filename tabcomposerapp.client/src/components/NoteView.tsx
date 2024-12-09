@@ -49,7 +49,7 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
                     id={noteId}
                     className="note-input-button"
                     style={{
-                        color: isHovered ? '#17a2b8' : 'black',
+                        color: isHovered ? '#007bff' : 'black',
                     }}
                 >
                     {isNote(note) ? note.fret.toString() : pauseRepresentationMap[note.noteDuration]}

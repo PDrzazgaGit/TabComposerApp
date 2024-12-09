@@ -20,13 +20,16 @@ export const MeasureLabelEditor = () => {
     const [tempo, setTempo] = useState(measure.tempo);
 
     const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newTempo = Number(event.target.value);
+        const newTempo = event.target.valueAsNumber;
         setTempo(newTempo);
         changeTempo(newTempo);
     };
 
     const handleNumeratorChange = (event: React.ChangeEvent<HTMLInputElement>) => {    
-        const newNumerator = Number(event.target.value);
+        const newNumerator = event.target.valueAsNumber;
+        if (!newNumerator) {
+            return;
+        }
         if (changeSignature(newNumerator, denominator)) {
             clearMeasureEditorErrors();
             setNumerator(Number(newNumerator));
@@ -37,7 +40,10 @@ export const MeasureLabelEditor = () => {
     };
 
     const handleDenominatorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newDenominator = Number(event.target.value);
+        const newDenominator = event.target.valueAsNumber;
+        if (!newDenominator) {
+            return;
+        }
         if (changeSignature(numerator, newDenominator)) {
             clearMeasureEditorErrors();
             setDenominator(newDenominator);
@@ -72,7 +78,7 @@ export const MeasureLabelEditor = () => {
                         type="number"
                         value={tempo}
                         onChange={handleTempoChange}
-                        min={0}
+                        min={1}
                         max={999}
                     />
                 </InputGroup>

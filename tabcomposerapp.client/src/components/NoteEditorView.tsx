@@ -106,21 +106,26 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                 )}
 
                 <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center" >
-                    <DropdownButton
-                        title={`Duration: ${NoteDuration[note.noteDuration]}`}
-                        variant="light"
+                    <Dropdown 
                         drop="down-centered"
                     >
-                       
-                        {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
-                            <Dropdown.Item
-                                key={key + "_duration"}
-                                onClick={() => handleDurationChange(key as unknown as NoteDuration)}
-                            >
-                                {symbol}
-                            </Dropdown.Item>
-                        ))}
-                    </DropdownButton>
+                        <Dropdown.Toggle
+                            variant="light"
+                            className="border flex-grow-1"
+                        >
+                            {`Duration: ${NoteDuration[note.noteDuration]}`}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
+                                <Dropdown.Item
+                                    key={key + "_duration"}
+                                    onClick={() => handleDurationChange(key as unknown as NoteDuration)}
+                                >
+                                    {symbol}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </InputGroup>
                 {noteEditorErrors["noteDuration"] && (
                     <InputGroup className="d-flex justify-content-center align-items-center column mb-3">

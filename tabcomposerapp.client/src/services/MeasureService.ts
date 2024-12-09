@@ -1,4 +1,4 @@
-import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause } from '../models';
+import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind } from '../models';
 import { GuitarScale } from '.';
 
 const MINUTE_IN_MS: number = 60000;
@@ -343,16 +343,21 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
 
-        this.forEach((notes, stringId) => {
+        
 
+        this.forEach((notes, stringId) => {
+            console.log(this.getNotes(stringId));
             const notesData = notes.map(note => ({
                 fret: note.fret,
-                noteDuration: note.noteDuration
+                noteDuration: note.noteDuration,
+                kind: note.kind
             }))
-
             this.set(Number(stringId), []);
             notesData.forEach(note => {
-                this.pushNote(note.fret, stringId, note.noteDuration);
+                if (note.kind === NoteKind.Note)
+                    this.pushNote(note.fret, stringId, note.noteDuration);
+                else
+                    this.pushPause(stringId, note.noteDuration);
             })
         });
     }

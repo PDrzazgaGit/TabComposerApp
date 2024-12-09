@@ -16,7 +16,7 @@ export const MeasureLabel = forwardRef<HTMLDivElement, MeasureLabelProps>(({ isH
         >
             <span
                 style={{
-                    color: isHovered ? "cyan" : "black",
+                    color: isHovered ? '#007bff' : "black",
                 }}
             >
                 {measureId}
@@ -24,7 +24,7 @@ export const MeasureLabel = forwardRef<HTMLDivElement, MeasureLabelProps>(({ isH
             <div>
                 <span
                     style={{
-                        color: isHovered ? "cyan" : "black",
+                        color: isHovered ? '#007bff' : "black",
                     }}
                 >{measure.numerator}\{measure.denominator}</span>
             </div>
@@ -32,7 +32,7 @@ export const MeasureLabel = forwardRef<HTMLDivElement, MeasureLabelProps>(({ isH
             <div>
                 <span
                     style={{
-                        color: isHovered ? "cyan" : "black",
+                        color: isHovered ? '#007bff' : "black",
                     }}
                 > &#9833; = {measure.tempo} </span>
             </div>

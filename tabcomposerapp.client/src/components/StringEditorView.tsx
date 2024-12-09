@@ -16,37 +16,33 @@ interface StringEditorViewProps {
 
 export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) => {
 
-    const [noteDuration, setNoteDuration] = useState<NoteDuration>(NoteDuration.Quarter);
+    const { tabulature, globalNoteDuration } = useTabulature();
 
-    const [pauseDuration, setPauseDuration] = useState<NoteDuration>(NoteDuration.Quarter);
+    const [noteDuration, setNoteDuration] = useState<NoteDuration>(globalNoteDuration);
+
+    const [pauseDuration, setPauseDuration] = useState<NoteDuration>(globalNoteDuration);
 
     const [isHovered, setIsHovered] = useState(false);
     
     const { measureId, measure, addNote, addPause } = useMeasure();  
-
-    const { tabulature } = useTabulature();
 
     const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
 
     const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
 
    // const [notes, setNotes] = useState<(INote | IPause)[]>(measure.getNotes(stringId));
-
-
-    
+  
     const notes = useMemo(() => {
         if (measure) {
             return measure.getNotes(stringId);
         }
         return [];
     }, [measure, stringId]); 
-    
-    /*
+     
     useEffect(() => {
-        setNotes(measure.getNotes(stringId));
-        console.log(notes)
-    }, [setNotes, measure, tabulature, stringId])
-    */
+        setNoteDuration(globalNoteDuration);
+    }, [globalNoteDuration])
+    
 
     const calculatePosition = useCallback(
         (timestamp: number, containerWidth: number): number => {
@@ -211,9 +207,9 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                 >
           
                     <div
-                        className="string-line"
+                        className='string-line'
                         style={{
-                            borderColor: isHovered ? '#17a2b8' : 'black'
+                            borderColor: isHovered ? '#007bff' : 'black'
                         }}
                     />
                     

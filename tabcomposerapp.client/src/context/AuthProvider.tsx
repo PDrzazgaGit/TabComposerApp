@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                     setUser(storedUser);
                 } catch (error) {
-                    console.error('B³¹d przy pobieraniu profilu u¿ytkownika:', error);
+                   // console.info('B³¹d przy pobieraniu profilu u¿ytkownika:', error);
 
                 }
             };

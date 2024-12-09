@@ -2,7 +2,7 @@ import { TuningFactory } from "../../services";
 import { ITabulature, Tabulature } from "../../models";
 import { TabulatureProvider } from '../../context/TabulatureProvider';
 import {TabulatureEditorView } from "../TabulatureEditorView"
-import { Button, Card, Dropdown, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { Button, Card, Container, Dropdown, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { useState } from "react";
 import { useError } from "../../hooks/useError";
 
@@ -23,10 +23,7 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
     const { createTabulatureErrors, setCreateTabulatureErrors, clearCreateTabulatureErrors } = useError();
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (tabulature) {
-            setTitle(event.target.value);
-            tabulature.title = title;
-        }
+        setTitle(event.target.value);
     }
 
     const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,20 +60,27 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
                         onChange={handleTitleChange}
                     />
                 </InputGroup>
-
+                <InputGroup
+                    className="d-flex justify-content-center align-items-center column mb-3"
+                >
+                    <InputGroup.Text>Frets</InputGroup.Text>
+                    <FormControl
+                        type="number"
+                        min={12}
+                        max={30}
+                        value={maxFrets}
+                        onChange={handleChangeMaxFrets}
+                    />
+                </InputGroup>
                 <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
-                    <InputGroup.Text
-                        className="flex-grow-1"
-                    >
-                        {tuning ? tuning : "Select Tuning"}
-                    </InputGroup.Text>
+                    
                     <Dropdown
                         drop="down-centered"
                     >
                         <Dropdown.Toggle
                             className="border flex-grow-1"
                             variant="light"
-                        ></Dropdown.Toggle>
+                        >{tuning ? tuning : "Select Tuning"}</Dropdown.Toggle>
                         <Dropdown.Menu>
                             {Object.entries(TuningFactory.TuningList).map(([key]) => (
                                 <Dropdown.Item
@@ -98,23 +102,11 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
                     </InputGroup>
                 )}
                 <InputGroup
-                    className="d-flex justify-content-center align-items-center column mb-3"
-                >
-                    <InputGroup.Text>Frets</InputGroup.Text>
-                    <FormControl
-                        type="number"
-                        min={12}
-                        max={30}
-                        value={maxFrets}
-                        onChange={handleChangeMaxFrets}
-                    />
-                </InputGroup>
-                <InputGroup
                     className="d-flex justify-content-center align-items-center column"
                 >
                     <Button
                         className="flex-grow-1 border"
-                        variant="light"
+                        variant="success"
                         onClick={ () => handleCreateTabulature() }
                     >
                         Create
@@ -135,24 +127,28 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
                     <TabulatureEditorView />
                 </TabulatureProvider>
             ) || (
-                <div
-                    className="d-flex justify-content-center align-items-center"
-                >
-                    <OverlayTrigger
-                        overlay={renderPopover}
-                        trigger="click"
-                        placement="bottom"
-                        onEnter={handleEnter}
-                        rootClose
+                <Container>
+                    <div
+                        className="d-flex justify-content-center align-items-center"
                     >
-                        <Button
-                            variant="light"
-                            className="border"
+                        
+                        <OverlayTrigger
+                            overlay={renderPopover}
+                            trigger="click"
+                            placement="bottom"
+                            onEnter={handleEnter}
+                            rootClose
                         >
-                            New Tablature
-                        </Button>
-                    </OverlayTrigger>
-                </div>
+                            <Button
+                                variant="light"
+                                className="border"
+                            >
+                                New Tablature
+                            </Button>
+                        </OverlayTrigger>
+                    </div>
+                    
+                </Container>
             )}        
         </div>
     );

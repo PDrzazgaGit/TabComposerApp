@@ -34,6 +34,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
         switch (formState) {
             case FormState.SIGNUP: {
                 await signUp(email, username, password);
+                await signIn(username, password, true);
                 break;
             }
             case FormState.SIGNIN: {
