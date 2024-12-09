@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { INote, NoteDuration, NoteKind, IPause } from '../models';
+import { INote, NoteDuration, NoteKind, IPause, Articulation } from '../models';
 import { useMeasure } from '../hooks/useMeasure';
 import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -21,8 +21,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
      
     const [noteId, setNoteId] = useState<string | null>(null);
 
-   // const [selectedDuration, setSelectedDuration] = useState<NoteDuration>(note.noteDuration);
-
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
     const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets } = useMeasure();
@@ -31,8 +29,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const maxFrets: number = getMaxFrets();
 
-   // useEffect(() => setSelectedDuration(note.noteDuration), [note, measure]);
-
     const handleGenerateId = (id: string) => {
         setNoteId(id);
     };
@@ -40,8 +36,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!isNote(note))
             return;
-        const newFret = event.target.value
-        saveChanges(Number(newFret))
+        const newFret = event.target.valueAsNumber
+        if (newFret > maxFrets || newFret < 0)
+            return;
+        saveChanges(newFret)
     };
 
     const handleDurationChange = (duration: NoteDuration) => {
@@ -74,8 +72,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             clearNoteEditorErrors();
         } else {
             setNoteEditorErrors({ ['moveNote']: ["Can't move left."] })
-        }
-            
+        }     
+    }
+
+    const handleChangeArticulation = () => {
+
     }
 
     const saveChanges = (newFret: number) => {
@@ -89,7 +90,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     };
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
-        <Popover id={"popover_" + noteId} {...props} onClick={ (e) => e.stopPropagation()}>
+        <Popover
+            id={"popover_" + noteId} 
+            onClick={(e) => e.stopPropagation()}
+            {...props}
+        >
             <Popover.Header as="h3">Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}</Popover.Header>
             <Popover.Body className="">
                 {isNote(note) && (
@@ -99,6 +104,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             type="number"
                             value={note.fret}
                             onChange={handleFretChange}
+                            onBlur={handleHide}
                             min={0}
                             max={maxFrets}
                         />
@@ -133,6 +139,45 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             {noteEditorErrors["noteDuration"]}
                         </div>
 
+                    </InputGroup>
+                )}
+                {isNote(note) && (
+                    <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center" >
+                        <Dropdown
+                            drop="down-centered"
+                        >
+                            <Dropdown.Toggle
+                                variant="light"
+                                className="border flex-grow-1"
+                            >
+                                {`Articulation: ${Articulation[note.articulation]}`}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                {Object.keys(Articulation)
+                                    .filter((key) => isNaN(Number(key)))
+                                    .map((symbol) => (
+                                    <Dropdown.Item
+                                        key={symbol + "_articulation"}
+                                        //onClick={() => handleDurationChange(key as unknown as NoteDuration)}
+                                    >
+                                        {symbol}
+                                    </Dropdown.Item>
+                                ))}
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </InputGroup>
+                )}
+                {(isNote(note) && note.articulation === Articulation.Legato) && (
+                    <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >
+                        <InputGroup.Text>Legato duration</InputGroup.Text>
+                        <FormControl
+                            type="number"
+                           // value={note.fret}
+                           // onChange={handleFretChange}
+                           // onBlur={handleHide}
+                            min={0}
+                            max={99}
+                        />
                     </InputGroup>
                 )}
                 <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >
@@ -203,6 +248,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     const handleEnter = () => {
         document.body.click();
         clearNoteEditorErrors();
+    }
+
+    const handleHide = () => {
+        if (!isNote(note))
+            return false;
+        if (!note.fret)
+            saveChanges(0);
+        return true;
     }
 
     return (

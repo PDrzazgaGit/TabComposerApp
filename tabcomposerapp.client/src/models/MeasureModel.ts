@@ -1,4 +1,4 @@
-import { NoteDuration, INote, IPause } from "./"
+import { NoteDuration, INote, IPause, Articulation } from "./"
 
 export interface IMeasure {
     readonly frets: number;
@@ -23,4 +23,5 @@ export interface IMeasure {
     moveNoteRight(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
     moveNoteLeft(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
     canPushNote(stringId: number, noteDuration: NoteDuration): boolean;
+    changeArticulation(note: INote, stringId: number, articulation: Articulation, step: number): boolean;
 }

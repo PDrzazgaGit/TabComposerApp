@@ -1,5 +1,12 @@
 import { Sound, Notation, IPause } from "./";
 
+export enum Articulation {
+    None,
+    Slide,
+    Legato,
+    BendHalf,
+    BendFull
+}
 export enum NoteDuration {
     Whole = 1,
     Half = 1 / 2,
@@ -15,18 +22,27 @@ export enum NoteKind {
 }
 
 export interface INote extends IPause{
-    readonly kind: NoteKind;
+    //readonly kind: NoteKind;
     readonly frequency: number,
     readonly notation: Notation,
     readonly octave: number,
     readonly fret: number;
+    readonly articulation: Articulation;
+    readonly linkedNote?: INote | undefined;
     clone(): Note;
+    setBendHalf(): void;
+    setBendFull(): void;
+    setSlide(destination: INote): void;
+    setLegato(destination: INote): void;
+    clearArticulation(): void;
 }
 
 export class Note extends Sound implements INote {
     public readonly kind: NoteKind;
     public fret: number;
     public noteDuration: NoteDuration;
+    public articulation: Articulation;
+    public linkedNote?: Note | undefined;
     private timeStamp: number;
     constructor(
         sound: Sound,
@@ -55,11 +71,13 @@ export class Note extends Sound implements INote {
             this.fret = notationOrFret as number; 
             this.noteDuration = noteDuration;
             this.timeStamp = 0;
+            this.articulation = Articulation.None;
         } else {
             super(frequencyOrSound, notationOrFret as Notation, octave!, noteDurationMs);
             this.fret = fret;
             this.noteDuration = noteDuration;
             this.timeStamp = 0;
+            this.articulation = Articulation.None
         }
         this.kind = NoteKind.Note;
     }
@@ -74,12 +92,39 @@ export class Note extends Sound implements INote {
     public clone(): Note {
         const note: Note = new Note(this, this.fret, this.getDurationMs(), this.noteDuration);
         note.setTimeStampMs(this.getTimeStampMs());
+        note.articulation = this.articulation;
+        note.linkedNote = this.linkedNote;
         return note;
     }
 
     public getTimeStampMs(): number { return this.timeStamp; }
 
-    public getEndTimeStampMs(): number {return this.timeStamp + this.durationMs }
+    public getEndTimeStampMs(): number { return this.timeStamp + this.durationMs }
+
+    public setBendFull() {
+        this.linkedNote = undefined;
+        this.articulation = Articulation.BendFull;
+    }
+
+    public setBendHalf() {
+        this.linkedNote = undefined;
+        this.articulation = Articulation.BendHalf;
+    }
+
+    public setSlide(destination: Note) {
+        this.articulation = Articulation.Slide;
+        this.linkedNote = destination;
+    }
+
+    public setLegato(destination: Note) {
+        this.articulation = Articulation.Legato;
+        this.linkedNote = destination;
+    }
+
+    public clearArticulation(){
+        this.linkedNote = undefined;
+        this.articulation = Articulation.None;
+    }
 }
 
 

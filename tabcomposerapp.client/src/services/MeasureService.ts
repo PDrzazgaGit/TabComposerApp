@@ -1,4 +1,4 @@
-import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind } from '../models';
+import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation } from '../models';
 import { GuitarScale } from '.';
 
 const MINUTE_IN_MS: number = 60000;
@@ -502,5 +502,36 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         pause.setTimeStampMs(timeStamp);
         stringNotes.push(pause);
         return pause;
+    }
+
+    public changeArticulation(note: Note, stringId: number, articulation: Articulation, step: number) {
+        const stringNotes = this.get(stringId);
+
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+
+        const noteIndex = stringNotes.indexOf(note);
+
+        if (noteIndex === -1) {
+            throw new Error("Provided note does not exists.");
+        }
+        switch (articulation) {
+            case Articulation.BendFull:
+                note.setBendFull();
+                break;
+            case Articulation.BendHalf:
+                note.setBendHalf();
+                break;
+            case Articulation.Legato:
+               // note.setLegato()   // legato bêdzie dodawane do przodu
+                break;
+            case Articulation.Slide:
+             //   note.setSlide(); // slide bêdzie dodawany w ten sposób: / note  czyli od ty³u
+                break;
+            case Articulation.None:
+                note.clearArticulation();
+                break;
+        }
     }
 }

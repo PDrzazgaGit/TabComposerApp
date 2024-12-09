@@ -52,7 +52,7 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
                         color: isHovered ? '#007bff' : 'black',
                     }}
                 >
-                    {isNote(note) ? note.fret.toString() : pauseRepresentationMap[note.noteDuration]}
+                    {isNote(note) ? (note.fret.toString() === 'NaN' ? '' : note.fret.toString()) : pauseRepresentationMap[note.noteDuration]}
                 </button>
             </div>
         </div>

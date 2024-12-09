@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { IMeasure, INote, IPause, NoteDuration } from '../models/'
+import { IMeasure, INote, IPause, NoteDuration, Articulation } from '../models/'
 interface MeasureContextType {
     measure: IMeasure;
     measureId: number;
@@ -16,6 +16,7 @@ interface MeasureContextType {
     addPause: (stringId: number, noteDuration?: NoteDuration) => boolean;
     changeSignature: (numerator: number, denominator: number) => boolean;
     changeTempo: (tempo: number) => void;
+    changeArticulation: (note: INote, stringId: number, articulation: Articulation, step?: number) => boolean;
 }
 
 export const MeasureContext = createContext<MeasureContextType | undefined>(undefined);
