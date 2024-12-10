@@ -23,3 +23,12 @@
     cursor: pointer; /* Wskaünik kursora jak dla przycisku */
     caret-color: transparent; /* Ukryj kursor */
 }
+
+.slide-line {
+    background: black;
+    height: 2px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+

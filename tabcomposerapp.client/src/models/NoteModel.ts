@@ -6,7 +6,9 @@ export enum Articulation {
     HammerOn,
     PullOff,
     BendHalf,
-    BendFull
+    BendHalfReturn,
+    BendFull,
+    BendFullReturn
 }
 export enum NoteDuration {
     Whole = 1,
@@ -23,7 +25,6 @@ export enum NoteKind {
 }
 
 export interface INote extends IPause{
-    //readonly kind: NoteKind;
     readonly frequency: number,
     readonly notation: Notation,
     readonly octave: number,

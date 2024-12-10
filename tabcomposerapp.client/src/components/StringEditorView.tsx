@@ -5,7 +5,7 @@ import { NoteView } from "./NoteView";
 import './../styles/StringView.css';
 import { NoteEditorView } from "./NoteEditorView";
 import { Button, ButtonGroup, Dropdown, DropdownButton, FormControl, InputGroup, OverlayTrigger, Popover, Tooltip } from "react-bootstrap";
-import { INote, IPause, NoteDuration, NoteKind, Sound } from "../models";
+import { Articulation, INote, IPause, NoteDuration, NoteKind, Sound } from "../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
 import { useError } from "../hooks/useError";
@@ -173,8 +173,37 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     const handleEnter = () => {
         document.body.click();
         clearStringEditorErrors();
+    }
+
+    const renderSlide = (prevNote: INote, currentNote: INote, containerWidth: number) => {
+        const startX = calculatePosition(prevNote.getTimeStampMs(), containerWidth); // pocz¹tek prawej nuty
+        const endX = calculatePosition(currentNote.getTimeStampMs(), containerWidth); // koniec lewej nuty
+
+        const startY = -2.25; // górny pocz¹tek prawej nuty
+        const endY = 0.75;     // dolny koniec lewej nuty
+
+        const dx = endX - startX; // ró¿nica na osi X
+        const dy = startY - endY; // ró¿nica na osi Y (zale¿na od pozycji nutek)
+
+        const length = Math.sqrt(dx * dx + dy * dy); // d³ugoœæ odcinka
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI); // k¹t obrotu
+
+        return (
+            <div
+                style={{
+                    position: 'absolute',
+                    left: `calc(${startX}% + 0.25em)`, // Przesuniêcie wzglêdem prawej nuty
+                    top: `${endY}em`, // Ustawienie na osi Y na poziomie prawej nuty
+                    width: `calc(${length}% - 0.75em)`, // Skrócenie z obu stron
+                    height: "1px", // Gruboœæ kreski
+                    backgroundColor: "black",
+                    transform: `rotate(${angle}deg)`, // Obrót zgodnie z obliczonym k¹tem
+                    transformOrigin: "center", // Obrót wzglêdem œrodka
+                }}
+            />
+        );
     };
-    
+
     return (
         <OverlayTrigger
             trigger="click"
@@ -214,23 +243,80 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     />
                     
                     <div className="position-relative ms-3 me-3">
-                        {notes
-                            .map((note, index) => (
-                                <div key={index}
-                                    style={{
-                                        position: "absolute",
-                                        height: "1.5em",
-                                        left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`,
-                                    }}
-                                >
-                                    <NoteEditorView note={note} stringId={stringId} />
-                                </div>
-                            ))}
-                    </div>  
+                        {notes.map((note, index) => {
+                            const prevNote = index > 0 ? notes[index - 1] : null;
+                            const isSlide = note.articulation === Articulation.Slide;
+
+                            return (
+                                <>
+                                    {prevNote && isSlide && renderSlide(prevNote, note, 100)}
+                                    <div
+                                        key={index}
+                                        style={{
+                                            position: "absolute",
+                                            height: "1.5em",
+                                            left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`,
+                                        }}
+                                    >
+
+                                        <NoteEditorView note={note} stringId={stringId} />
+                                    </div>
+                                </>
+                                
+                            );
+                        })}
+                    </div>
                     
                 </div>
             </div>
             
         </OverlayTrigger>
     );
+
 }
+// d³ugoœæ kreski slide albo bendów w zale¿noœci od noteDurationMs <3
+
+/*
+
+<div className="position-relative ms-3 me-3">
+    {notes.map((note, index) => {
+        const prevNote = index > 0 ? notes[index - 1] : null;
+
+        // Pozycja aktualnej nuty
+        const currentNotePos = calculatePosition(note.getTimeStampMs(), 100);
+
+        // Pozycja poprzedniej nuty (jeœli istnieje)
+        const prevNotePos = prevNote
+            ? calculatePosition(prevNote.getEndTimeStampMs(), 100)
+            : currentNotePos - 5; // D³ugoœæ domyœlna dla pierwszej nuty
+
+        return (
+            <div
+                key={index}
+                style={{
+                    position: "absolute",
+                    height: "1.5em",
+                    left: `calc(${currentNotePos}% - 0.5em)`,
+                }}
+            >
+                {note.articulation === Articulation.Slide && (
+                    <div
+                        className="slide-line"
+                        style={{
+                            position: "absolute",
+                            width: `calc(${currentNotePos - prevNotePos}%)`,
+                            height: "2px",
+                            backgroundColor: "black",
+                            left: `calc(-${currentNotePos - prevNotePos}% + 0.5em)`,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                        }}
+                    />
+                )}
+                <NoteEditorView note={note} stringId={stringId} />
+            </div>
+        );
+    })}
+</div>
+
+*/
