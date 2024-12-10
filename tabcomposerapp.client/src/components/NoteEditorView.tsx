@@ -3,7 +3,7 @@ import { INote, NoteDuration, NoteKind, IPause, Articulation } from '../models';
 import { useMeasure } from '../hooks/useMeasure';
 import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
+
 import { pauseRepresentationMap, noteRepresentationMap } from "../utils/noteUtils";
 import './../styles/NoteView.css';
 import { NoteView } from './NoteView';
@@ -23,7 +23,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation } = useMeasure();
 
     const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
 
@@ -75,8 +75,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         }     
     }
 
-    const handleChangeArticulation = () => {
-
+    const handleChangeArticulation = (articulation: Articulation) => {
+        if (!isNote(note))
+            return; 
+        changeArticulation(note, stringId, articulation);
     }
 
     const saveChanges = (newFret: number) => {
@@ -154,30 +156,17 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {Object.keys(Articulation)
-                                    .filter((key) => isNaN(Number(key)))
+                                    .filter((key) => !isNaN(Number(key))) 
                                     .map((symbol) => (
                                     <Dropdown.Item
                                         key={symbol + "_articulation"}
-                                        //onClick={() => handleDurationChange(key as unknown as NoteDuration)}
+                                            onClick={() => handleChangeArticulation(Number(symbol))}
                                     >
-                                        {symbol}
+                                            {Articulation[symbol as unknown as number]}
                                     </Dropdown.Item>
                                 ))}
                             </Dropdown.Menu>
                         </Dropdown>
-                    </InputGroup>
-                )}
-                {(isNote(note) && note.articulation === Articulation.Legato) && (
-                    <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >
-                        <InputGroup.Text>Legato duration</InputGroup.Text>
-                        <FormControl
-                            type="number"
-                           // value={note.fret}
-                           // onChange={handleFretChange}
-                           // onBlur={handleHide}
-                            min={0}
-                            max={99}
-                        />
                     </InputGroup>
                 )}
                 <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >

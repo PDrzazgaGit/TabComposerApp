@@ -504,7 +504,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return pause;
     }
 
-    public changeArticulation(note: Note, stringId: number, articulation: Articulation, step: number) {
+    public changeArticulation(note: Note, stringId: number, articulation: Articulation) {
         const stringNotes = this.get(stringId);
 
         if (!stringNotes) {
@@ -512,26 +512,10 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
 
         const noteIndex = stringNotes.indexOf(note);
-
+       
         if (noteIndex === -1) {
             throw new Error("Provided note does not exists.");
         }
-        switch (articulation) {
-            case Articulation.BendFull:
-                note.setBendFull();
-                break;
-            case Articulation.BendHalf:
-                note.setBendHalf();
-                break;
-            case Articulation.Legato:
-               // note.setLegato()   // legato bêdzie dodawane do przodu
-                break;
-            case Articulation.Slide:
-             //   note.setSlide(); // slide bêdzie dodawany w ten sposób: / note  czyli od ty³u
-                break;
-            case Articulation.None:
-                note.clearArticulation();
-                break;
-        }
+        note.setArticulation(articulation);
     }
 }

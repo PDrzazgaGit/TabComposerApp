@@ -3,7 +3,8 @@ import { Sound, Notation, IPause } from "./";
 export enum Articulation {
     None,
     Slide,
-    Legato,
+    HammerOn,
+    PullOff,
     BendHalf,
     BendFull
 }
@@ -28,13 +29,8 @@ export interface INote extends IPause{
     readonly octave: number,
     readonly fret: number;
     readonly articulation: Articulation;
-    readonly linkedNote?: INote | undefined;
     clone(): Note;
-    setBendHalf(): void;
-    setBendFull(): void;
-    setSlide(destination: INote): void;
-    setLegato(destination: INote): void;
-    clearArticulation(): void;
+    setArticulation(articulation: Articulation): void;
 }
 
 export class Note extends Sound implements INote {
@@ -101,29 +97,8 @@ export class Note extends Sound implements INote {
 
     public getEndTimeStampMs(): number { return this.timeStamp + this.durationMs }
 
-    public setBendFull() {
-        this.linkedNote = undefined;
-        this.articulation = Articulation.BendFull;
-    }
-
-    public setBendHalf() {
-        this.linkedNote = undefined;
-        this.articulation = Articulation.BendHalf;
-    }
-
-    public setSlide(destination: Note) {
-        this.articulation = Articulation.Slide;
-        this.linkedNote = destination;
-    }
-
-    public setLegato(destination: Note) {
-        this.articulation = Articulation.Legato;
-        this.linkedNote = destination;
-    }
-
-    public clearArticulation(){
-        this.linkedNote = undefined;
-        this.articulation = Articulation.None;
+    public setArticulation(articulation: Articulation) {
+        this.articulation = articulation;
     }
 }
 

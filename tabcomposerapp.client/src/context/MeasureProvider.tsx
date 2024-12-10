@@ -116,15 +116,15 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         setMeasure(updatedMeasure);
     }
 
-    const changeArticulation = (note: INote, stringId: number, articulation: Articulation, step: number = 1): boolean => {
-        if (measure.changeArticulation(note, stringId, articulation, step)) {
-            const updatedMeasure: IMeasure = measure.clone();
-            tabulature.updateTablature(measure, updatedMeasure);
-            setMeasure(updatedMeasure);
-            return true;
-        } else {
-            return false;
+    const changeArticulation = (note: INote, stringId: number, articulation: Articulation) => {
+        const index: number = getStringNotes(stringId).indexOf(note);
+        if (index === -1) {
+            throw new Error(`Provided note does not exists.`);
         }
+        measure.changeArticulation(note, stringId, articulation)
+        const updatedMeasure: IMeasure = measure.clone();
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
     }
 
 
