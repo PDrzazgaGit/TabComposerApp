@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { INote, NoteDuration, NoteKind, IPause, Articulation } from '../models';
 import { useMeasure } from '../hooks/useMeasure';
 import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup } from 'react-bootstrap';

@@ -22,6 +22,8 @@ export const StringView: FC<StringViewProps> = ({
 
     const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
 
+    const leftMargin: number = 150;
+
     const notes = useMemo(() => {
         console.log(stringId);
         if (measure) {
@@ -55,8 +57,6 @@ export const StringView: FC<StringViewProps> = ({
                     position: "relative",
                     height: "100%",
                 }}
-                //onMouseEnter={() => setIsHovered(true)}
-                //onMouseLeave={() => setIsHovered(false)}
             >
 
                 <div
@@ -65,14 +65,14 @@ export const StringView: FC<StringViewProps> = ({
                         borderColor: isHovered ? '#17a2b8' : 'black'
                     }}
                 />
-                <div className="position-relative ms-3 me-3">
+                <div className="position-relative me-3">
                     {notes
                         .map((note, index) => (
                             <div key={index}
                                 style={{
                                     height: "1.5em",
                                     position: "absolute",
-                                    left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`
+                                    left: `calc(${calculatePosition(note.getTimeStampMs(), 100) + leftMargin}%)`
                                 }}
                             >
                                 <NoteView note={note}></NoteView>

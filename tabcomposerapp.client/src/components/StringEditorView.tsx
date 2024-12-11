@@ -9,6 +9,7 @@ import { Articulation, INote, IPause, NoteDuration, NoteKind, Sound } from "../m
 import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
 import { useError } from "../hooks/useError";
+import { render } from "react-dom";
 
 interface StringEditorViewProps {
     stringId: number;
@@ -29,6 +30,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
 
     const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
+
+    const leftMargin: number = 150;
 
    // const [notes, setNotes] = useState<(INote | IPause)[]>(measure.getNotes(stringId));
   
@@ -175,12 +178,12 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         clearStringEditorErrors();
     }
 
-    const renderSlide = (prevNote: INote, currentNote: INote, containerWidth: number) => {
-        const startX = calculatePosition(prevNote.getTimeStampMs(), containerWidth); // pocz¹tek prawej nuty
-        const endX = calculatePosition(currentNote.getTimeStampMs(), containerWidth); // koniec lewej nuty
+    const renderSlide = (prevNoteTimeStamp: number, currentNoteTimeStamp: number, containerWidth: number) => {
+        const startX = calculatePosition(prevNoteTimeStamp, containerWidth); // pocz¹tek prawej nuty
+        const endX = calculatePosition(currentNoteTimeStamp, containerWidth); // koniec lewej nuty
 
-        const startY = -2.25; // górny pocz¹tek prawej nuty
-        const endY = 0.75;     // dolny koniec lewej nuty
+        const startY = -1; // górny pocz¹tek prawej nuty
+        const endY = 1;     // dolny koniec lewej nuty
 
         const dx = endX - startX; // ró¿nica na osi X
         const dy = startY - endY; // ró¿nica na osi Y (zale¿na od pozycji nutek)
@@ -190,15 +193,17 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
         return (
             <div
+                //key={uuidv4()}
                 style={{
                     position: 'absolute',
-                    left: `calc(${startX}% + 0.25em)`, // Przesuniêcie wzglêdem prawej nuty
-                    top: `${endY}em`, // Ustawienie na osi Y na poziomie prawej nuty
-                    width: `calc(${length}% - 0.75em)`, // Skrócenie z obu stron
-                    height: "1px", // Gruboœæ kreski
-                    backgroundColor: "black",
+                    left: prevNoteTimeStamp !== 0 ? `calc(${startX}% + 0.6em)` : `${startX}%`, // Przesuniêcie wzglêdem prawej nuty  +25
+                    top: `calc(${0.75}em - 0.5px)`, // Ustawienie na osi Y na poziomie prawej nuty
+                    width: prevNoteTimeStamp !== 0 ? `calc(${length}% - 0.6em)` : `${length}%`, // Skrócenie z obu stron             -75
+                    height: "2px", // Gruboœæ kreski
+                    backgroundColor: "gray",
                     transform: `rotate(${angle}deg)`, // Obrót zgodnie z obliczonym k¹tem
                     transformOrigin: "center", // Obrót wzglêdem œrodka
+                    borderRadius: "10px"
                 }}
             />
         );
@@ -242,26 +247,25 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                         }}
                     />
                     
-                    <div className="position-relative ms-3 me-3">
+                    <div className="position-relative me-3">
                         {notes.map((note, index) => {
                             const prevNote = index > 0 ? notes[index - 1] : null;
                             const isSlide = note.articulation === Articulation.Slide;
 
                             return (
-                                <>
-                                    {prevNote && isSlide && renderSlide(prevNote, note, 100)}
+                                <div key={ index}>
+                                    {isSlide && renderSlide(prevNote ? prevNote.getTimeStampMs() + leftMargin : 0, note.getTimeStampMs() + leftMargin, 100)}
                                     <div
-                                        key={index}
                                         style={{
                                             position: "absolute",
                                             height: "1.5em",
-                                            left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`,
+                                            left: `calc(${calculatePosition(note.getTimeStampMs() + leftMargin, 100)}%)`,
                                         }}
                                     >
 
                                         <NoteEditorView note={note} stringId={stringId} />
                                     </div>
-                                </>
+                                </div>
                                 
                             );
                         })}
@@ -272,51 +276,4 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             
         </OverlayTrigger>
     );
-
 }
-// d³ugoœæ kreski slide albo bendów w zale¿noœci od noteDurationMs <3
-
-/*
-
-<div className="position-relative ms-3 me-3">
-    {notes.map((note, index) => {
-        const prevNote = index > 0 ? notes[index - 1] : null;
-
-        // Pozycja aktualnej nuty
-        const currentNotePos = calculatePosition(note.getTimeStampMs(), 100);
-
-        // Pozycja poprzedniej nuty (jeœli istnieje)
-        const prevNotePos = prevNote
-            ? calculatePosition(prevNote.getEndTimeStampMs(), 100)
-            : currentNotePos - 5; // D³ugoœæ domyœlna dla pierwszej nuty
-
-        return (
-            <div
-                key={index}
-                style={{
-                    position: "absolute",
-                    height: "1.5em",
-                    left: `calc(${currentNotePos}% - 0.5em)`,
-                }}
-            >
-                {note.articulation === Articulation.Slide && (
-                    <div
-                        className="slide-line"
-                        style={{
-                            position: "absolute",
-                            width: `calc(${currentNotePos - prevNotePos}%)`,
-                            height: "2px",
-                            backgroundColor: "black",
-                            left: `calc(-${currentNotePos - prevNotePos}% + 0.5em)`,
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                        }}
-                    />
-                )}
-                <NoteEditorView note={note} stringId={stringId} />
-            </div>
-        );
-    })}
-</div>
-
-*/

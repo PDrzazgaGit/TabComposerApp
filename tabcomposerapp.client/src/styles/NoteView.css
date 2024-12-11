@@ -1,7 +1,7 @@
 
 .note-square {
-    width: 0.75em;
-    height: 0.75em;
+    width: 0.6em;
+    height: 0.6em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -16,7 +16,8 @@
     border: none;
     background: transparent;
     text-align: center;
-    font-size: 1em;
+    font-weight: 700;
+    font-size: 0.9em;
     outline: none; /* Usuñ obramowanie przy focuse */
     padding: 0; /* Usuñ padding */
     margin: 0; /* Usuñ margin */
