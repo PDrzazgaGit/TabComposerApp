@@ -1,6 +1,6 @@
 import { useState, ReactNode, useEffect } from 'react';
 import { MeasureContext } from './MeasureContext';
-import { Articulation, IMeasure, INote, IPause, NoteDuration } from '../models';
+import { Articulation, IMeasure, INote, IPause, NoteDuration, NoteKind } from '../models';
 import { useTabulature } from '../hooks/useTabulature';
 
 
@@ -121,10 +121,27 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         if (index === -1) {
             throw new Error(`Provided note does not exists.`);
         }
+        if (index === getStringNotes(stringId).length-1 && articulation === Articulation.Legato) {
+            const nexMeasure: IMeasure | undefined = tabulature.getMeasure(measureId + 1);
+            if (!nexMeasure) {
+                return false;
+            }
+            const notes = nexMeasure.getNotes(stringId);
+
+            if (notes.length === 0) {
+                return false;
+            }
+
+            const nextNote: INote = notes[0];
+            if (nextNote.kind === NoteKind.Pause) {
+                return false;
+            }
+        }
         measure.changeArticulation(note, stringId, articulation)
         const updatedMeasure: IMeasure = measure.clone();
         tabulature.updateTablature(measure, updatedMeasure);
         setMeasure(updatedMeasure);
+        return true;
     }
 
 

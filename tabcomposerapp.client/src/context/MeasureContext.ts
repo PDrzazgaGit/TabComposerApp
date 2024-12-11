@@ -16,7 +16,7 @@ interface MeasureContextType {
     addPause: (stringId: number, noteDuration?: NoteDuration) => boolean;
     changeSignature: (numerator: number, denominator: number) => boolean;
     changeTempo: (tempo: number) => void;
-    changeArticulation: (note: INote, stringId: number, articulation: Articulation) => void;
+    changeArticulation: (note: INote, stringId: number, articulation: Articulation) => boolean;
 }
 
 export const MeasureContext = createContext<MeasureContextType | undefined>(undefined);

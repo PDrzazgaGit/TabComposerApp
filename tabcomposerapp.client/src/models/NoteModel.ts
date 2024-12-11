@@ -3,8 +3,7 @@ import { Sound, Notation, IPause } from "./";
 export enum Articulation {
     None,
     Slide,
-    HammerOn,
-    PullOff,
+    Legato,
     BendHalf,
     BendHalfReturn,
     BendFull,

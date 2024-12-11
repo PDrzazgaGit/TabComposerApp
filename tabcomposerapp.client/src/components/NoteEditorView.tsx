@@ -62,8 +62,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         } else {
             setNoteEditorErrors({ ['moveNote']: ["Can't move right."] })
         }
-            
-
     }
 
     const handleMoveLeft = () => {
@@ -78,7 +76,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     const handleChangeArticulation = (articulation: Articulation) => {
         if (!isNote(note))
             return; 
-        changeArticulation(note, stringId, articulation);
+        if (!changeArticulation(note, stringId, articulation)) {
+            setNoteEditorErrors({ ['articulation']: ["Add next note first."] })
+        } else {
+            clearNoteEditorErrors();
+        }
     }
 
     const saveChanges = (newFret: number) => {
@@ -167,6 +169,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                 ))}
                             </Dropdown.Menu>
                         </Dropdown>
+                    </InputGroup>
+                )}
+                {noteEditorErrors["articulation"] && (
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                        <div className="text-danger">
+                            {noteEditorErrors["articulation"]}
+                        </div>
+
                     </InputGroup>
                 )}
                 <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >

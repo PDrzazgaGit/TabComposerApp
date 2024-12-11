@@ -12,6 +12,7 @@ export interface ITabulature {
     updateTablature(oldM: IMeasure | number, newM: IMeasure): void;
     addMeasure(tempo: number, numerator: number, denominator: number): void;
     deleteMeasure(measure: IMeasure): void;
+    getMeasure(index: number): IMeasure | undefined;
     clone(): ITabulature;
 }
 
