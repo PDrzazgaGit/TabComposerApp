@@ -17,7 +17,8 @@ namespace TabComposerApp.Server.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<AppUser> userManager, IConfiguration configuration)        {
+        public AuthController(UserManager<AppUser> userManager, IConfiguration configuration)
+        {
             _userManager = userManager;
             _configuration = configuration;
         }
@@ -83,28 +84,6 @@ namespace TabComposerApp.Server.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        /*
-         
-         var signInKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:JWTSecret"]!));
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[] {
-                    new Claim("UserID", user.Id.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(10),
-                SigningCredentials = new SigningCredentials(
-                    signInKey,
-                    SecurityAlgorithms.HmacSha256Signature
-                    )
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-            var token = tokenHandler.WriteToken(securityToken);
-            return Results.Ok(new { token });
-         
-         */
     }
 
 

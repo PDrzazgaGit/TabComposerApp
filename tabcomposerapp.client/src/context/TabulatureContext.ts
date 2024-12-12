@@ -2,6 +2,7 @@ import { createContext } from 'react';
 import { IMeasure, ITabulature, NoteDuration } from '../models'
 interface TabulatureContextType {
     tabulature: ITabulature;
+    setTabulature: (tabulature: ITabulature) => void;
 
     measuresPerRow: number;
     setMeasuresPerRow: (measures: number) => void;
@@ -20,6 +21,9 @@ interface TabulatureContextType {
 
     globalNoteInterval: NoteDuration;
     setGlobalNoteInterval: (noteInterval: NoteDuration) => void;
+
+    shiftOnDelete: boolean;
+    setShiftOnDelete: (shift: boolean) => void;
 
     addMeasure: (tempo: number, numerator: number, denominator: number) => void;
     deleteMeasure: (measure: IMeasure) => void;

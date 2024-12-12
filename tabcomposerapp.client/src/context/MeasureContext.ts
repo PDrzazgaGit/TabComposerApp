@@ -9,7 +9,7 @@ interface MeasureContextType {
     getStringNotes: (stringId: number) => INote[];
     changeFret: (note: INote, stringId: number, fret: number) => void;
     changeNoteDuration: (note: INote | IPause, newDuration: NoteDuration, stringId: number) => boolean;
-    deleteNote: (note: INote | IPause, stringId: number) => void;
+    deleteNote: (note: INote | IPause, stringId: number, shift: boolean) => void;
     moveNoteRight: (note: INote | IPause, stringId: number, interval?: NoteDuration) => boolean;
     moveNoteLeft: (note: INote | IPause, stringId: number, interval?: NoteDuration) => boolean;
     addNote: (stringId: number, noteDuration?: NoteDuration) => boolean;

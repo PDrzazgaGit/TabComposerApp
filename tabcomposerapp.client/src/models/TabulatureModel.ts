@@ -1,9 +1,12 @@
-import { MeasureService } from "../services/MeasureService";
-import { ITuning, IMeasure } from "./";
+import { TuningFactory } from "../services";
+import { MeasureService, SerializedMeasure, SerializedNote } from "../services/MeasureService";
+import { ITuning, IMeasure, SerializedTuning } from "./";
 
 export interface ITabulature {
+    id: number
     title: string;
     author: string;
+    frets: number;
     readonly tuning: ITuning;
     getLength(): number;
     forEach(callback: (measure: IMeasure) => void): void;
@@ -19,7 +22,7 @@ export interface ITabulature {
 export class Tabulature implements ITabulature {
 
     private measures: IMeasure[] = [];
-    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown") { }
+    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public readonly id: number = 0) { }
 
     public getLength(): number {
         return this.measures.length;
@@ -43,9 +46,10 @@ export class Tabulature implements ITabulature {
         return this.measures.map(callback);
     }
 
-    public addMeasure(tempo: number, numerator: number, denominator: number): void {
+    public addMeasure(tempo: number, numerator: number, denominator: number): void | IMeasure {
         const measure: MeasureService = new MeasureService(tempo, numerator, denominator, this.tuning, this.frets);
         this.measures.push(measure);
+        return measure;
     }
 
     public deleteMeasure(measure: IMeasure) {

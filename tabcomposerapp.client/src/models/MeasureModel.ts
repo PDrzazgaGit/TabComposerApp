@@ -18,7 +18,7 @@ export interface IMeasure {
     changeNoteDuration(note: INote | IPause, newDuration: NoteDuration, stringId: number): boolean;
     pushPause(stringId: number, noteDuration: NoteDuration): IPause | undefined;
     putPause(stringId: number, timeStamp: number, noteDuration: NoteDuration): IPause | undefined;
-    deleteNote(note: INote | IPause, stringId: number): void;
+    deleteNote(note: INote | IPause, stringId: number, shift:boolean): void;
     clone(): IMeasure;
     moveNoteRight(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
     moveNoteLeft(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;

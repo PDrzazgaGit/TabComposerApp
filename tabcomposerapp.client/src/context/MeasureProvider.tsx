@@ -20,7 +20,13 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
 
     useEffect(() => {
         setMeasure(initialMeasure)
+        
     }, [tabulature, initialMeasure])
+
+    //tutaj aktualizowanie
+    useEffect(() => {
+        
+    }, [measure])
 
     const getMaxFrets = (): number => {
         return measure.frets;
@@ -53,9 +59,9 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return notes;
     }
 
-    const deleteNote = (note: INote | IPause, stringId: number) => {
+    const deleteNote = (note: INote | IPause, stringId: number, shift: boolean) => {
         const updatedMeasure: IMeasure = measure.clone();
-        measure.deleteNote(note, stringId);
+        measure.deleteNote(note, stringId, shift);
         tabulature.updateTablature(measure, updatedMeasure);
         setMeasure(updatedMeasure);
     }
@@ -117,26 +123,6 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
     }
 
     const changeArticulation = (note: INote, stringId: number, articulation: Articulation) => {
-        const index: number = getStringNotes(stringId).indexOf(note);
-        if (index === -1) {
-            throw new Error(`Provided note does not exists.`);
-        }
-        if (index === getStringNotes(stringId).length-1 && articulation === Articulation.Legato) {
-            const nexMeasure: IMeasure | undefined = tabulature.getMeasure(measureId + 1);
-            if (!nexMeasure) {
-                return false;
-            }
-            const notes = nexMeasure.getNotes(stringId);
-
-            if (notes.length === 0) {
-                return false;
-            }
-
-            const nextNote: INote = notes[0];
-            if (nextNote.kind === NoteKind.Pause) {
-                return false;
-            }
-        }
         measure.changeArticulation(note, stringId, articulation)
         const updatedMeasure: IMeasure = measure.clone();
         tabulature.updateTablature(measure, updatedMeasure);

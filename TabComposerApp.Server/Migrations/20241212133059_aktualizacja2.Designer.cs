@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TabComposerApp.Server.Data;
 
@@ -11,9 +12,11 @@ using TabComposerApp.Server.Data;
 namespace TabComposerApp.Server.Migrations
 {
     [DbContext(typeof(TabComposerAppContext))]
-    partial class TabComposerAppContextModelSnapshot : ModelSnapshot
+    [Migration("20241212133059_aktualizacja2")]
+    partial class aktualizacja2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -256,7 +259,7 @@ namespace TabComposerApp.Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tabulatures", "identity");
+                    b.ToTable("Tabulature", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -1,4 +1,4 @@
-import { Sound } from "./";
+import { Notation, Sound } from "./";
 import { Dictionary } from "./../structures";
 
 export interface ITuning {
@@ -9,6 +9,7 @@ export interface ITuning {
     getStringsCount(): number;
     getStringSound(stringNumber: number): Sound;
     forEach(callback: (key: number, value: Sound) => void): void;
+    getData(): Record<number, Sound>;
     readonly stringCount: number;
 }
 export class Tuning implements ITuning {
@@ -54,5 +55,9 @@ export class Tuning implements ITuning {
 
     public forEach(callback: (key: number, value:Sound) => void): void {
         this.strings.forEach(callback);
+    }
+
+    public getData(): Record<number, Sound> {
+        return this.strings.toRecord();
     }
 }

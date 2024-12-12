@@ -3,6 +3,7 @@ import { GuitarScale } from '.';
 
 const MINUTE_IN_MS: number = 60000;
 
+
 export class MeasureService extends Map<number, (Note | Pause)[]> implements IMeasure {
 
     public measureDurationMs: number;
@@ -173,7 +174,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return false;
     }
 
-    public deleteNote(note: Note | Pause, stringId: number) {
+    public deleteNote(note: Note | Pause, stringId: number, shift: boolean) {
         const stringNotes = this.get(stringId);
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
@@ -183,13 +184,15 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (index === -1) {
             throw new Error("Note does not exist.");
         }
+
         
-        if (index != stringNotes.length - 1) { // check if last, if not shift
+        if (shift && (index != stringNotes.length - 1)) { // check if last, if not shift
             const durationToShift = note.getDurationMs();
             for (let i = index + 1; i < stringNotes.length; i++) {
                 stringNotes[i].setTimeStampMs(stringNotes[i].getTimeStampMs() - durationToShift);
             }
         }
+        
         stringNotes.splice(index, 1);
         this.set(Number(stringId), stringNotes);
     }
@@ -346,16 +349,16 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         
 
         this.forEach((notes, stringId) => {
-            console.log(this.getNotes(stringId));
             const notesData = notes.map(note => ({
                 fret: note.fret,
                 noteDuration: note.noteDuration,
-                kind: note.kind
+                kind: note.kind,
+                articulation: note.articulation
             }))
             this.set(Number(stringId), []);
             notesData.forEach(note => {
                 if (note.kind === NoteKind.Note)
-                    this.pushNote(note.fret, stringId, note.noteDuration);
+                    this.pushNote(note.fret, stringId, note.noteDuration)?.setArticulation(note.articulation);
                 else
                     this.pushPause(stringId, note.noteDuration);
             })

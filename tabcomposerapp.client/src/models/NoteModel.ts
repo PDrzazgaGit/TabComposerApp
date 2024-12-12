@@ -100,6 +100,8 @@ export class Note extends Sound implements INote {
     public setArticulation(articulation: Articulation) {
         this.articulation = articulation;
     }
+
+    public serialize()
 }
 
 

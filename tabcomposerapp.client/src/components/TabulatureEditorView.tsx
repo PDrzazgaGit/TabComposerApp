@@ -1,4 +1,4 @@
-import { Card, Badge, Tab, Container, Dropdown, FormControl, InputGroup, Tabs } from "react-bootstrap";
+import { Card, Badge, Tab, Container, Dropdown, FormControl, InputGroup, Tabs, FormCheck } from "react-bootstrap";
 import { MeasureProvider } from "../context/MeasureProvider";
 import { useTabulature } from "../hooks/useTabulature";
 import { AddMeasureView } from "./AddMeasureView";
@@ -9,11 +9,14 @@ import { useState } from "react";
 import { StickyPanel } from "./StickyPanel";
 import { NoteDuration } from "../models";
 import { noteRepresentationMap } from "../utils/noteUtils";
+import { SerializationService } from "../services/SerializationService";
+import test from "node:test";
 
 
 export const TabulatureEditorView = () => {
 
     const {
+        setTabulature,
         tabulature,
         measuresPerRow,
         setMeasuresPerRow,
@@ -26,7 +29,9 @@ export const TabulatureEditorView = () => {
         globalNoteDuration,
         setGlobalNoteDuration,
         globalNoteInterval,
-        setGlobalNoteInterval
+        setGlobalNoteInterval,
+        shiftOnDelete,
+        setShiftOnDelete
     } = useTabulature();
 
     const [title, setTitle] = useState<string>(tabulature.title);
@@ -35,6 +40,17 @@ export const TabulatureEditorView = () => {
 
     const handleMeasuresPerRow = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMeasuresPerRow(event.target.valueAsNumber);
+    }
+
+    function exampleFunction() {
+        const start = performance.now(); // Pocz¹tek pomiaru
+
+        const testString: string = SerializationService.serializeTabulature(tabulature);
+        const newTab = SerializationService.deserializeTabulature(testString);
+        setTabulature(newTab);
+
+        const end = performance.now(); // Koniec pomiaru
+        console.log(`Czas wykonania: ${(end - start).toFixed(2)} ms`);
     }
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,13 +67,96 @@ export const TabulatureEditorView = () => {
         }
     }
 
-    /*
-        //  <Card.Header>
-             //   <h4>
-             //       <Badge bg="secondary">Global Toolbar</Badge>
-               // </h4>
-           // </Card.Header>
-    */
+    const renderGlobalToolbar = () => (
+        <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+                <InputGroup.Text>Display</InputGroup.Text>
+                <FormControl
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={measuresPerRow}
+                    onChange={handleMeasuresPerRow}
+                />
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+                <InputGroup.Text>Tempo</InputGroup.Text>
+                <FormControl
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={globalTempo}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalTempo(e.target.valueAsNumber)}
+                />
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+                <InputGroup.Text>Numerator</InputGroup.Text>
+                <FormControl
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={globalNumerator}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalNumerator(e.target.valueAsNumber)}
+                />
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+                <InputGroup.Text>Denominator</InputGroup.Text>
+                <FormControl
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={globalDenominator}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalDenominator(e.target.valueAsNumber)}
+                />
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+                <Dropdown drop="down-centered">
+                    <Dropdown.Toggle variant="light" className="border flex-grow-1">
+                        {`Duration: ${NoteDuration[globalNoteDuration]}`}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
+                            <Dropdown.Item key={key + "_duration"} onClick={() => setGlobalNoteDuration(key as unknown as NoteDuration)}>
+                                {symbol}
+                            </Dropdown.Item>
+                        ))}
+                    </Dropdown.Menu>
+                </Dropdown>
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+                <Dropdown drop="down-centered">
+                    <Dropdown.Toggle variant="light" className="border flex-grow-1">
+                        {`Interval: ${NoteDuration[globalNoteInterval]}`}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
+                            <Dropdown.Item key={key + "_interval"} onClick={() => setGlobalNoteInterval(key as unknown as NoteDuration)}>
+                                {symbol}
+                            </Dropdown.Item>
+                        ))}
+                    </Dropdown.Menu>
+                </Dropdown>
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 15%' }}>
+                <FormCheck
+                    checked={shiftOnDelete}
+                    type="checkbox"
+                    id={"checkShift"}
+                    label="Shift on delete"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setShiftOnDelete(e.target.checked)}
+                />
+            </InputGroup>
+        </div>
+    );
+
+
+
 
     const renderFooterContent = () => (
         <Card>
@@ -73,109 +172,7 @@ export const TabulatureEditorView = () => {
                     <Tab
                         eventKey="toolbar" title="Global Toolbar"
                     >
-                        <div
-                            className="d-flex justify-content-center align-items-center gap-3"
-                        >
-                            <InputGroup
-                                className="flex-grow-1"
-                            >
-                                <InputGroup.Text>Display</InputGroup.Text>
-                                <FormControl
-                                    type="number"
-                                    min={1}
-                                    max={5}
-                                    value={measuresPerRow}
-                                    onChange={handleMeasuresPerRow}
-                                ></FormControl>
-                            </InputGroup>
-                            <InputGroup
-                                className="flex-grow-1"
-                            >
-                                <InputGroup.Text>Tempo</InputGroup.Text>
-                                <FormControl
-                                    type="number"
-                                    min={1}
-                                    max={999}
-                                    value={globalTempo}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalTempo(e.target.valueAsNumber)}
-                                ></FormControl>
-                            </InputGroup>
-                            <InputGroup
-                                className="flex-grow-1"
-                            >
-                                <InputGroup.Text>Numerator</InputGroup.Text>
-                                <FormControl
-                                    type="number"
-                                    min={1}
-                                    max={999}
-                                    value={globalNumerator}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalNumerator(e.target.valueAsNumber)}
-                                ></FormControl>
-                            </InputGroup>
-                            <InputGroup
-                                className="flex-grow-1"
-                            >
-                                <InputGroup.Text>Denominator</InputGroup.Text>
-                                <FormControl
-                                    type="number"
-                                    min={1}
-                                    max={999}
-                                    value={globalDenominator}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalDenominator(e.target.valueAsNumber)}
-                                ></FormControl>
-                            </InputGroup>
-                            <InputGroup
-                                className="flex-grow-1"
-                            >
-                                <Dropdown
-
-                                    drop="down-centered"
-                                >
-                                    <Dropdown.Toggle
-                                        variant="light"
-                                        className="border flex-grow-1"
-                                    >
-                                        {`Duration: ${NoteDuration[globalNoteDuration]}`}
-
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
-                                            <Dropdown.Item
-                                                key={key + "_duration"}
-                                                onClick={() => setGlobalNoteDuration(key as unknown as NoteDuration)}
-                                            >
-                                                {symbol}
-                                            </Dropdown.Item>
-                                        ))}
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </InputGroup>
-                            <InputGroup
-                                className="flex-grow-1"
-                            >
-                                <Dropdown
-                                    drop="down-centered"
-                                >
-                                    <Dropdown.Toggle
-                                        variant="light"
-                                        className="border flex-grow-1"
-                                    >
-                                        {`Interval: ${NoteDuration[globalNoteInterval]}`}
-
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
-                                            <Dropdown.Item
-                                                key={key + "_duration"}
-                                                onClick={() => setGlobalNoteInterval(key as unknown as NoteDuration)}
-                                            >
-                                                {symbol}
-                                            </Dropdown.Item>
-                                        ))}
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </InputGroup>
-                        </div>
+                        {renderGlobalToolbar()}
                     </Tab>
                     <Tab
                         eventKey="player" title="Tab Player"

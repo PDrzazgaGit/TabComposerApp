@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
 
@@ -16,6 +16,7 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     const [globalDenominator, setGlobalDenominator] = useState(4);
     const [globalNoteDuration, setGlobalNoteDuration] = useState<NoteDuration>(NoteDuration.Quarter);
     const [globalNoteInterval, setGlobalNoteInterval] = useState(NoteDuration.Quarter);
+    const [shiftOnDelete, setShiftOnDelete] = useState(true);
     const [measuresPerRow, setMeasuresPerRow] = useState(3);
 
     const addMeasure = (tempo: number, numerator: number, denominator: number) => {
@@ -32,6 +33,7 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     }
 
     const value = {
+        setTabulature,
         tabulature,
         addMeasure,
         deleteMeasure,
@@ -52,7 +54,10 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         setGlobalNoteDuration,
 
         globalNoteInterval,
-        setGlobalNoteInterval
+        setGlobalNoteInterval,
+
+        shiftOnDelete,
+        setShiftOnDelete
     }
 
     return (

@@ -8,6 +8,7 @@ import { pauseRepresentationMap, noteRepresentationMap } from "../utils/noteUtil
 import './../styles/NoteView.css';
 import { NoteView } from './NoteView';
 import { useError } from '../hooks/useError';
+import { useTabulature } from '../hooks/useTabulature';
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
@@ -24,6 +25,8 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
     const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation } = useMeasure();
+
+    const { shiftOnDelete } = useTabulature();
 
     const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
 
@@ -51,7 +54,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     };
 
     const handleDeleteNote = () => {  
-        deleteNote(note, stringId);
+        deleteNote(note, stringId, shiftOnDelete);
         document.body.click();
     }
 
@@ -76,11 +79,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     const handleChangeArticulation = (articulation: Articulation) => {
         if (!isNote(note))
             return; 
-        if (!changeArticulation(note, stringId, articulation)) {
-            setNoteEditorErrors({ ['articulation']: ["Add next note first."] })
-        } else {
-            clearNoteEditorErrors();
-        }
+        changeArticulation(note, stringId, articulation);
     }
 
     const saveChanges = (newFret: number) => {
@@ -169,14 +168,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                 ))}
                             </Dropdown.Menu>
                         </Dropdown>
-                    </InputGroup>
-                )}
-                {noteEditorErrors["articulation"] && (
-                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
-                        <div className="text-danger">
-                            {noteEditorErrors["articulation"]}
-                        </div>
-
                     </InputGroup>
                 )}
                 <InputGroup className="mb-3 d-flex justify-content-center align-items-center" >

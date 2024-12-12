@@ -17,7 +17,7 @@ interface StringEditorViewProps {
 
 export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) => {
 
-    const { tabulature, globalNoteDuration } = useTabulature();
+    const { tabulature, globalNoteDuration, measuresPerRow } = useTabulature();
 
     const [noteDuration, setNoteDuration] = useState<NoteDuration>(globalNoteDuration);
 
@@ -190,17 +190,17 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     position: 'absolute',
                     left: prevNoteTimeStamp !== 0 ? `calc(${startX}% + 0.6em)` : `${startX}%`,
                     width: prevNoteTimeStamp !== 0 ? `calc(${dx}% - 0.6em)` : `${dx}%`,
-                    top: '-0.25em',
-                    height: '2em',
+                   // top: '-0.25em',
+                    height: '1.5em',
                     overflow: 'visible',
                 }}
-                viewBox={`0 -1 ${dx} 2`} preserveAspectRatio="none"
+                viewBox={`0 -1.55555 ${dx} 3`} preserveAspectRatio="none"
             >
                 <line
-                    x1="0" y1={down ? "-0.25" : "0.25"}
-                    x2={dx} y2={down ? "0.25" : "-0.25"}
+                    x1="0" y1={down ? "-0.5" : "0.5"}
+                    x2={dx} y2={down ? "0.5" : "-0.5"}
                     stroke="gray"
-                    strokeWidth="0.1"
+                    strokeWidth="0.25"
                     strokeLinecap="round"
                 />
             </svg>
@@ -208,12 +208,15 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     };
 
     const renderLegato = (nextNoteTimeStamp: number, currentNoteTimeStamp: number, containerWidth: number) => {
+
+        if (nextNoteTimeStamp === 0)
+            return;
+
         const startX = calculatePosition(currentNoteTimeStamp, containerWidth); // pocz¹tek prawej nuty
         const endX = calculatePosition(nextNoteTimeStamp, containerWidth); // koniec lewej nuty
 
-        const topHeight = 0.75; // Wysokoœæ nad nutkami
         const length = endX - startX;
-        const controlPointY = -5; // Wysokoœæ krzywizny ³uku
+        const controlPointY = -2.5; // Wysokoœæ krzywizny ³uku
 
         return (
             <svg
@@ -222,81 +225,203 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     background: 'transparent',
                     left: currentNoteTimeStamp !== 0 ? `calc(${startX}% + 0.6em)` : `${startX}%`,
                     width: currentNoteTimeStamp !== 0 ? `calc(${length}% - 0.6em)` : `${length}%`,
-                    top: `calc(${topHeight}em)`,
+                    top: `-0.25`,
                     height: '1.5em',
                     overflow: 'visible',
                 }}
-                viewBox={`0 3 ${length} 10`} preserveAspectRatio="none"
+                viewBox={`0 -0.5 ${length} 3`} preserveAspectRatio="none"
             >
                 <path
                     d={`M 0,0 Q ${length / 2},${controlPointY} ${length},0`}
                     fill="transparent"
-                    stroke="black"
-                    strokeWidth="1"
+                    stroke="gray"
+                    strokeWidth="0.25"
                 />
             </svg>
         );
     };
 
-    const renderBend = (noteTimeStamp: number, noteDuration: number, containerWidth: number, full: boolean) => {
-        const positionX = calculatePosition(noteTimeStamp, containerWidth);
+    const renderBend = (
+        noteTimeStamp: number,
+        noteDuration: number,
+        containerWidth: number,
+        full: boolean
+    ) => {
+    const startX = calculatePosition(noteTimeStamp, containerWidth);
+    const endX = calculatePosition(noteTimeStamp + noteDuration, containerWidth);
+
+    const length = endX - startX;
+
+    const lengthRatio = length * 3 / 4;
+
+    const text: string = full ? 'full' : '1/2'
+
+    return (
+        <svg
+            style={{
+                position: 'absolute',
+                background: 'transparent',
+                left: `calc(${startX}% + 0.6em)`,
+                width: `calc(${length}% - 0.6em)`,
+                top: '-0.25em', 
+                height: '1.5em',
+                overflow: 'visible',
+            }}
+            viewBox={`0 -2 ${length} 3`} preserveAspectRatio="none"
+        >
+            <path
+                d={`M 0 0 Q ${lengthRatio} 0 ${(lengthRatio)} -3.5`}
+                stroke="gray"
+                strokeWidth="0.25"
+                fill="transparent"
+                strokeLinecap="round"
+            />
+            <polygon
+                points={`
+                    ${lengthRatio - 1},-3.5 
+                    ${lengthRatio + 1},-3.5 
+                    ${lengthRatio},-4.5
+                `}
+                fill="gray"
+            />
+            <text
+                x={lengthRatio}
+                y="-4.5"
+                textAnchor="middle"
+                fontSize="1.5"
+                fontWeight="700"
+                letterSpacing="0.2em"
+                fill="gray"
+                fontFamily="Arial, sans-serif"
+            >
+                {text}
+            </text>
+            
+        </svg>
+        );
+    };
+
+    const renderBendReturn = (
+        noteTimeStamp: number,
+        noteDuration: number,
+        containerWidth: number,
+        full: boolean
+    ) => {
+        const startX = calculatePosition(noteTimeStamp, containerWidth);
         const endX = calculatePosition(noteTimeStamp + noteDuration, containerWidth);
-        const dx = endX - positionX;
+
+        const length = endX - startX;
+
+        const lengthRatio = length * 0.75;
+
+        const lengthReturn = length * 0.95;
+
+        const text: string = full ? 'full' : '1/2'
 
         return (
             <svg
                 style={{
                     position: 'absolute',
-                    left: `calc(${positionX}% + 0.5em)`,
-                    top: '-1em',
-                    width: '2em',
-                    height: '2em',
+                    background: 'transparent',
+                    left: `calc(${startX}% + 0.6em)`,
+                    width: `calc(${length}% - 0.6em)`,
+                    top: '-0.25em',
+                    height: '1.5em',
                     overflow: 'visible',
                 }}
-                viewBox="0 0 20 20" preserveAspectRatio="none"
+                viewBox={`0 -2 ${length} 3`} preserveAspectRatio="none"
             >
                 <path
-                    d={`M 0 18 L ${dx / 2} -5 L ${dx} 18`}
+                    d={`M 0 0 Q ${lengthRatio} 0 ${(lengthRatio)} -3.5`}
+                    stroke="gray"
+                    strokeWidth="0.25"
                     fill="transparent"
-                    stroke="black"
-                    strokeWidth="1.5"
+                    strokeLinecap="round"
                 />
+                <polygon
+                    points={`
+                    ${lengthRatio - 1},-3.5 
+                    ${lengthRatio + 1},-3.5 
+                    ${lengthRatio},-4.5
+                `}
+                    fill="gray"
+                />
+                <path
+                    d={`M ${lengthRatio} -3.5 Q ${lengthReturn} -3.5 ${lengthReturn} 0`}
+                    stroke="gray"
+                    strokeWidth="0.25"
+                    fill="transparent"
+                    strokeLinecap="round"
+                />
+
+                <polygon
+                    points={`
+                    ${lengthReturn - 1},-1 
+                    ${lengthReturn + 1},-1 
+                    ${lengthReturn},0
+                `}
+                    fill="gray"
+                />
+
                 <text
-                    x={dx / 2}
-                    y="-7"
+                    x={lengthRatio}
+                    y="-4.5"
                     textAnchor="middle"
-                    fontSize="6"
-                    fill="black"
+                    fontSize="1.5"
+                    fontWeight="700"
+                    letterSpacing="0.2em"
+                    fill="gray"
+                    fontFamily="Arial, sans-serif"
                 >
-                    {full ? 'full' : '1/2'}
+                    {text}
                 </text>
+
             </svg>
         );
     };
 
-
-
-
-
-
     const calculateLegatoOverflow = (): number => {
-        const nexMeasure: IMeasure | undefined = tabulature.getMeasure(measureId + 1);
-        if (!nexMeasure) {
-            throw new Error("Cannot add legato.")    
+        const nextMeasure: IMeasure | undefined = tabulature.getMeasure(measureId + 1);
+        if (!nextMeasure) {
+            return 0;  
         }
-        const notes = nexMeasure.getNotes(stringId);
+        const notes = nextMeasure.getNotes(stringId);
 
         if (notes.length === 0) {
-            throw new Error("Cannot add legato.") 
+            return 0;
         }
 
         const nextNote: INote = notes[0];
-        if (nextNote.kind === NoteKind.Pause) {
-            throw new Error("Cannot add legato.") 
+
+        if (measureId % measuresPerRow === 2) {
+            return measure.measureDurationMs + 2* stringMargin;
         }
 
         return measure.measureDurationMs + 3 * stringMargin + nextNote.getTimeStampMs();
         
+    }
+
+    const calculateSlideOverFlow = (): number => {
+        if (measureId === 0)
+            return 0;
+
+        const prevMeasure: IMeasure | undefined = tabulature.getMeasure(measureId - 1);
+        if (!prevMeasure) {
+            return 0;
+        }
+        const notes = prevMeasure.getNotes(stringId);
+
+        if (notes.length === 0) {
+            return 0;
+        }
+
+        const prevNote: INote = notes[notes.length-1];
+
+        if (measureId % measuresPerRow === 0) {
+            return 0;
+        }
+
+        return - 1 * stringMargin - prevNote.getDurationMs();
     }
 
     return (
@@ -348,14 +473,20 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                             const isSlide = note.articulation === Articulation.Slide;
                             const isLegato = note.articulation === Articulation.Legato;
                             const isBendFull = note.articulation === Articulation.BendFull;
+                            const isBendHalf = note.articulation === Articulation.BendHalf;
+                            const isBendFullReturn = note.articulation === Articulation.BendFullReturn;
+                            const isBendHalfReturn = note.articulation === Articulation.BendHalfReturn;
 
                             return (
                                 <div key={ index}>
                                     {isSlide &&
-                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : 0, note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)                 
+                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)                 
                                     }
                                     {isLegato && renderLegato(nextNote ? nextNote.getTimeStampMs() + stringMargin : calculateLegatoOverflow(), note.getTimeStampMs() + stringMargin, 100)}
                                     {isBendFull && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}
+                                    {isBendHalf && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, false)}
+                                    {isBendFullReturn && renderBendReturn(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}
+                                    {isBendHalfReturn && renderBendReturn(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, false)}
                                     <div
                                         style={{
                                             position: "absolute",

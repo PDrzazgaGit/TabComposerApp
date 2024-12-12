@@ -1,8 +1,4 @@
-/*
-type DictionaryType<Key extends keyof never, Value> = {
-    [key in Key]: Value; // Mapped types syntax
-};
-*/
+
 export class Dictionary<Key extends string | number | symbol, Value> {
     private items: { [key in Key]: Value } = {} as { [key in Key]: Value };
 
@@ -48,5 +44,9 @@ export class Dictionary<Key extends string | number | symbol, Value> {
         for (const [key, value] of this.entries()) {
             callback(key, value);
         }
+    }
+
+    toRecord(): Record<Key, Value> {
+        return { ...this.items };
     }
 }

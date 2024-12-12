@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TabComposerApp.Server.Data;
 
@@ -11,9 +12,11 @@ using TabComposerApp.Server.Data;
 namespace TabComposerApp.Server.Migrations
 {
     [DbContext(typeof(TabComposerAppContext))]
-    partial class TabComposerAppContextModelSnapshot : ModelSnapshot
+    [Migration("20241212132105_aktualizacja")]
+    partial class aktualizacja
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,12 +244,22 @@ namespace TabComposerApp.Server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Data")
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Tuning")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -256,7 +269,7 @@ namespace TabComposerApp.Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tabulatures", "identity");
+                    b.ToTable("Tabulature", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
