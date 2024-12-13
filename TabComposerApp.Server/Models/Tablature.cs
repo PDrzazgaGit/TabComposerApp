@@ -1,6 +1,6 @@
 ﻿namespace TabComposerApp.Server.Models
 {
-    public class Tabulature
+    public class Tablature
     {
         public int Id { get; set; }
         public string Data { get; set; }

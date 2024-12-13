@@ -4,8 +4,11 @@ import { getUserProfileApi } from '../api/UserService';
 import { User, AuthContext } from './AuthContext';
 import { useError } from './../hooks/useError';
 import { apiErrorFormatter } from '../api/ApiErrorFormatter';
+import { useNavigate } from 'react-router-dom';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+
+    const navigate = useNavigate();
 
     const { setFormErrors } = useError();
 
@@ -37,7 +40,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
 
             setUser(user);
-
+            navigate('/');
             if (remember) {
                 localStorage.setItem("userToken", user.token);
             } else {
@@ -100,7 +103,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 try {
 
                     const profileData = await getUserProfileApi(token);
-                    console.log(profileData);
 
                     const storedUser: User = {
                         email: profileData.email,

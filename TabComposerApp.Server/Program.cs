@@ -20,7 +20,10 @@ builder.Services.AddSwaggerExplorer().
                  InjectDbContext(builder.Configuration)
                 .AddIdentityHandlersStores()
                 .ConfigureIdentityOptions()
-                .AddIdentityAuth(builder.Configuration);
+                .AddIdentityAuth(builder.Configuration)
+                .InjectRepositories()
+                .InjectServices();
+                
 
 #endregion
 

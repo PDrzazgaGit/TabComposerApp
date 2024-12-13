@@ -43,21 +43,19 @@ export const TabulatureEditorView = () => {
     }
 
     function exampleFunction() {
-        const start = performance.now(); // Pocz¹tek pomiaru
+
 
         const testString: string = SerializationService.serializeTabulature(tabulature);
-        const newTab = SerializationService.deserializeTabulature(testString);
-        setTabulature(newTab);
+        console.log(testString);
 
-        const end = performance.now(); // Koniec pomiaru
-        console.log(`Czas wykonania: ${(end - start).toFixed(2)} ms`);
     }
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (tabulature) {
             setTitle(event.target.value);
             tabulature.title = title;
-        }
+        } 
+        exampleFunction();
     }
 
     const handleOnBlur = () => {
@@ -190,44 +188,42 @@ export const TabulatureEditorView = () => {
     )
 
     return (
-        <Container className="mt-3">
-            <StickyPanel content={renderFooterContent()}>
-                    <InputGroup
-                        className="d-flex justify-content-center align-items-center mb-3 column"
-                    >
-                        <h1>
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={handleTitleChange}
-                                onBlur={handleOnBlur}
-                                style={{
-                                    padding: "0",
-                                    margin: "0",
-                                    border: "0",
-                                    outline: "0",
-                                    cursor: "pointer",
-                                    textAlign: "center"
-                                }}
-                            />
-                        </h1>
-                    </InputGroup>
-                    <TabulatureContainer maxItemsPerRow={measuresPerRow} >
-                        {tabulature.map((measure, index) => {
-                            return (
-                                <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
-                                    <MeasureLabelEditor />
-                                    <MeasureView isEditor={true} measurePerRow={measuresPerRow} />
+        <StickyPanel content={renderFooterContent()}>
+                <InputGroup
+                    className="d-flex justify-content-center align-items-center mb-3 column"
+                >
+                    <h1>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={handleTitleChange}
+                            onBlur={handleOnBlur}
+                            style={{
+                                padding: "0",
+                                margin: "0",
+                                border: "0",
+                                outline: "0",
+                                cursor: "pointer",
+                                textAlign: "center"
+                            }}
+                        />
+                    </h1>
+                </InputGroup>
+                <TabulatureContainer maxItemsPerRow={measuresPerRow} >
+                    {tabulature.map((measure, index) => {
+                        return (
+                            <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
+                                <MeasureLabelEditor />
+                                <MeasureView isEditor={true} measurePerRow={measuresPerRow} />
 
-                                </MeasureProvider>
-                            )
-                        })}
-                        <AddMeasureView></AddMeasureView>
-                    </TabulatureContainer>
+                            </MeasureProvider>
+                        )
+                    })}
+                    <AddMeasureView></AddMeasureView>
+                </TabulatureContainer>
                    
                
-            </StickyPanel>
-        </Container>
+        </StickyPanel>
   );
 }
 

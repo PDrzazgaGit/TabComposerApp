@@ -12,7 +12,7 @@ namespace TabComposerApp.Server.Models
         public bool Active { get; set; } = true;
 
         #region FK
-        public ICollection<Tabulature> Tabulatures { get; set; } = new List<Tabulature>();
+        public ICollection<Tablature> Tabulatures { get; set; } = new List<Tablature>();
         #endregion
     }
 }

@@ -5,43 +5,43 @@
 namespace TabComposerApp.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class FixDbSetDeclaration : Migration
+    public partial class ConfigureDB2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Tabulature_AspNetUsers_UserId",
+                name: "FK_Tablatures_AspNetUsers_UserId",
                 schema: "identity",
-                table: "Tabulature");
+                table: "Tablatures");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Tabulature",
+                name: "PK_Tablatures",
                 schema: "identity",
-                table: "Tabulature");
+                table: "Tablatures");
 
             migrationBuilder.RenameTable(
-                name: "Tabulature",
+                name: "Tablatures",
                 schema: "identity",
-                newName: "Tabulatures",
+                newName: "Tablature",
                 newSchema: "identity");
 
             migrationBuilder.RenameIndex(
-                name: "IX_Tabulature_UserId",
+                name: "IX_Tablatures_UserId",
                 schema: "identity",
-                table: "Tabulatures",
-                newName: "IX_Tabulatures_UserId");
+                table: "Tablature",
+                newName: "IX_Tablature_UserId");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Tabulatures",
+                name: "PK_Tablature",
                 schema: "identity",
-                table: "Tabulatures",
+                table: "Tablature",
                 column: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Tabulatures_AspNetUsers_UserId",
+                name: "FK_Tablature_AspNetUsers_UserId",
                 schema: "identity",
-                table: "Tabulatures",
+                table: "Tablature",
                 column: "UserId",
                 principalSchema: "identity",
                 principalTable: "AspNetUsers",
@@ -53,37 +53,37 @@ namespace TabComposerApp.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Tabulatures_AspNetUsers_UserId",
+                name: "FK_Tablature_AspNetUsers_UserId",
                 schema: "identity",
-                table: "Tabulatures");
+                table: "Tablature");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Tabulatures",
+                name: "PK_Tablature",
                 schema: "identity",
-                table: "Tabulatures");
+                table: "Tablature");
 
             migrationBuilder.RenameTable(
-                name: "Tabulatures",
+                name: "Tablature",
                 schema: "identity",
-                newName: "Tabulature",
+                newName: "Tablatures",
                 newSchema: "identity");
 
             migrationBuilder.RenameIndex(
-                name: "IX_Tabulatures_UserId",
+                name: "IX_Tablature_UserId",
                 schema: "identity",
-                table: "Tabulature",
-                newName: "IX_Tabulature_UserId");
+                table: "Tablatures",
+                newName: "IX_Tablatures_UserId");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Tabulature",
+                name: "PK_Tablatures",
                 schema: "identity",
-                table: "Tabulature",
+                table: "Tablatures",
                 column: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Tabulature_AspNetUsers_UserId",
+                name: "FK_Tablatures_AspNetUsers_UserId",
                 schema: "identity",
-                table: "Tabulature",
+                table: "Tablatures",
                 column: "UserId",
                 principalSchema: "identity",
                 principalTable: "AspNetUsers",

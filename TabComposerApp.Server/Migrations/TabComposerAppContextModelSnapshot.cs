@@ -230,7 +230,7 @@ namespace TabComposerApp.Server.Migrations
                     b.ToTable("AspNetUsers", "identity");
                 });
 
-            modelBuilder.Entity("TabComposerApp.Server.Models.Tabulature", b =>
+            modelBuilder.Entity("TabComposerApp.Server.Models.Tablature", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -256,7 +256,7 @@ namespace TabComposerApp.Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tabulatures", "identity");
+                    b.ToTable("Tablatures", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -310,7 +310,7 @@ namespace TabComposerApp.Server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TabComposerApp.Server.Models.Tabulature", b =>
+            modelBuilder.Entity("TabComposerApp.Server.Models.Tablature", b =>
                 {
                     b.HasOne("TabComposerApp.Server.Models.AppUser", "AppUser")
                         .WithMany("Tabulatures")

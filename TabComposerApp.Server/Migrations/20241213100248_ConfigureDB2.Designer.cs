@@ -12,8 +12,8 @@ using TabComposerApp.Server.Data;
 namespace TabComposerApp.Server.Migrations
 {
     [DbContext(typeof(TabComposerAppContext))]
-    [Migration("20241212140918_FixDbSetDeclaration11")]
-    partial class FixDbSetDeclaration11
+    [Migration("20241213100248_ConfigureDB2")]
+    partial class ConfigureDB2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -233,7 +233,7 @@ namespace TabComposerApp.Server.Migrations
                     b.ToTable("AspNetUsers", "identity");
                 });
 
-            modelBuilder.Entity("TabComposerApp.Server.Models.Tabulature", b =>
+            modelBuilder.Entity("TabComposerApp.Server.Models.Tablature", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,7 +259,7 @@ namespace TabComposerApp.Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tabulatures", "identity");
+                    b.ToTable("Tablature", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -313,7 +313,7 @@ namespace TabComposerApp.Server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TabComposerApp.Server.Models.Tabulature", b =>
+            modelBuilder.Entity("TabComposerApp.Server.Models.Tablature", b =>
                 {
                     b.HasOne("TabComposerApp.Server.Models.AppUser", "AppUser")
                         .WithMany("Tabulatures")

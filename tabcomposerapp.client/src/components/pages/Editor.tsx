@@ -121,35 +121,27 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
     }
 
     return (
-    <div>
+        <Container className = "mb-3">
             {tabulature && (
                 <TabulatureProvider initialTabulature={tabulature!}>
                     <TabulatureEditorView />
                 </TabulatureProvider>
             ) || (
-                <Container>
-                    <div
-                        className="d-flex justify-content-center align-items-center"
+                <OverlayTrigger
+                    overlay={renderPopover}
+                    trigger="click"
+                    placement="bottom"
+                    onEnter={handleEnter}
+                    rootClose
+                >
+                    <Button
+                        variant="light"
+                        className="border"
                     >
-                        
-                        <OverlayTrigger
-                            overlay={renderPopover}
-                            trigger="click"
-                            placement="bottom"
-                            onEnter={handleEnter}
-                            rootClose
-                        >
-                            <Button
-                                variant="light"
-                                className="border"
-                            >
-                                New Tablature
-                            </Button>
-                        </OverlayTrigger>
-                    </div>
-                    
-                </Container>
+                        New Tablature
+                    </Button>
+                </OverlayTrigger>
             )}        
-        </div>
+        </Container>
     );
 }

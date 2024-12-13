@@ -1,5 +1,6 @@
 ﻿using TabComposerApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using TabComposerApp.Server.Repositories;
 
 namespace TabComposerApp.Server.Extensions
 {
@@ -11,6 +12,12 @@ namespace TabComposerApp.Server.Extensions
             {
                 options.UseSqlServer(configuration.GetConnectionString("TabComposerDBConnection"));
             });
+            return services;
+        }
+
+        public static IServiceCollection InjectRepositories(this IServiceCollection services)
+        {
+            services.AddScoped<ITablatureRepository, TablatureRepository>();
             return services;
         }
     }

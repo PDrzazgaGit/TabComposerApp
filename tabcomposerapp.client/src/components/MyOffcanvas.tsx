@@ -6,37 +6,41 @@ interface MyOffcanvasProps extends OffcanvasProps {
     trigger?: ReactNode;
     title?: string;
     children: ReactNode;
+    alwaysShow?: boolean;
+    handleClose?: () => void;
 }
 
 export const MyOffcanvas: FC<MyOffcanvasProps> = ({
     trigger,
     title = "Offcanvas Title",
     children,
+    alwaysShow = false,
+    handleClose,
     ...props
 }) => {
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(alwaysShow);
 
-    const handleClose = () => setShow(false);
+    const defaultHandleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [width] = useWindowSize(); 
-
-
+    const [width] = useWindowSize();
     const isMobile: boolean = width < 768;
 
     return (
         <>
-            <div onClick={handleShow} style={{ display: 'inline' }}>
-                {trigger}
-            </div>
+            {!alwaysShow && (
+                <div onClick={handleShow} style={{ display: 'inline' }}>
+                    {trigger}
+                </div>
+            )}
 
             <Offcanvas
                 show={show}
-                onHide={handleClose}
+                onHide={handleClose || defaultHandleClose}
                 style={{
                     width: isMobile ? '100%' : 'auto',
-                    minWidth: isMobile ? '100%' : '25%', 
-                    transition: 'width 0.3s ease-in-out', 
+                    minWidth: isMobile ? '100%' : '25%',
+                    transition: 'width 0.3s ease-in-out',
                 }}
                 {...props}
             >
@@ -49,4 +53,4 @@ export const MyOffcanvas: FC<MyOffcanvasProps> = ({
             </Offcanvas>
         </>
     );
-}
+};

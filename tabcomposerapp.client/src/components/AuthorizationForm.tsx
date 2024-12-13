@@ -59,16 +59,14 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     useEffect(() => {
         switch (formState) {
             case FormState.SIGNIN:
-                updateTitle("Sign In to Tab Composer");
+                updateTitle("Sign In");
                 break;
             case FormState.SIGNUP:
-                updateTitle("Sign Up to Tab Composer");
+                updateTitle("Sign Up");
                 break;
             case FormState.CHANGEPSWD:
                 updateTitle("Change Password");
                 break;
-            default:
-                updateTitle("Welcome!");
         }
     }, [FormState.CHANGEPSWD, FormState.SIGNIN, FormState.SIGNUP, formState, updateTitle, clearFormErrors]);
 

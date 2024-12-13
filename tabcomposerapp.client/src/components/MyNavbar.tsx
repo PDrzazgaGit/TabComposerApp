@@ -40,27 +40,28 @@ export const MyNavbar = () => {
                     <Nav className="ms-auto d-flex align-items-center">
 
                         <Nav className="me-auto ">
-                            <Nav.Link as={Link} to="/editor">Editor</Nav.Link>
-                            <Nav.Link as={Link} to="/about">About</Nav.Link>
+                            
                             {user === null && (
-                                <MyOffcanvas
-                                    title={offcanvasTitle}
-                                    trigger={<Nav.Link>Sign in</Nav.Link>}
-                                    placement="end"
-                                >
-                                    <AuthorizationForm updateTitle={setOffcanvasTitle} />
-                                </MyOffcanvas>
+                                <>
+                                    <Nav.Link as={Link} to="/editor">Try Editor</Nav.Link>
+                                    <Nav.Link as={Link} to="/login">Sign in</Nav.Link>
+                                   
+                                </>
                             ) || user !== null && (
-                                <MyOffcanvas
-                                    title={"Hello " + user.username}
-                                    trigger={<Nav.Link>My Account</Nav.Link>}
-                                    placement="end"
-                                >
-                                    some manage account component
-                                    <Button onClick={ signOut }>
-                                        Sign Out
-                                    </Button>
-                                </MyOffcanvas>
+                                <>
+                                    <Nav.Link as={Link} to="/mytabs">My Tabs</Nav.Link>
+                                    <MyOffcanvas
+                                        title={"Hello " + user.username}
+                                        trigger={<Nav.Link>Account</Nav.Link>}
+                                        placement="end"
+                                    >
+                                        some manage account component
+                                        <Button onClick={signOut}>
+                                            Sign Out
+                                        </Button>
+                                    </MyOffcanvas>
+                                </>
+                                
                             )}
                            
                             
@@ -74,3 +75,15 @@ export const MyNavbar = () => {
         </Navbar>
     );
 };
+
+/*
+
+ <MyOffcanvas
+                                        title={offcanvasTitle}
+                                        trigger={<Nav.Link>Sign in</Nav.Link>}
+                                        placement="end"
+                                    >
+                                        <AuthorizationForm updateTitle={setOffcanvasTitle} />
+                                        </MyOffcanvas>
+
+*/

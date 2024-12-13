@@ -7,7 +7,7 @@ namespace TabComposerApp.Server.Data
     public class TabComposerAppContext : IdentityDbContext<AppUser>
     {
         public DbSet<AppUser> AppUsers = null!; 
-        public DbSet<Tabulature> Tabulatures{ get; set; } = null!;
+        public DbSet<Tablature> Tablatures{ get; set; } = null!;
 
         /*
         
@@ -28,7 +28,6 @@ namespace TabComposerApp.Server.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<AppUser>(entity => {
-
                 entity.Property(u => u.Active).IsRequired();
                 entity.Property(u => u.CreatedAt).IsRequired();
                 
@@ -39,7 +38,7 @@ namespace TabComposerApp.Server.Data
                 
             });  
 
-            modelBuilder.Entity<Tabulature>(entity => {
+            modelBuilder.Entity<Tablature>(entity => {
                 entity.HasKey(t => t.Id);
 
                 entity.Property(t => t.Id).ValueGeneratedOnAdd();
