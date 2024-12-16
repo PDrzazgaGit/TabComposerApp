@@ -43,7 +43,7 @@ namespace TabComposerApp.Server.Services
     {
         public TablatureService() { }
 
-        public SerializedTabulature? DeserializeTabulature(string data)
+        public SerializedTabulature? DeserializeTablature(string data)
         {
             var jsonObject = JObject.Parse(data);
             var modelProperties = typeof(SerializedTabulature).GetProperties()
@@ -59,9 +59,19 @@ namespace TabComposerApp.Server.Services
             return JsonConvert.DeserializeObject<SerializedTabulature>(data);
         }
 
+        public string SerializeTablature(SerializedTabulature tabulature)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            return JsonConvert.SerializeObject(tabulature, settings);
+        }
+
         public bool ValidateTablatureData(string data)
         {
-            var deserializedTablature = DeserializeTabulature(data);
+            var deserializedTablature = DeserializeTablature(data);
 
             if (deserializedTablature == null)
             {

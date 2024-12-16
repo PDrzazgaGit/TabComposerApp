@@ -20,7 +20,7 @@ export const StringView: FC<StringViewProps> = ({
 
     const { tabulature } = useTabulature();
 
-    const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
+    const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
 
     const leftMargin: number = 150;
 

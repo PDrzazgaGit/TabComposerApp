@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import { IMeasure, ITabulature, NoteDuration } from '../models'
 interface TabulatureContextType {
-    tabulature: ITabulature;
+    tabulature?: ITabulature ;
     setTabulature: (tabulature: ITabulature) => void;
 
     measuresPerRow: number;

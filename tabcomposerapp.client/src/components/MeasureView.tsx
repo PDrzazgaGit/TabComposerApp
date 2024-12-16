@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {useMeasure } from "./../hooks/useMeasure"
 import { useTabulature } from "./../hooks/useTabulature"
 import { StringEditorView } from "./StringEditorView";

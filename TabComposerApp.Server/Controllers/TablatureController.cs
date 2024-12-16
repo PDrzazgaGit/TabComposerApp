@@ -29,37 +29,39 @@ namespace TabComposerApp.Server.Controllers
         }
 
         [HttpPost("AddTablature")]
-        public async Task<IActionResult> AddTablature(string data)
+        public async Task<IActionResult> AddTablature([FromBody] SerializedTabulature request)
         {
-            string userId = User.Claims.First(x => x.Type == "UserID").Value;
-
-            var tabulature = new Tablature
-            {
-                Data = data,
-                UserId = userId
-            };
-
             try
             {
+                // Przetwarzanie dużego JSON-a
+                if (request == null)
+                {
+                    return BadRequest(new { Message = "Invalid tablature data." });
+                }
+
+                // Walidacja i zapis w bazie
+                var tabulature = new Tablature
+                {
+                    Data = _tablatureService.SerializeTablature(request),
+                    UserId = User.Claims.First(x => x.Type == "UserID").Value
+                };
+
                 if (!_tablatureService.ValidateTablatureData(tabulature.Data))
                 {
-                    return BadRequest(new { Meassage = "Invalid tablature data." });
+                    return BadRequest(new { Message = "Invalid tablature data." });
                 }
+
                 await _tablatureRepository.AddAsync(tabulature);
                 return Ok(new { Message = "Tablature added successfully", Id = tabulature.Id });
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Cannot add tablature due to a database error." });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { Message = "An error occurred while adding the tablature." });
+                return StatusCode(500, new { Message = $"An error occurred: {ex.Message}" });
             }
         }
 
         [HttpPost("UpdateTablature")]
-        public async Task<IActionResult> UpdateTablature(int id, string data)
+        public async Task<IActionResult> UpdateTablature(int id, [FromBody] SerializedTabulature request)
         {
             string userId = User.Claims.First(x => x.Type == "UserID").Value;
 
@@ -67,7 +69,7 @@ namespace TabComposerApp.Server.Controllers
             {
                 var tabulature = await _tablatureRepository.GetByIdAsync(id);
 
-                tabulature.Data = data;
+                tabulature.Data = _tablatureService.SerializeTablature(request);
 
                 if (!_tablatureService.ValidateTablatureData(tabulature.Data))
                 {
@@ -89,16 +91,15 @@ namespace TabComposerApp.Server.Controllers
         }
 
 
-        [HttpGet("GetTablature")]
+        [HttpGet("GetTablature/{id}")]
         public async Task<IActionResult> GetTabulture(int id)
         {
             string userId = User.Claims.First(x => x.Type == "UserID").Value;
 
             try
             {
-                var tabulature = await _tablatureRepository.GetByIdAsync(id);
-
-                return Ok(new { Tabulature = tabulature.Data });
+                var data = await _tablatureRepository.GetByIdAsync(id);
+                return Ok(new { Tablature = data.Data });
             }
             catch (KeyNotFoundException)
             {
@@ -123,7 +124,7 @@ namespace TabComposerApp.Server.Controllers
 
                 foreach (var tab in tabulatures)
                 {
-                    var data = _tablatureService.DeserializeTabulature(tab.Data);
+                    var data = _tablatureService.DeserializeTablature(tab.Data);
 
                     if (data == null)
                     {

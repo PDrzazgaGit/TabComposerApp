@@ -1,4 +1,4 @@
-import { Card, Badge, Tab, Container, Dropdown, FormControl, InputGroup, Tabs, FormCheck } from "react-bootstrap";
+import { Card, Tab, Dropdown, FormControl, InputGroup, Tabs, FormCheck } from "react-bootstrap";
 import { MeasureProvider } from "../context/MeasureProvider";
 import { useTabulature } from "../hooks/useTabulature";
 import { AddMeasureView } from "./AddMeasureView";
@@ -10,13 +10,10 @@ import { StickyPanel } from "./StickyPanel";
 import { NoteDuration } from "../models";
 import { noteRepresentationMap } from "../utils/noteUtils";
 import { SerializationService } from "../services/SerializationService";
-import test from "node:test";
-
 
 export const TabulatureEditorView = () => {
 
     const {
-        setTabulature,
         tabulature,
         measuresPerRow,
         setMeasuresPerRow,
@@ -34,7 +31,7 @@ export const TabulatureEditorView = () => {
         setShiftOnDelete
     } = useTabulature();
 
-    const [title, setTitle] = useState<string>(tabulature.title);
+    const [title, setTitle] = useState<string>(tabulature!.title);
 
     const [tabKey, setTabKey] = useState<string | null>(null);
 
@@ -45,7 +42,7 @@ export const TabulatureEditorView = () => {
     function exampleFunction() {
 
 
-        const testString: string = SerializationService.serializeTabulature(tabulature);
+        const testString: string = SerializationService.serializeTabulature(tabulature!);
         console.log(testString);
 
     }
@@ -210,7 +207,7 @@ export const TabulatureEditorView = () => {
                     </h1>
                 </InputGroup>
                 <TabulatureContainer maxItemsPerRow={measuresPerRow} >
-                    {tabulature.map((measure, index) => {
+                    {tabulature!.map((measure, index) => {
                         return (
                             <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
                                 <MeasureLabelEditor />

@@ -1,10 +1,10 @@
 import { TuningFactory } from "../../services";
 import { ITabulature, Tabulature } from "../../models";
-import { TabulatureProvider } from '../../context/TabulatureProvider';
 import {TabulatureEditorView } from "../TabulatureEditorView"
 import { Button, Card, Container, Dropdown, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { useState } from "react";
 import { useError } from "../../hooks/useError";
+import { useTabulature } from "../../hooks/useTabulature";
 
 interface EditorProps {
     initialTabulature?: ITabulature;
@@ -12,7 +12,9 @@ interface EditorProps {
 
 export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
 
-    const [tabulature, setTabulature] = useState<ITabulature | undefined>(initialTabulature);
+    //const [tabulature2, setTabulature2] = useState<ITabulature | undefined>(initialTabulature);
+
+    const { tabulature, setTabulature } = useTabulature();
 
     const [title, setTitle] = useState<string>('Untitled');
 
@@ -38,6 +40,8 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
         if (tuning) {
             clearCreateTabulatureErrors();
             const tuningModel = TuningFactory.getTuning(tuning);
+           // setTabulature2(new Tabulature(tuningModel, maxFrets, title));
+            //console.log(tabulature2);
             setTabulature(new Tabulature(tuningModel, maxFrets, title));
         } else {
             setCreateTabulatureErrors({["tuningNotProvided"] : ["Select tuning first"]})
@@ -123,9 +127,7 @@ export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
     return (
         <Container className = "mb-3">
             {tabulature && (
-                <TabulatureProvider initialTabulature={tabulature!}>
-                    <TabulatureEditorView />
-                </TabulatureProvider>
+                <TabulatureEditorView />
             ) || (
                 <OverlayTrigger
                     overlay={renderPopover}

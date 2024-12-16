@@ -4,12 +4,11 @@ import { IMeasure, ITabulature, NoteDuration } from '../models';
 
 interface TabulatureProviderProps {
     children: ReactNode;
-    initialTabulature: ITabulature;
 }
 
-export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children, initialTabulature }) => {
+export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children}) => {
 
-    const [tabulature, setTabulature] = useState<ITabulature>(initialTabulature);
+    const [tabulature, setTabulature] = useState<ITabulature | undefined>();
 
     const [globalTempo, setGlobalTempo] = useState(100);
     const [globalNumerator, setGlobalNumerator] = useState(4);
@@ -19,13 +18,21 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     const [shiftOnDelete, setShiftOnDelete] = useState(true);
     const [measuresPerRow, setMeasuresPerRow] = useState(3);
 
+    useEffect(() => {
+
+    }, [tabulature])
+
     const addMeasure = (tempo: number, numerator: number, denominator: number) => {
+        if (!tabulature)
+            return
         tabulature.addMeasure(tempo, numerator, denominator);
         const tabulatureNew = tabulature.clone();
         setTabulature(tabulatureNew);
     }
 
     const deleteMeasure = (measure: IMeasure) => {
+        if (!tabulature)
+            return
         const tabulatureNew = tabulature.clone();
         tabulatureNew.deleteMeasure(measure);
         

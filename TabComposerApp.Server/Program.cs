@@ -22,7 +22,8 @@ builder.Services.AddSwaggerExplorer().
                 .ConfigureIdentityOptions()
                 .AddIdentityAuth(builder.Configuration)
                 .InjectRepositories()
-                .InjectServices();
+                .InjectServices()
+                .ConfigureServer();
                 
 
 #endregion
@@ -37,6 +38,8 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();
+
+app.UseResponseCompression();
 
 app.MapControllers();
 

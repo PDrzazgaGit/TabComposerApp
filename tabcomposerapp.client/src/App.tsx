@@ -6,21 +6,24 @@ import { ErrorProvider } from "./context/ErrorProvider";
 import { AuthRoute } from "./components/AuthRoute";
 import { UserTabs } from "./components/pages/UserTabs";
 import { Login } from "./components/pages/Login";
+import { TabulatureProvider } from "./context/TabulatureProvider";
 
 function App() {
 
     return (
         <ErrorProvider>
             <AuthProvider>
-                <MyNavbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/editor" element={<Editor />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route element={<AuthRoute />}>
-                        <Route path="/mytabs" element={<UserTabs/>}></Route>
-                    </Route>
-                </Routes>
+                <TabulatureProvider>
+                    <MyNavbar />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/login" element={<Login />} />            
+                            <Route path="/editor" element={<Editor />} />
+                            <Route element={<AuthRoute />}>
+                                <Route path="/mytabs" element={<UserTabs />}></Route>
+                            </Route>        
+                    </Routes>
+                </TabulatureProvider> 
             </AuthProvider>
         </ErrorProvider>
        

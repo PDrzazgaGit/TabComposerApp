@@ -4,8 +4,9 @@ namespace TabComposerApp.Server.Services
 {
     public interface ITablatureService
     {
-        //string GetTitle(Tablature tablature);
         bool ValidateTablatureData(string data);
-        public SerializedTabulature? DeserializeTabulature(string data);
+        public SerializedTabulature? DeserializeTablature(string data);
+
+        public string SerializeTablature(SerializedTabulature tabulature);
     }
 }

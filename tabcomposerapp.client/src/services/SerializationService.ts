@@ -43,6 +43,9 @@ export class SerializationService {
         const serializedTabulature: SerializedTabulature = JSON.parse(data);
 
         const tuning: ITuning = this.deserializeTuning(serializedTabulature.tuning);
+
+        console.log(serializedTabulature);
+
         const title = serializedTabulature.title;
         const author = serializedTabulature.author;
         const frets = serializedTabulature.frets;
@@ -120,7 +123,7 @@ export class SerializationService {
     private static deserializeTuning(data: SerializedTuning): ITuning {
 
         const tuningData: Record<number, Sound> = {};
-        
+
         Object.keys(data.tuning).forEach(key => {
             const numberKey = parseInt(key);
             const soundData = data.tuning[numberKey];
