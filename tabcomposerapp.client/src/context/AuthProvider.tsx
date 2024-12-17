@@ -1,14 +1,12 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { signUpApi, signInApi } from '../api/AuthService';
 import { getUserProfileApi } from '../api/UserService';
 import { User, AuthContext } from './AuthContext';
 import { useError } from './../hooks/useError';
 import { apiErrorFormatter } from '../api/ApiErrorFormatter';
-import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-
-    const navigate = useNavigate();
 
     const { setFormErrors } = useError();
 
@@ -40,17 +38,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
 
             setUser(user);
-            navigate('/');
             if (remember) {
                 localStorage.setItem("userToken", user.token);
             } else {
                 sessionStorage.setItem("userToken", user.token);
             }
-
+            sessionStorage.setItem('logged', 'true');  // Zapisanie stanu zalogowania w sessionStorage
         } catch (error) {
-            const errors = apiErrorFormatter(error, {
-                message: "message"
-            })
+            const errors = apiErrorFormatter(error, { message: "message" });
+            sessionStorage.setItem('logged', 'false'); // Ustawienie na 'false' w przypadku b³êdu
             setFormErrors(errors);
         }
     };
@@ -73,57 +69,77 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         try {
-            await signUpApi(email, username, password)
+            await signUpApi(email, username, password);
+            sessionStorage.setItem('logged', 'true');  // Ustawienie na 'true' po udanym rejestracji
         } catch (error) {
             const errors = apiErrorFormatter(error, {
                 email: "Email",
                 username: "UserName",
                 password: "Password",
-            })
+            });
+            sessionStorage.setItem('logged', 'false');  // Ustawienie na 'false' w przypadku b³êdu
             setFormErrors(errors);
         }
     };
 
     const signOut = () => {
         setUser(null);
-        localStorage.removeItem("userToken")
-        sessionStorage.removeItem("userToken")
+        localStorage.removeItem("userToken");
+        sessionStorage.removeItem("userToken");
+        sessionStorage.setItem('logged', 'false');  // Ustawienie na 'false' podczas wylogowywania
     };
+
+    const getToken = useCallback(() => {
+        const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+
+        if (!token) {
+            return null;
+        }
+
+        const decodeToken = (token: string) => {
+            try {
+                return jwtDecode<{ exp: number }>(token);
+            } catch {
+                return null;
+            }
+        };
+
+        const decoded = decodeToken(token);
+        if (!decoded || Date.now() >= decoded.exp * 1000) {
+            signOut();
+            return null;
+        }
+
+        return token;
+    }, []);
 
     useEffect(() => {
 
-        const getToken = () => {
-            return localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
-        }
-
         const token = getToken();
-        if (token) {
 
+        if (token) {
             const fetchUserProfile = async () => {
                 try {
-
                     const profileData = await getUserProfileApi(token);
-
-                    const storedUser: User = {
+                    const user: User = {
                         email: profileData.email,
                         username: profileData.userName,
-                        token: token,
+                        token: profileData.token,
                     };
-
-                    setUser(storedUser);
-                } catch (error) {
-                    console.info('B³¹d przy pobieraniu profilu u¿ytkownika:', error);
-
+                    setUser(user);
+                    sessionStorage.setItem('logged', 'true');  // Ustawienie na 'true' po pobraniu profilu
+                } catch {
+                    signOut();
                 }
             };
 
             fetchUserProfile();
         }
-
-    }, []);
+    }, [getToken]);
 
     const value = {
         user,
+        getToken,
         signUp,
         signIn,
         signOut

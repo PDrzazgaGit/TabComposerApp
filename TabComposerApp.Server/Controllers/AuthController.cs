@@ -77,7 +77,7 @@ namespace TabComposerApp.Server.Controllers
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
+                expires: DateTime.UtcNow.AddMinutes(60), //double.Parse(_configuration["AppSettings:TokenExpires"] ?? "30.0")
                 signingCredentials: creds
             );
 

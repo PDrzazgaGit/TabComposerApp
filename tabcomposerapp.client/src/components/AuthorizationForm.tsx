@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 //import { apiErrorFormatter } from '../api/ApiErrorFormatter';
 import { useAuth } from '../hooks/useAuth'
 import { useError } from '../hooks/useError';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthorizationFormProps {
     updateTitle: (newTutle: string) => void;
@@ -28,6 +29,8 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
 
     const { formErrors, clearFormErrors } = useError();
 
+    const navigate = useNavigate();
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         clearFormErrors();
@@ -35,10 +38,12 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
             case FormState.SIGNUP: {
                 await signUp(email, username, password);
                 await signIn(username, password, true);
+                navigate("/");
                 break;
             }
             case FormState.SIGNIN: {
                 await signIn(username, password, remember);
+                navigate("/");
                 break;
             }
             case FormState.CHANGEPSWD:

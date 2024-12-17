@@ -1,13 +1,8 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from './../hooks/useAuth';
 
 export const AuthRoute: React.FC = () => {
-    const { user } = useAuth();
 
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    }
+    return sessionStorage.getItem('logged') === "true" && <Outlet /> || (<Navigate to="/login" replace />);
 
-    return <Outlet />;
 };

@@ -4,14 +4,13 @@ import { Navbar, Nav, Container, Form, InputGroup, Button } from "react-bootstra
 import { MyOffcanvas } from "./MyOffcanvas";
 import { AuthorizationForm } from "./AuthorizationForm";
 import { useAuth } from "./../hooks/useAuth"
+import { Account } from "./Account";
 
 
 
 export const MyNavbar = () => {
 
-    const { user, signOut } = useAuth();
-
-    const [offcanvasTitle, setOffcanvasTitle] = useState<string>();
+    const { user } = useAuth();
 
     return (
         <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
@@ -55,10 +54,7 @@ export const MyNavbar = () => {
                                         trigger={<Nav.Link>Account</Nav.Link>}
                                         placement="end"
                                     >
-                                        some manage account component
-                                        <Button onClick={signOut}>
-                                            Sign Out
-                                        </Button>
+                                        <Account/>
                                     </MyOffcanvas>
                                 </>
                                 
@@ -75,15 +71,3 @@ export const MyNavbar = () => {
         </Navbar>
     );
 };
-
-/*
-
- <MyOffcanvas
-                                        title={offcanvasTitle}
-                                        trigger={<Nav.Link>Sign in</Nav.Link>}
-                                        placement="end"
-                                    >
-                                        <AuthorizationForm updateTitle={setOffcanvasTitle} />
-                                        </MyOffcanvas>
-
-*/

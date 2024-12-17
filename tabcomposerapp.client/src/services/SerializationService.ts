@@ -44,8 +44,6 @@ export class SerializationService {
 
         const tuning: ITuning = this.deserializeTuning(serializedTabulature.tuning);
 
-        console.log(serializedTabulature);
-
         const title = serializedTabulature.title;
         const author = serializedTabulature.author;
         const frets = serializedTabulature.frets;

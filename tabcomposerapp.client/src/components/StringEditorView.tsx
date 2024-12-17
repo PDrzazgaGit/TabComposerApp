@@ -9,7 +9,6 @@ import { Articulation, IMeasure, INote, IPause, NoteDuration, NoteKind, Sound } 
 import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
 import { useError } from "../hooks/useError";
-import { render } from "react-dom";
 
 interface StringEditorViewProps {
     stringId: number;
@@ -29,7 +28,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
     const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
 
-    const stringSound: Sound = tabulature.tuning.getStringSound(stringId);
+    const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
 
     const stringMargin: number = 150;
 
@@ -381,7 +380,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     };
 
     const calculateLegatoOverflow = (): number => {
-        const nextMeasure: IMeasure | undefined = tabulature.getMeasure(measureId + 1);
+        const nextMeasure: IMeasure | undefined = tabulature!.getMeasure(measureId + 1);
         if (!nextMeasure) {
             return 0;  
         }
@@ -405,7 +404,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         if (measureId === 0)
             return 0;
 
-        const prevMeasure: IMeasure | undefined = tabulature.getMeasure(measureId - 1);
+        const prevMeasure: IMeasure | undefined = tabulature!.getMeasure(measureId - 1);
         if (!prevMeasure) {
             return 0;
         }

@@ -40,8 +40,6 @@ export const TabulatureEditorView = () => {
     }
 
     function exampleFunction() {
-
-
         const testString: string = SerializationService.serializeTabulature(tabulature!);
         console.log(testString);
 

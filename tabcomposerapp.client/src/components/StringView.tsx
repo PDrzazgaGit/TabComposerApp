@@ -22,10 +22,9 @@ export const StringView: FC<StringViewProps> = ({
 
     const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
 
-    const leftMargin: number = 150;
+    const stringMargin: number = 150;
 
     const notes = useMemo(() => {
-        console.log(stringId);
         if (measure) {
             return measure.getNotes(stringId);
         }
@@ -72,7 +71,7 @@ export const StringView: FC<StringViewProps> = ({
                                 style={{
                                     height: "1.5em",
                                     position: "absolute",
-                                    left: `calc(${calculatePosition(note.getTimeStampMs(), 100) + leftMargin}%)`
+                                    left: `calc(${calculatePosition(note.getTimeStampMs() + stringMargin, 100)}%)`
                                 }}
                             >
                                 <NoteView note={note}></NoteView>
@@ -84,66 +83,3 @@ export const StringView: FC<StringViewProps> = ({
         
     )
 }
-
-
-/*
-
-
-return (
-        <OverlayTrigger
-            trigger="click"
-            placement="bottom-start"
-            overlay={renderPopover}
-            onEnter={handleEnter}
-            rootClose
-        >
-            
-            <div
-                onClick={(e) => e.stopPropagation()}
-                className="w-100 d-flex align-items-center"     
-                style={{ height: "1.5em" } }
-            >
-
-
-                {measureId === 0 && (
-                    <div style={{ flex: "0 0 auto", minWidth: "1em" }}>{stringSound.getName()}</div>
-                )}
-
-                <div
-                    style={{
-                        flex: "1 1 auto",
-                        position: "relative",
-                        height: "100%",
-                    }}
-                    
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                >
-          
-                    <div
-                        className="string-line"
-                        style={{
-                            borderColor: isHovered ? '#17a2b8' : 'black'
-                        }}
-                    />
-                    <div className="position-relative ms-3 me-3">
-                        {notes
-                            //.filter((note): note is INote => (note as INote).kind === NoteKind.Note) // Filtrujemy tylko INote
-                            .map((note, index) => (
-                                <div key={index}
-                                    style={{
-                                        position: "absolute",
-                                        left: `calc(${calculatePosition(note.getTimeStampMs(), 100)}% - 0.5em)`
-                                    }}
-                                >
-                                    <NoteEditorView note={note} stringId={stringId} />
-                                </div>
-                            ))}
-                    </div>      
-                </div>
-            </div>
-        </OverlayTrigger>
-    );
-
-
-*/

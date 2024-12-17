@@ -7,6 +7,7 @@ import { AuthRoute } from "./components/AuthRoute";
 import { UserTabs } from "./components/pages/UserTabs";
 import { Login } from "./components/pages/Login";
 import { TabulatureProvider } from "./context/TabulatureProvider";
+import { Player } from "./components/pages/Player";
 
 function App() {
 
@@ -17,11 +18,14 @@ function App() {
                     <MyNavbar />
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/login" element={<Login />} />            
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/player" element={<Player />}/>
+                        <Route element={<AuthRoute />}>
+                            <Route path="/mytabs" element={<UserTabs />}></Route>
                             <Route path="/editor" element={<Editor />} />
-                            <Route element={<AuthRoute />}>
-                                <Route path="/mytabs" element={<UserTabs />}></Route>
-                            </Route>        
+                        </Route>  
+                        
+                        
                     </Routes>
                 </TabulatureProvider> 
             </AuthProvider>

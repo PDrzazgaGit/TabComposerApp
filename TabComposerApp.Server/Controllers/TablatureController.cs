@@ -112,7 +112,47 @@ namespace TabComposerApp.Server.Controllers
             }
         }
 
-        [HttpGet("GetUserTablaturesInfo")]
+        [HttpGet("GetTablaturesInfo")]
+        public async Task<IActionResult> GetTablaturesInfo()
+        {
+            try
+            {
+                var tabulatures = await _tablatureRepository.GetAllAsync();
+                var response = new Dictionary<int, object>();
+
+                foreach (var tab in tabulatures)
+                {
+                    var data = _tablatureService.DeserializeTablature(tab.Data);
+
+                    if (data == null)
+                    {
+                        return StatusCode(500, new { Message = "An error occurred while retrieving the tablature" });
+                    }
+
+                    var title = data.Title;
+                    var length = data.Measures?.Count ?? 0;
+                    var created = tab.CreatedAt.ToString();
+                    var tuning = data.Tuning?.Tuning?.Values
+                        .Select(x => new { Notation = x.Notation })
+                        .ToList();
+                    var id = tab.Id;
+
+                    // Dodaj dane do słownika
+                    response[id] = new
+                    {
+                        Title = title,
+                        Length = length,
+                        Created = created,
+                        Tuning = tuning
+                    };
+                }
+                return Ok(response);
+            }
+            catch (Exception x)
+            {
+                return StatusCode(500, new { Message = "An error occurred while retrieving the tablature", Error = x });
+            }
+        }
         public async Task<IActionResult> GetUserTablaturesInfo()
         {
             string userId = User.Claims.First(x => x.Type == "UserID").Value;

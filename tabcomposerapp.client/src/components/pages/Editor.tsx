@@ -6,13 +6,8 @@ import { useState } from "react";
 import { useError } from "../../hooks/useError";
 import { useTabulature } from "../../hooks/useTabulature";
 
-interface EditorProps {
-    initialTabulature?: ITabulature;
-}
 
-export const Editor: React.FC<EditorProps> = ({ initialTabulature }) => {
-
-    //const [tabulature2, setTabulature2] = useState<ITabulature | undefined>(initialTabulature);
+export const Editor = () => {
 
     const { tabulature, setTabulature } = useTabulature();
 

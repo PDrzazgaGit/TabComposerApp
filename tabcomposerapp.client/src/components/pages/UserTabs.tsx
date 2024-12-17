@@ -7,6 +7,7 @@ import { useTabulature } from "../../hooks/useTabulature";
 import { SerializationService } from "../../services/SerializationService";
 import { ITabulature } from "../../models";
 import { useNavigate } from "react-router-dom";
+import { SessionExpired } from "../SessionExpired";
 
 interface TabulatureInfo {
     title: string;
@@ -16,7 +17,7 @@ interface TabulatureInfo {
 }
 
 export const UserTabs = () => {
-    const { user } = useAuth();
+    const { user, getToken } = useAuth();
     const { setTabulature } = useTabulature();
     const [tabInfo, setTabInfo] = useState<Record<number, TabulatureInfo>>({});
 
@@ -26,7 +27,7 @@ export const UserTabs = () => {
         if (user) {
             const fetchTablatureData = async () => {
                 try {
-                    const data = await getUserTabulaturesInfo(user.token);
+                    const data = await getUserTabulaturesInfo(getToken()!);
                     setTabInfo(data);
                 } catch (error) {
                     console.error("Error fetching tablatures:", error);
@@ -34,21 +35,22 @@ export const UserTabs = () => {
             };
             fetchTablatureData();
         } else {
-            //navigate("/login");
-            // render sesja wygas³a, potem navigate to login
+           //
         }
-    }, [user, navigate]);
+    }, [user, navigate, getToken]);
+
+    const fetchTabulature = async (token: string, id: number) => {
+        const tablatureData = await getTabulature(token, id) as string;
+        setTabulature(SerializationService.deserializeTabulature(tablatureData))
+    }
 
     const handleOpen = (id: number) => {
-
+        fetchTabulature(getToken()!, id);
+        navigate("/player");
     }
 
     const handleEdit = (id: number) => {     
-        const fetchTabulature = async () => {
-            const tablatureData = await getTabulature(user!.token, id) as string;
-            setTabulature(SerializationService.deserializeTabulature(tablatureData))
-        }
-        fetchTabulature();
+        fetchTabulature(getToken()!, id);
         navigate("/editor");
     }
 
@@ -79,7 +81,8 @@ export const UserTabs = () => {
                         <Col xs="auto" className="text-end">
                             <Button
                                 variant="light"
-                                className="me-2"          
+                                className="me-2"  
+                                onClick={() => { handleOpen(Number(key)) }}
                             >
                                 Open
                             </Button>

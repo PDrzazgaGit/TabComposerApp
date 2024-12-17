@@ -31,6 +31,8 @@ namespace TabComposerApp.Server.Extensions
 
         public static IServiceCollection AddIdentityAuth(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddDataProtection();
+
             services.AddAuthentication(authOptions =>
             {
                 authOptions.DefaultAuthenticateScheme =
