@@ -3,7 +3,6 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 //import { apiErrorFormatter } from '../api/ApiErrorFormatter';
 import { useAuth } from '../hooks/useAuth'
-import { useError } from '../hooks/useError';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthorizationFormProps {
@@ -25,25 +24,25 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
     const [password, setPassword] = useState<string>('');
     const [remember, setRemember] = useState<boolean>(false);
 
-    const { signIn, signUp } = useAuth(); 
-
-    const { formErrors, clearFormErrors } = useError();
+    const { signIn, signUp, errors, clearErrors } = useAuth(); 
 
     const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        clearFormErrors();
         switch (formState) {
             case FormState.SIGNUP: {
-                await signUp(email, username, password);
-                await signIn(username, password, true);
-                navigate("/");
+                const success = await signUp(email, username, password);
+                if (success) {
+                    navigate("/");
+                }
                 break;
             }
             case FormState.SIGNIN: {
-                await signIn(username, password, remember);
-                navigate("/");
+                const success = await signIn(username, password, remember);
+                if (success) {
+                    navigate("/");
+                }
                 break;
             }
             case FormState.CHANGEPSWD:
@@ -54,8 +53,8 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
 
     // Funkcja prze³¹czaj¹ca tryb
     const changeMode = (newState: FormState) => {
+        clearErrors();
         setFormState(newState);
-        clearFormErrors();
         setEmail("");
         setPassword("");
         setUsername("");
@@ -73,7 +72,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 updateTitle("Change Password");
                 break;
         }
-    }, [FormState.CHANGEPSWD, FormState.SIGNIN, FormState.SIGNUP, formState, updateTitle, clearFormErrors]);
+    }, [FormState.CHANGEPSWD, FormState.SIGNIN, FormState.SIGNUP, formState, updateTitle]);
 
     const renderEmailInput = () => (
         <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -87,10 +86,10 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 placeholder="Enter email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                isInvalid={formErrors.email && formErrors.email.length > 0}
+                isInvalid={errors.email && errors.email.length > 0}
             />
             <Form.Control.Feedback type="invalid">
-                {formErrors.email && formErrors.email.map((error, index) => (
+                {errors.email && errors.email.map((error, index) => (
                     <div key={index}>{error}</div>
                 ))}
             </Form.Control.Feedback>
@@ -106,10 +105,10 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                isInvalid={formErrors.password && formErrors.password.length > 0}
+                isInvalid={errors.password && errors.password.length > 0}
             />
             <Form.Control.Feedback type="invalid">
-                {formErrors.password && formErrors.password.map((error, index) => (
+                {errors.password && errors.password.map((error, index) => (
                     <div key={index}>{error}</div>
                 ))}
             </Form.Control.Feedback>
@@ -135,16 +134,16 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                 placeholder="Enter username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                isInvalid={formErrors.username && formErrors.username.length > 0}
+                isInvalid={errors.username && errors.username.length > 0}
             />
             <Form.Control.Feedback type="invalid">
-                {formErrors.username && formErrors.username.map((error, index) => (
+
+                {errors.username && errors.username.map((error, index) => (
                     <div key={index}>{error}</div>
                 ))}
             </Form.Control.Feedback>
         </Form.Group>
     );
-
 
     const renderForgotPasswordLink = () => (
         <Form.Group className="mb-3 d-flex justify-content-center align-items-center">
@@ -200,7 +199,7 @@ export const AuthorizationForm: React.FC<AuthorizationFormProps> = ({ updateTitl
                     </Button>  
                 </Form.Group>
                 <Form.Group className="mb-3">
-                    {formErrors.message && formErrors.message.map((error, index) => (
+                    {errors.message && errors.message.map((error, index) => (
                         <div className="alert alert-danger text-center" role="alert" key={index}>{error}</div>
                     ))}
                 </Form.Group>

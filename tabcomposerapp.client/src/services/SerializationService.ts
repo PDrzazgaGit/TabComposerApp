@@ -4,6 +4,7 @@ import { TuningFactory } from "./TuningFactory";
 
 export interface SerializedNote {
     fret: number,
+    timeStamp: number;
     noteDuration: NoteDuration,
     articulation: Articulation
 }
@@ -59,9 +60,11 @@ export class SerializationService {
                 const notes: SerializedNote[] = serializedMeasure.notes[stringId];
                 notes.forEach(serializedNote => {
                     if (serializedNote.fret != -1) {
-                        measure.pushNote(serializedNote.fret, Number(stringId), serializedNote.noteDuration)?.setArticulation(serializedNote.articulation);
+                        //measure.pushNote(serializedNote.fret, Number(stringId), serializedNote.noteDuration)?.setArticulation(serializedNote.articulation);
+                        measure.putNote(serializedNote.fret, Number(stringId), serializedNote.timeStamp , serializedNote.noteDuration)?.setArticulation(serializedNote.articulation);
                     } else {
-                        measure.pushPause(Number(stringId), serializedNote.noteDuration);
+                        //measure.pushPause(Number(stringId), serializedNote.noteDuration);
+                        measure.putPause(Number(stringId), serializedNote.timeStamp,serializedNote.noteDuration);
                     }
                 })
             })
@@ -74,13 +77,15 @@ export class SerializationService {
             return {
                 fret: (note as INote).fret,
                 articulation: (note as INote).articulation,
-                noteDuration: note.noteDuration
+                noteDuration: note.noteDuration,
+                timeStamp: note.getTimeStampMs()
             }
         } else {
             return {
                 fret: -1,
                 articulation: Articulation.None,
-                noteDuration: note.noteDuration
+                noteDuration: note.noteDuration,
+                timeStamp: note.getTimeStampMs()
             }
         }
     }

@@ -39,7 +39,6 @@ namespace TabComposerApp.Server.Controllers
                     return BadRequest(new { Message = "Invalid tablature data." });
                 }
 
-                // Walidacja i zapis w bazie
                 var tabulature = new Tablature
                 {
                     Data = _tablatureService.SerializeTablature(request),
@@ -52,7 +51,7 @@ namespace TabComposerApp.Server.Controllers
                 }
 
                 await _tablatureRepository.AddAsync(tabulature);
-                return Ok(new { Message = "Tablature added successfully", Id = tabulature.Id });
+                return Ok(new { Message = "Tablature added successfully", tabulature.Id });
             }
             catch (Exception ex)
             {
@@ -60,7 +59,7 @@ namespace TabComposerApp.Server.Controllers
             }
         }
 
-        [HttpPost("UpdateTablature")]
+        [HttpPost("UpdateTablature/{id}")]
         public async Task<IActionResult> UpdateTablature(int id, [FromBody] SerializedTabulature request)
         {
             string userId = User.Claims.First(x => x.Type == "UserID").Value;
@@ -90,12 +89,10 @@ namespace TabComposerApp.Server.Controllers
             }
         }
 
-
+        [AllowAnonymous]
         [HttpGet("GetTablature/{id}")]
         public async Task<IActionResult> GetTabulture(int id)
         {
-            string userId = User.Claims.First(x => x.Type == "UserID").Value;
-
             try
             {
                 var data = await _tablatureRepository.GetByIdAsync(id);
@@ -111,7 +108,9 @@ namespace TabComposerApp.Server.Controllers
                 return StatusCode(500, new { Message = "An error occurred while retrieving the tablature" });
             }
         }
+        
 
+        [AllowAnonymous]
         [HttpGet("GetTablaturesInfo")]
         public async Task<IActionResult> GetTablaturesInfo()
         {
@@ -150,9 +149,34 @@ namespace TabComposerApp.Server.Controllers
             }
             catch (Exception x)
             {
-                return StatusCode(500, new { Message = "An error occurred while retrieving the tablature", Error = x });
+                return StatusCode(500, new { Message = "An error occurred while retrieving the tablature"});
             }
         }
+
+        [HttpPost("DeleteTablature/${id}")]
+        public async Task<IActionResult> DeleteTablature(int Id)
+        {
+            string userId = User.Claims.First(x => x.Type == "UserID").Value;
+            try
+            {
+                var tabulatures = await _tablatureRepository.GetUserTablaturesAsync(userId);
+
+                bool exists = tabulatures.Any(t => t.Id == Id);
+
+                if (!exists) {
+                    return StatusCode(500, new { Message = "Tablature does not belong to this user." });
+                }
+
+                await _tablatureRepository.DeleteAsync(Id);
+                return Ok(new { Message ="Tabulature deleted"});
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { Message = "An error occurred while retrieving the tablature"});
+            }
+        }
+
+        [HttpGet("GetUserTablaturesInfo")]
         public async Task<IActionResult> GetUserTablaturesInfo()
         {
             string userId = User.Claims.First(x => x.Type == "UserID").Value;

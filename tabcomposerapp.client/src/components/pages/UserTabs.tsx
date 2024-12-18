@@ -1,67 +1,93 @@
 import { Container, Row, Col, Button, Badge } from "react-bootstrap";
 import { getTabulature, getUserTabulaturesInfo } from "../../api/TabulatureService";
 import { useAuth } from "../../hooks/useAuth";
-import { useEffect, useState } from "react";
+import { Key, useEffect, useMemo, useState } from "react";
 import { Notation } from "../../models/NotationModel";
 import { useTabulature } from "../../hooks/useTabulature";
 import { SerializationService } from "../../services/SerializationService";
-import { ITabulature } from "../../models";
 import { useNavigate } from "react-router-dom";
-import { SessionExpired } from "../SessionExpired";
+import { TabulatureDataModel } from "../../models/TabulatureDataModel";
+import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 
-interface TabulatureInfo {
-    title: string;
-    created: string;
-    length: number;
-    tuning: { notation: number }[];
-}
 
 export const UserTabs = () => {
-    const { user, getToken } = useAuth();
-    const { setTabulature } = useTabulature();
-    const [tabInfo, setTabInfo] = useState<Record<number, TabulatureInfo>>({});
+    const { getToken } = useAuth();
+    const { setTabulature, downloadTabulature, deleteTabulature } = useTabulature();
+    const [tabInfo, setTabInfo] = useState<Record<number, TabulatureDataModel> | null>(null);
 
     const  navigate  = useNavigate();
 
     useEffect(() => {
-        if (user) {
-            const fetchTablatureData = async () => {
-                try {
-                    const data = await getUserTabulaturesInfo(getToken()!);
+        console.log("wczytujê siê za ka¿dym razem")
+        const fetchTablatureData = async () => {
+            const token = await getToken();
+            if (token) {
+                const data = await TabulatureManagerApi.getUserTabulaturesInfo(token);
+                if (data) {
                     setTabInfo(data);
-                } catch (error) {
-                    console.error("Error fetching tablatures:", error);
+                } else {
+                    //b³¹d
                 }
-            };
-            fetchTablatureData();
-        } else {
-           //
-        }
-    }, [user, navigate, getToken]);
+            } else {
+                navigate('/');
+            }
+        };
+        fetchTablatureData();
+    }, [getToken, navigate]);
 
-    const fetchTabulature = async (token: string, id: number) => {
-        const tablatureData = await getTabulature(token, id) as string;
-        setTabulature(SerializationService.deserializeTabulature(tablatureData))
-    }
 
-    const handleOpen = (id: number) => {
-        fetchTabulature(getToken()!, id);
+    const handlePlay = async (id: number) => {
+        //fetchTabulature(id);
+        const success = await downloadTabulature(id);
+        console.log(success);
         navigate("/player");
     }
 
-    const handleEdit = (id: number) => {     
-        fetchTabulature(getToken()!, id);
+    const handleEdit = async (id: number) => {
+        await downloadTabulature(id);
         navigate("/editor");
     }
 
+    const handleDelete = async (id: number) => {
+        const token = await getToken();
+        if (token) {
+            console.log("HEHE")
+            await deleteTabulature(token);
+        } else {
+            navigate("/login");
+        }
+        
+        navigate("/mytabs");
+    }
+
+    const handleNewTablature = () => {
+        setTabulature(null)
+        navigate("/editor");
+    }
+
+    if (!tabInfo) return (<></>);
+
     return (
-        <Container className="mt-4">
+        <Container className="mt-3">
             <Row className="align-items-center">
-                <h1 className="mb-4 text-center">My Tabs</h1>
+                <h1 className="mb-3 text-center">My Tabs</h1>
             </Row>
-            
+            {Object.entries(tabInfo).length === 0 && (
+                <div className="mb-3">
+                    <Row className="align-items-center">
+                        <Col
+                            className="text-center"
+                        >
+                            Ohh there is nothing here. Let's Compose your first Tab!
+                        </Col>
+                    </Row>
+                    
+                </div>
+            )}
             {Object.entries(tabInfo).map(([key, tab]) => (
-                <div key={key} className="shadow-sm mb-4 p-3 rounded">
+                <div key={key}
+                    className="mb-3"
+                >
                     <Row className="align-items-center">
                         <Col>
                             <h5 className="fw-bold">{tab.title}</h5>
@@ -70,7 +96,7 @@ export const UserTabs = () => {
                             
                             <strong>Tuning:</strong>
                             <div>
-                                {tab.tuning.slice().reverse().map((notation, idx) => (
+                                {tab.tuning.slice().reverse().map((notation: { notation: Notation; }, idx: Key | null | undefined) => (
                                     <Badge key={idx} bg="secondary" className="me-2">
                                         {Notation[Number(notation.notation)]}
                                     </Badge>
@@ -82,9 +108,9 @@ export const UserTabs = () => {
                             <Button
                                 variant="light"
                                 className="me-2"  
-                                onClick={() => { handleOpen(Number(key)) }}
+                                onClick={() => { handlePlay(Number(key)) }}
                             >
-                                Open
+                                Play
                             </Button>
                             <Button
                                 variant="success"
@@ -92,10 +118,28 @@ export const UserTabs = () => {
                             >
                                 Edit
                             </Button>
+                            <Button
+                                variant="danger"
+                                onClick={() => { handleDelete(Number(key)) }}
+                            >
+                                Delete
+                            </Button>
                         </Col>
                     </Row>
                 </div>
             ))}
+            <Row className="align-items-center mb-3">
+                <Col
+                    className="text-center"
+                >
+                    <Button
+                        variant="success"
+                        onClick={() => handleNewTablature() }
+                    >
+                        New Tablature
+                    </Button>
+                </Col>
+            </Row>
         </Container>
     );
 };

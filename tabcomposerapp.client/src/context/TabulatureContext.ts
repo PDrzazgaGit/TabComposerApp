@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 import { IMeasure, ITabulature, NoteDuration } from '../models'
 interface TabulatureContextType {
-    tabulature?: ITabulature ;
-    setTabulature: (tabulature: ITabulature) => void;
+    tabulature: ITabulature | null;
+    setTabulature: (tabulature: ITabulature | null) => void;
 
     measuresPerRow: number;
     setMeasuresPerRow: (measures: number) => void;
@@ -25,8 +25,17 @@ interface TabulatureContextType {
     shiftOnDelete: boolean;
     setShiftOnDelete: (shift: boolean) => void;
 
-    addMeasure: (tempo: number, numerator: number, denominator: number) => void;
-    deleteMeasure: (measure: IMeasure) => void;
+    downloadTabulature: (id: number) => Promise<boolean>
+
+    addTabulature: (token: string, newTabulature: ITabulature) => Promise<boolean>
+
+    updateTabulature: (token: string) => Promise<boolean> 
+
+    deleteTabulature: (token: string) => Promise<boolean> 
+
+    addMeasure: (tempo: number, numerator: number, denominator: number, token: string) => void;
+
+    deleteMeasure: (measure: IMeasure, token: string) => void;
 }
 
 export const TabulatureContext = createContext<TabulatureContextType | undefined>(undefined);

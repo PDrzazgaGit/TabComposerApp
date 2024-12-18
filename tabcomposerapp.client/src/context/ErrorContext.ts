@@ -1,23 +1,24 @@
 import { createContext } from 'react';
+import { AppErrors } from '../models/AppErrorsModel';
 interface ErrorContextType {
-    formErrors: { [key: string]: string[] };
-    setFormErrors: (newErrors: { [key: string]: string[] }) => void;
+    formErrors: AppErrors;
+    setFormErrors: (newErrors: AppErrors) => void;
     clearFormErrors: () => void;
 
-    stringEditorErrors: { [key: string]: string[] };
-    setStringEditorErrors: (newErrors: { [key: string]: string[] }) => void;
+    stringEditorErrors: AppErrors;
+    setStringEditorErrors: (newErrors: AppErrors) => void;
     clearStringEditorErrors: () => void;
 
-    noteEditorErrors: { [key: string]: string[] };
-    setNoteEditorErrors: (newErrors: { [key: string]: string[] }) => void;
+    noteEditorErrors: AppErrors;
+    setNoteEditorErrors: (newErrors: AppErrors) => void;
     clearNoteEditorErrors: () => void;
 
-    measureEditorErrors: { [key: string]: string[] };
-    setMeasureEditorErrors: (newErrors: { [key: string]: string[] }) => void;
+    measureEditorErrors: AppErrors;
+    setMeasureEditorErrors: (newErrors: AppErrors) => void;
     clearMeasureEditorErrors: () => void;
 
-    createTabulatureErrors: { [key: string]: string[] };
-    setCreateTabulatureErrors: (newErrors: { [key: string]: string[] }) => void;
+    createTabulatureErrors: AppErrors;
+    setCreateTabulatureErrors: (newErrors: AppErrors) => void;
     clearCreateTabulatureErrors: () => void;
 }
 

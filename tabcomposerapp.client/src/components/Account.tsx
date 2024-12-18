@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 export const Account = () => {
 
-    const { signOut, user } = useAuth();
+    const { signOut } = useAuth();
 
     const navigate = useNavigate();
 
@@ -14,14 +14,10 @@ export const Account = () => {
         navigate('/');
     }
 
-    useEffect(() => {
-
-    });
-
     return (
         <div className="d-flex justify-content-center align-items-center">
             <Button
-                variant="light"
+                variant="danger"
                 onClick={handleSignOut}
 
             >

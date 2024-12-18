@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useError } from "../hooks/useError";
 import { MeasureLabel } from "./MeasureLabel";
 import { useTabulature } from "../hooks/useTabulature";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export const MeasureLabelEditor = () => {
 
@@ -13,11 +15,15 @@ export const MeasureLabelEditor = () => {
 
     const { measureEditorErrors, setMeasureEditorErrors, clearMeasureEditorErrors } = useError();
 
+    const { getToken } = useAuth();
+
     const [isHovered, setIsHovered] = useState(false);
 
     const [numerator, setNumerator] = useState(measure.numerator);
     const [denominator, setDenominator] = useState(measure.denominator);
     const [tempo, setTempo] = useState(measure.tempo);
+
+    const navigate = useNavigate();
 
     const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newTempo = event.target.valueAsNumber;
@@ -53,8 +59,13 @@ export const MeasureLabelEditor = () => {
 
     };
 
-    const handleDeleteMeasure = () => {
-        deleteMeasure(measure);
+    const handleDeleteMeasure = async () => {
+        const token = await getToken();
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        deleteMeasure(measure, token);
     }
 
     const handleEnter = () => {

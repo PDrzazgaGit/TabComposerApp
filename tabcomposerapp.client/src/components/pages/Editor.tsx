@@ -5,17 +5,23 @@ import { Button, Card, Container, Dropdown, FormControl, InputGroup, OverlayTrig
 import { useState } from "react";
 import { useError } from "../../hooks/useError";
 import { useTabulature } from "../../hooks/useTabulature";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 
 export const Editor = () => {
 
-    const { tabulature, setTabulature } = useTabulature();
+    const { getToken } = useAuth();
+
+    const { tabulature, addTabulature } = useTabulature();
 
     const [title, setTitle] = useState<string>('Untitled');
 
     const [tuning, setTuning] = useState<string | undefined>();
 
     const [maxFrets, setMaxFrets] = useState(24);
+
+    const navigate = useNavigate();
 
     const { createTabulatureErrors, setCreateTabulatureErrors, clearCreateTabulatureErrors } = useError();
 
@@ -31,113 +37,105 @@ export const Editor = () => {
         setTuning(tuning);
     }
 
-    const handleCreateTabulature = () => {
+    const handleCreateTabulature = async () => {
         if (tuning) {
             clearCreateTabulatureErrors();
             const tuningModel = TuningFactory.getTuning(tuning);
-           // setTabulature2(new Tabulature(tuningModel, maxFrets, title));
-            //console.log(tabulature2);
-            setTabulature(new Tabulature(tuningModel, maxFrets, title));
+            const newTabulature = new Tabulature(tuningModel, maxFrets, title);
+            const token = await getToken();
+            if (!token) {
+                navigate('/login');
+                return;
+            }
+            const success = await addTabulature(token, newTabulature);
+            if (!success) {
+                setCreateTabulatureErrors({ ["error"]: ["Cannot add tablature"] });
+            }
+
         } else {
             setCreateTabulatureErrors({["tuningNotProvided"] : ["Select tuning first"]})
         }
     }
-    
-    const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
-        <Popover {...props}>
-            <Popover.Header>
-                Configure Tablature
-            </Popover.Header>
-            <Popover.Body>
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center column mb-3"
-                >
-                    <InputGroup.Text>Title</InputGroup.Text>
-                    <FormControl
-                        type="text"
-                        value={title}
-                        onChange={handleTitleChange}
-                    />
-                </InputGroup>
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center column mb-3"
-                >
-                    <InputGroup.Text>Frets</InputGroup.Text>
-                    <FormControl
-                        type="number"
-                        min={12}
-                        max={30}
-                        value={maxFrets}
-                        onChange={handleChangeMaxFrets}
-                    />
-                </InputGroup>
-                <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
-                    
-                    <Dropdown
-                        drop="down-centered"
-                    >
-                        <Dropdown.Toggle
-                            className="border flex-grow-1"
-                            variant="light"
-                        >{tuning ? tuning : "Select Tuning"}</Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            {Object.entries(TuningFactory.TuningList).map(([key]) => (
-                                <Dropdown.Item
-                                    key={key}
-                                    onClick={() => handleTuningChange(key)}
-                                >
-                                    {key}
-                                </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </InputGroup>
-                {createTabulatureErrors["tuningNotProvided"] && (
-                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
-                        <div className="text-danger">
-                            {createTabulatureErrors["tuningNotProvided"]}
-                        </div>
-
-                    </InputGroup>
-                )}
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center column"
-                >
-                    <Button
-                        className="flex-grow-1 border"
-                        variant="success"
-                        onClick={ () => handleCreateTabulature() }
-                    >
-                        Create
-                    </Button>
-                </InputGroup>
-            </Popover.Body>
-        </Popover>
-    )
-    
-    const handleEnter = () => {
-        document.body.click()
-    }
 
     return (
-        <Container className = "mb-3">
+        <Container className = "mt-3">
             {tabulature && (
                 <TabulatureEditorView />
             ) || (
-                <OverlayTrigger
-                    overlay={renderPopover}
-                    trigger="click"
-                    placement="bottom"
-                    onEnter={handleEnter}
-                    rootClose
-                >
-                    <Button
-                        variant="light"
-                        className="border"
+               
+                <div>
+                    <h1 className="text-center mb-3">New tabulature</h1>
+                    <InputGroup
+                        className="d-flex justify-content-center align-items-center column mb-3"
                     >
-                        New Tablature
-                    </Button>
-                </OverlayTrigger>
+                        <InputGroup.Text>Title</InputGroup.Text>
+                        <FormControl
+                            type="text"
+                            value={title}
+                            onChange={handleTitleChange}
+                        />
+                    </InputGroup>
+                    <InputGroup
+                        className="d-flex justify-content-center align-items-center column mb-3"
+                    >
+                        <InputGroup.Text>Frets</InputGroup.Text>
+                        <FormControl
+                            type="number"
+                            min={12}
+                            max={30}
+                            value={maxFrets}
+                            onChange={handleChangeMaxFrets}
+                        />
+                    </InputGroup>
+                    <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+
+                        <Dropdown
+                            drop="down-centered"
+                        >
+                            <Dropdown.Toggle
+                                className="border flex-grow-1"
+                                variant="light"
+                            >{tuning ? tuning : "Select Tuning"}</Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                {Object.entries(TuningFactory.TuningList).map(([key]) => (
+                                    <Dropdown.Item
+                                        key={key}
+                                        onClick={() => handleTuningChange(key)}
+                                    >
+                                        {key}
+                                    </Dropdown.Item>
+                                ))}
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </InputGroup>
+                    {createTabulatureErrors["tuningNotProvided"] && (
+                        <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                            <div className="text-danger">
+                                {createTabulatureErrors["tuningNotProvided"]}
+                            </div>
+
+                        </InputGroup>
+                    )}
+                    <InputGroup
+                        className="d-flex justify-content-center align-items-center column"
+                    >
+                        <Button
+                            className="flex-grow-1 border"
+                            variant="success"
+                            onClick={() => handleCreateTabulature()}
+                        >
+                            Create
+                        </Button>
+                    </InputGroup>
+                    {createTabulatureErrors["error"] && (
+                        <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                            <div className="text-danger">
+                                {createTabulatureErrors["error"]}
+                            </div>
+
+                        </InputGroup>
+                    )}
+                </div>
             )}        
         </Container>
     );

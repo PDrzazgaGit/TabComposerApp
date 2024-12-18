@@ -23,6 +23,12 @@ namespace TabComposerApp.Server.Controllers
             _configuration = configuration;
         }
 
+        [HttpGet("Authorize")]
+        public IActionResult Authorize()
+        {
+            return Ok(new { Message = "User is authorized." });
+        }
+
         // Sign Up Endpoint
         [AllowAnonymous]
         [HttpPost("signup")]

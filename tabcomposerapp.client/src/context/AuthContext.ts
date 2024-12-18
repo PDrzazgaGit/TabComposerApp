@@ -1,19 +1,15 @@
 import { createContext } from 'react';
-
-export interface IUser {
-    readonly username: string;
-    readonly email: string;
-}
-
-export class User implements IUser {
-    constructor(public username: string, public email: string, public token: string) { }
-}
+import { IUser } from '../models/UserModel';
+import { AppErrors } from '../models/AppErrorsModel';
 
 interface AuthContextType {
     user: IUser | null;
-    getToken: () => string | null;
-    signUp: (email: string, username: string, password: string) => Promise<void>;
-    signIn: (username: string, password: string, remember: boolean) => Promise<void>;
+    errors: AppErrors;
+    clearErrors: () => void;
+    getToken: () => Promise<string | null>;
+    authorize: () => Promise<boolean>;
+    signUp: (email: string, username: string, password: string) => Promise<boolean>;
+    signIn: (username: string, password: string, remember: boolean) => Promise<boolean>;
     signOut: () => void;
 }
 

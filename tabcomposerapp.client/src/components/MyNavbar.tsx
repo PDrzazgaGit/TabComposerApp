@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Navbar, Nav, Container, Form, InputGroup, Button } from "react-bootstrap";
+import { Navbar, Nav, Container, Form, InputGroup } from "react-bootstrap";
 import { MyOffcanvas } from "./MyOffcanvas";
-import { AuthorizationForm } from "./AuthorizationForm";
 import { useAuth } from "./../hooks/useAuth"
 import { Account } from "./Account";
 
@@ -10,7 +9,14 @@ import { Account } from "./Account";
 
 export const MyNavbar = () => {
 
-    const { user } = useAuth();
+    const { authorize, user } = useAuth();
+
+    useEffect(() => {
+        const fetchAuthorize = async () => {
+            await authorize();
+        }
+        fetchAuthorize();
+    }, [user, authorize])
 
     return (
         <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
@@ -40,27 +46,27 @@ export const MyNavbar = () => {
 
                         <Nav className="me-auto ">
                             
-                            {user === null && (
-                                <>
-                                    <Nav.Link as={Link} to="/editor">Try Editor</Nav.Link>
-                                    <Nav.Link as={Link} to="/login">Sign in</Nav.Link>
-                                   
-                                </>
-                            ) || user !== null && (
+                            {user && (
                                 <>
                                     <Nav.Link as={Link} to="/mytabs">My Tabs</Nav.Link>
                                     <MyOffcanvas
-                                        title={"Hello " + user.username}
+                                        title={"Hello " + user?.username || ""}
                                         trigger={<Nav.Link>Account</Nav.Link>}
                                         placement="end"
                                     >
-                                        <Account/>
+                                        <Account />
                                     </MyOffcanvas>
                                 </>
-                                
-                            )}
-                           
-                            
+
+                            ) || (
+                                    <>
+                                        <Nav.Link as={Link} to="/editor">Try Editor</Nav.Link>
+                                        <Nav.Link as={Link} to="/login">Sign in</Nav.Link>
+
+                                    </>
+                                )
+                            }
+
                         </Nav>
 
                     </Nav>

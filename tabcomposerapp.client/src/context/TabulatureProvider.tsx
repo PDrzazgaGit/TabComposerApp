@@ -1,6 +1,7 @@
 import { useState, ReactNode, useEffect } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
+import { TabulatureManagerApi } from '../api/TabulatureManagerApi';
 
 interface TabulatureProviderProps {
     children: ReactNode;
@@ -8,7 +9,7 @@ interface TabulatureProviderProps {
 
 export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children}) => {
 
-    const [tabulature, setTabulature] = useState<ITabulature | undefined>();
+    const [tabulature, setTabulature] = useState<ITabulature | null>();
 
     const [globalTempo, setGlobalTempo] = useState(100);
     const [globalNumerator, setGlobalNumerator] = useState(4);
@@ -22,21 +23,64 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
 
     }, [tabulature])
 
-    const addMeasure = (tempo: number, numerator: number, denominator: number) => {
-        if (!tabulature)
-            return
-        tabulature.addMeasure(tempo, numerator, denominator);
-        const tabulatureNew = tabulature.clone();
-        setTabulature(tabulatureNew);
+    const downloadTabulature = async (id: number): Promise<boolean> => {
+        const downloadedTab = await TabulatureManagerApi.downloadTabulature(id);
+        if (!downloadedTab) {
+            return false
+        }
+        setTabulature(downloadedTab);
+        return true;
     }
 
-    const deleteMeasure = (measure: IMeasure) => {
+    const addTabulature = async (token: string, newTabulature: ITabulature): Promise<boolean> => {
+        const success = await TabulatureManagerApi.addTabulature(token, newTabulature);
+        console.log(success)
+        if (!success) {
+            return false
+        }
+        setTabulature(newTabulature);
+        return true;
+    }
+
+    const updateTabulature = async (token: string): Promise<boolean> => {
+        return await TabulatureManagerApi.updateTabulature(token);
+    }
+
+    const deleteTabulature = async (token: string): Promise<boolean> => {
+        const success = await TabulatureManagerApi.deleteTabulature(token);
+        console.log(success);
+        if (success) {
+            setTabulature(null);
+        }
+        return success;
+    }
+
+    const addMeasure = (tempo: number, numerator: number, denominator: number, token: string) => {
         if (!tabulature)
             return
-        const tabulatureNew = tabulature.clone();
-        tabulatureNew.deleteMeasure(measure);
-        
+      //  console.log("heheh")
+        const tabulatureNew = TabulatureManagerApi.cloneTabulature();
+        if (!tabulatureNew) {
+            return;
+        }
+
+        tabulatureNew.addMeasure(tempo, numerator, denominator);
         setTabulature(tabulatureNew);
+        TabulatureManagerApi.updateTabulature(token);
+       
+    }
+
+    const deleteMeasure = (measure: IMeasure, token: string) => {
+        if (!tabulature)
+            return
+        const tabulatureNew = TabulatureManagerApi.cloneTabulature();
+        if (!tabulatureNew) {
+            return;
+        }
+
+        tabulatureNew.deleteMeasure(measure);
+        setTabulature(tabulatureNew);
+        TabulatureManagerApi.updateTabulature(token);
     }
 
     const value = {
@@ -64,7 +108,12 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         setGlobalNoteInterval,
 
         shiftOnDelete,
-        setShiftOnDelete
+        setShiftOnDelete,
+
+        downloadTabulature,
+        addTabulature,
+        updateTabulature,
+        deleteTabulature
     }
 
     return (

@@ -2,6 +2,9 @@ import { useState, ReactNode, useEffect } from 'react';
 import { MeasureContext } from './MeasureContext';
 import { Articulation, IMeasure, INote, IPause, NoteDuration, NoteKind } from '../models';
 import { useTabulature } from '../hooks/useTabulature';
+import { TabulatureManagerApi } from '../api/TabulatureManagerApi';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 
 interface MeasureProviderProps {
@@ -18,14 +21,29 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
 
     const { tabulature } = useTabulature();
 
+    const { getToken } = useAuth();
+
+    const navigate = useNavigate();
+
     useEffect(() => {
         setMeasure(initialMeasure)
         
     }, [tabulature, initialMeasure])
 
-    //tutaj aktualizowanie
+
     useEffect(() => {
-        
+
+        const fetchUpdate = async () => {
+            const token = await getToken();
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+            TabulatureManagerApi.updateTabulature(token); 
+        }
+        fetchUpdate();
+
+        console.log("ehehe");
     }, [measure])
 
     const getMaxFrets = (): number => {

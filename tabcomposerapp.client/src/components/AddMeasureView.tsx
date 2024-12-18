@@ -1,5 +1,7 @@
 import { Button } from "react-bootstrap";
 import { useTabulature } from "../hooks/useTabulature";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -7,8 +9,17 @@ export const AddMeasureView = () => {
 
     const { addMeasure, globalNumerator, globalDenominator, globalTempo } = useTabulature();
 
-    const handleAddMeasure = () => {
-        addMeasure(globalTempo, globalNumerator, globalDenominator);
+    const { getToken } = useAuth();
+
+    const navigate = useNavigate();
+
+    const handleAddMeasure = async () => {
+        const token = await getToken();
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        addMeasure(globalTempo, globalNumerator, globalDenominator, token);
     }
 
     return (

@@ -1,148 +1,115 @@
-import { useState, useEffect, ReactNode, useCallback } from 'react';
-import { signUpApi, signInApi } from '../api/AuthService';
-import { getUserProfileApi } from '../api/UserService';
-import { User, AuthContext } from './AuthContext';
-import { useError } from './../hooks/useError';
-import { apiErrorFormatter } from '../api/ApiErrorFormatter';
-import { jwtDecode } from 'jwt-decode';
+import { useState, ReactNode, useEffect } from 'react';
+//import { signUpApi, signInApi } from '../api/AuthService';
+//import { getUserProfileApi } from '../api/UserService';
+import { AuthContext } from './AuthContext';
+import { IUser } from '../models/UserModel';
+import { UserManagerApi } from '../api/UserManagerApi';
+import { AppErrors } from '../models/AppErrorsModel';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
-    const { setFormErrors } = useError();
+    const [errors, setErrors] = useState<AppErrors>({});
 
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<IUser | null>(null);
 
-    const signIn = async (username: string, password: string, remember: boolean = false) => {
-
-        const errors: { username?: string[]; password?: string[] } = {};
-
+    const signIn = async (username: string, password: string, remember: boolean = false): Promise<boolean> => { 
+        clearErrors();
+        const preErrors: AppErrors = {};
         if (!username) {
-            errors.username = ['Username is required.'];
+            preErrors.username = ['Username is required.'];
         }
         if (!password) {
-            errors.password = ['Password is required.'];
+            preErrors.password = ['Password is required.'];
         }
-        if (Object.keys(errors).length > 0) {
-            setFormErrors(errors);
-            return;
+        if (Object.keys(preErrors).length > 0) {
+            setErrors(preErrors);
+            return false;
         }
-
-        try {
-
-            const token = await signInApi(username, password);
-
-            const user: User = {
-                username: username,
-                token: token,
-                email: ''
-            }
-
-            setUser(user);
-            if (remember) {
-                localStorage.setItem("userToken", user.token);
-            } else {
-                sessionStorage.setItem("userToken", user.token);
-            }
-            sessionStorage.setItem('logged', 'true');  // Zapisanie stanu zalogowania w sessionStorage
-        } catch (error) {
-            const errors = apiErrorFormatter(error, { message: "message" });
-            sessionStorage.setItem('logged', 'false'); // Ustawienie na 'false' w przypadku b³êdu
-            setFormErrors(errors);
+        
+        const success = await UserManagerApi.signIn(username, password, remember);
+        if (success) {
+            setUser(UserManagerApi.getUser());
+            return true;
+        } else {
+            setErrors(UserManagerApi.getErrors() ?? {});
+            return false;
         }
     };
 
-    const signUp = async (email: string, username: string, password: string) => {
-
-        const errors: { email?: string[]; username?: string[]; password?: string[] } = {};
+    const signUp = async (email: string, username: string, password: string): Promise<boolean> => {
+        clearErrors();
+        const preErrors: AppErrors = {};
         if (!email) {
-            errors.email = ['Email is required.'];
+            preErrors.email = ['Email is required.'];
         }
         if (!username) {
-            errors.username = ['Username is required.'];
+            preErrors.username = ['Username is required.'];
         }
         if (!password) {
-            errors.password = ['Password is required.'];
+            preErrors.password = ['Password is required.'];
         }
-        if (Object.keys(errors).length > 0) {
-            setFormErrors(errors);
-            return;
+        if (Object.keys(preErrors).length > 0) {
+            setErrors(preErrors);
+            return false;
         }
-
-        try {
-            await signUpApi(email, username, password);
-            sessionStorage.setItem('logged', 'true');  // Ustawienie na 'true' po udanym rejestracji
-        } catch (error) {
-            const errors = apiErrorFormatter(error, {
-                email: "Email",
-                username: "UserName",
-                password: "Password",
-            });
-            sessionStorage.setItem('logged', 'false');  // Ustawienie na 'false' w przypadku b³êdu
-            setFormErrors(errors);
+        const success = await UserManagerApi.signUp(email, username, password);
+        if (success) {
+            return true;
+        } else {
+            setErrors(UserManagerApi.getErrors() ?? {});
+            return false;
         }
+        
     };
 
     const signOut = () => {
+        UserManagerApi.signOut();
         setUser(null);
-        localStorage.removeItem("userToken");
-        sessionStorage.removeItem("userToken");
-        sessionStorage.setItem('logged', 'false');  // Ustawienie na 'false' podczas wylogowywania
+        console.log("debug user is null reference changed")
     };
 
-    const getToken = useCallback(() => {
-        const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-
+    const getToken = async (): Promise<string | null> => {
+        const token = await UserManagerApi.getUserToken();
         if (!token) {
-            return null;
-        }
-
-        const decodeToken = (token: string) => {
-            try {
-                return jwtDecode<{ exp: number }>(token);
-            } catch {
-                return null;
-            }
-        };
-
-        const decoded = decodeToken(token);
-        if (!decoded || Date.now() >= decoded.exp * 1000) {
             signOut();
-            return null;
         }
-
         return token;
-    }, []);
+    }
+
+    const authorize = async (): Promise<boolean> => {
+        const success = await UserManagerApi.authorize();
+        if (!success) {
+            signOut();
+        }
+        return success;
+    }
+
+    const clearErrors = () => {
+        setErrors({});
+    }
 
     useEffect(() => {
-
-        const token = getToken();
-
-        if (token) {
-            const fetchUserProfile = async () => {
-                try {
-                    const profileData = await getUserProfileApi(token);
-                    const user: User = {
-                        email: profileData.email,
-                        username: profileData.userName,
-                        token: profileData.token,
-                    };
-                    setUser(user);
-                    sessionStorage.setItem('logged', 'true');  // Ustawienie na 'true' po pobraniu profilu
-                } catch {
-                    signOut();
-                }
-            };
-
-            fetchUserProfile();
+       
+        const fetchUser = async () => {
+            const token = await getToken();
+            if (token) {
+                setUser(await UserManagerApi.downloadUser());
+            }
         }
-    }, [getToken]);
+        if (!user) {
+            fetchUser();
+        }
+    })
 
     const value = {
         user,
+        errors,
+        clearErrors,
         getToken,
         signUp,
         signIn,
-        signOut
+        signOut,
+        authorize
     }
 
     return (

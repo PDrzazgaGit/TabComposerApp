@@ -1,16 +1,17 @@
 import { useState, ReactNode, useMemo } from 'react';
 import {  ErrorContext } from './ErrorContext';
+import { AppErrors } from '../models/AppErrorsModel';
 
 export const ErrorProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [formErrors, setFormErrors] = useState<{ [key: string]: string[] }>({});
+    const [formErrors, setFormErrors] = useState<AppErrors>({});
 
-    const [stringEditorErrors, setStringEditorErrors] = useState<{ [key: string]: string[] }>({});
+    const [stringEditorErrors, setStringEditorErrors] = useState<AppErrors>({});
 
-    const [noteEditorErrors, setNoteEditorErrors] = useState<{ [key: string]: string[] }>({}); 
+    const [noteEditorErrors, setNoteEditorErrors] = useState<AppErrors>({}); 
 
-    const [measureEditorErrors, setMeasureEditorErrors] = useState<{ [key: string]: string[] }>({}); 
+    const [measureEditorErrors, setMeasureEditorErrors] = useState<AppErrors>({}); 
 
-    const [createTabulatureErrors, setCreateTabulatureErrors] = useState<{ [key: string]: string[] }>({}); //measureEditorErrors
+    const [createTabulatureErrors, setCreateTabulatureErrors] = useState<AppErrors>({}); //measureEditorErrors
 
     const clearFormErrors = () => setFormErrors({});
     const clearStringEditorErrors = () => setStringEditorErrors({});

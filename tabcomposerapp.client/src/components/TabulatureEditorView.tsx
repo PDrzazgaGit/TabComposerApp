@@ -5,7 +5,7 @@ import { AddMeasureView } from "./AddMeasureView";
 import { MeasureLabelEditor } from "./MeasureLabelEditor";
 import { MeasureView } from "./MeasureView";
 import { TabulatureContainer } from "./TabulatureContainer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StickyPanel } from "./StickyPanel";
 import { NoteDuration } from "../models";
 import { noteRepresentationMap } from "../utils/noteUtils";
@@ -182,12 +182,18 @@ export const TabulatureEditorView = () => {
         
     )
 
+    const [isRendered, setIsRendered] = useState(false);
+
+    useEffect(() => {
+        setIsRendered(true);
+    }, []);
+
     return (
         <StickyPanel content={renderFooterContent()}>
                 <InputGroup
                     className="d-flex justify-content-center align-items-center mb-3 column"
                 >
-                    <h1>
+                <h1>
                         <input
                             type="text"
                             value={title}
@@ -199,18 +205,18 @@ export const TabulatureEditorView = () => {
                                 border: "0",
                                 outline: "0",
                                 cursor: "pointer",
-                                textAlign: "center"
+                                textAlign: "center",
+                                fontWeight: '600'
                             }}
                         />
                     </h1>
                 </InputGroup>
                 <TabulatureContainer maxItemsPerRow={measuresPerRow} >
-                    {tabulature!.map((measure, index) => {
+                    {isRendered && tabulature!.map((measure, index) => {
                         return (
                             <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
                                 <MeasureLabelEditor />
                                 <MeasureView isEditor={true} measurePerRow={measuresPerRow} />
-
                             </MeasureProvider>
                         )
                     })}
