@@ -147,28 +147,32 @@ namespace TabComposerApp.Server.Controllers
                 }
                 return Ok(response);
             }
-            catch (Exception x)
+            catch (Exception)
             {
                 return StatusCode(500, new { Message = "An error occurred while retrieving the tablature"});
             }
         }
 
-        [HttpPost("DeleteTablature/${id}")]
-        public async Task<IActionResult> DeleteTablature(int Id)
+        [HttpPost("DeleteTablature/{id}")]
+        public async Task<IActionResult> DeleteTablature(int id)
         {
             string userId = User.Claims.First(x => x.Type == "UserID").Value;
             try
             {
                 var tabulatures = await _tablatureRepository.GetUserTablaturesAsync(userId);
 
-                bool exists = tabulatures.Any(t => t.Id == Id);
+                bool exists = tabulatures.Any(t => t.Id == id);
 
                 if (!exists) {
                     return StatusCode(500, new { Message = "Tablature does not belong to this user." });
                 }
 
-                await _tablatureRepository.DeleteAsync(Id);
+                await _tablatureRepository.DeleteAsync(id);
                 return Ok(new { Message ="Tabulature deleted"});
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { Message = "Tablature not found" });
             }
             catch (Exception)
             {

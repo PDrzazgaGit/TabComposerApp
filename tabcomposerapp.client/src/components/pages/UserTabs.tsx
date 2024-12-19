@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button, Badge } from "react-bootstrap";
 import { getTabulature, getUserTabulaturesInfo } from "../../api/TabulatureService";
 import { useAuth } from "../../hooks/useAuth";
-import { Key, useEffect, useMemo, useState } from "react";
+import { Key, useEffect, useMemo, useReducer, useState } from "react";
 import { Notation } from "../../models/NotationModel";
 import { useTabulature } from "../../hooks/useTabulature";
 import { SerializationService } from "../../services/SerializationService";
@@ -18,7 +18,6 @@ export const UserTabs = () => {
     const  navigate  = useNavigate();
 
     useEffect(() => {
-        console.log("wczytujê siê za ka¿dym razem")
         const fetchTablatureData = async () => {
             const token = await getToken();
             if (token) {
@@ -37,7 +36,6 @@ export const UserTabs = () => {
 
 
     const handlePlay = async (id: number) => {
-        //fetchTabulature(id);
         const success = await downloadTabulature(id);
         console.log(success);
         navigate("/player");
@@ -51,14 +49,19 @@ export const UserTabs = () => {
     const handleDelete = async (id: number) => {
         const token = await getToken();
         if (token) {
-            console.log("HEHE")
-            await deleteTabulature(token);
+            const success = await deleteTabulature(token, id);
+            if (success) {
+                setTabInfo(prev => {
+                    if (!prev) return prev;
+                    const updatedTabs = { ...prev };
+                    delete updatedTabs[id];
+                    return updatedTabs;
+                });
+            }
         } else {
             navigate("/login");
         }
-        
-        navigate("/mytabs");
-    }
+    };
 
     const handleNewTablature = () => {
         setTabulature(null)
@@ -114,6 +117,7 @@ export const UserTabs = () => {
                             </Button>
                             <Button
                                 variant="success"
+                                className="me-2" 
                                 onClick={() => { handleEdit(Number(key)) } }
                             >
                                 Edit

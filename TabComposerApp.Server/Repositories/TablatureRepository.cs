@@ -48,6 +48,10 @@ namespace TabComposerApp.Server.Repositories
         public async Task DeleteAsync(int id)
         {
             var tabulature = await GetByIdAsync(id);
+            if (tabulature == null)
+            {
+                throw new KeyNotFoundException($"Tablature with id '{id}' does not exists.");
+            }
             _context.Tablatures.Remove(tabulature);
             await _context.SaveChangesAsync();
         }

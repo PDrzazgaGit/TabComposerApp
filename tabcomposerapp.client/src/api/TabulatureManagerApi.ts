@@ -48,7 +48,7 @@ export class TabulatureManagerApi {
                     },
                 }
             );
-            const id = response.data;
+            const id = response.data.id;
             if (id === null) {
                 return false;
             }
@@ -60,22 +60,17 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static async deleteTabulature(token: string): Promise<boolean> {
-        if (this.tabulatureId === null || this.tabulature === null) {
-            return false;
-        }
+    public static async deleteTabulature(token: string, id: number): Promise<boolean> {
         try {
-            const result = await axios.post(
-                `https://localhost:44366/api/Tablature/DeleteTablature/${this.tabulatureId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    },
+            await axios.post(`https://localhost:44366/api/Tablature/DeleteTablature/${id}`, null ,{
+                headers: {
+                    Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
-            );
-            console.log(result);
-            this.tabulature = null;
-            this.tabulatureId = undefined;
+            });
+            if (id === this.tabulatureId) {
+                this.tabulatureId = undefined;
+                this.tabulature = null;
+            }
             return true;
         } catch {
             return false
@@ -83,7 +78,7 @@ export class TabulatureManagerApi {
     }
 
     public static async updateTabulature(token: string): Promise<boolean> {
-        if (this.tabulatureId === null || this.tabulature === null) {
+        if (this.tabulatureId === undefined || this.tabulature === null) {
             return false;
         }
         try {
@@ -105,7 +100,6 @@ export class TabulatureManagerApi {
     }
 
     public static cloneTabulature(): ITabulature | null {
-        console.log(this.tabulature);
         const clone = this.tabulature?.clone() || null;
         this.tabulature = clone;
         return clone;

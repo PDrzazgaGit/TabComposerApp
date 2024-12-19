@@ -43,7 +43,6 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         }
         fetchUpdate();
 
-        console.log("ehehe");
     }, [measure])
 
     const getMaxFrets = (): number => {
@@ -53,6 +52,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return measure.measureDurationMs;
     }
 
+    // clone here
     const changeFret = (note: INote, stringId: number, fret: number): void => {
         const updatedMeasure: IMeasure = measure.clone();
         updatedMeasure.changeNoteFret(note, stringId, fret);
@@ -60,6 +60,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         setMeasure(updatedMeasure);
     }
 
+    // clone here
     const changeNoteDuration = (note: INote | IPause, newDuration: NoteDuration, stringId: number): boolean => {
         const updatedMeasure: IMeasure = measure.clone();
         if (updatedMeasure.changeNoteDuration(note, newDuration, stringId)) {
@@ -77,6 +78,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return notes;
     }
 
+    // clone here
     const deleteNote = (note: INote | IPause, stringId: number, shift: boolean) => {
         const updatedMeasure: IMeasure = measure.clone();
         measure.deleteNote(note, stringId, shift);
@@ -84,6 +86,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         setMeasure(updatedMeasure);
     }
 
+    // clone here
     const moveNoteRight = (note: INote | IPause, stringId: number, interval?: NoteDuration): boolean => {
         const updatedMeasure: IMeasure = measure.clone();
         if (!measure.moveNoteRight(note, stringId, interval))
@@ -93,6 +96,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return true;
     }
 
+    // clone here
     const moveNoteLeft = (note: INote | IPause, stringId: number, interval?: NoteDuration): boolean => {
         const updatedMeasure: IMeasure = measure.clone();
         if (!measure.moveNoteLeft(note, stringId, interval))
@@ -102,6 +106,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return true;
     }
 
+    // clone here
     const addPause = (stringId: number, noteDuration?: NoteDuration): boolean => {
         const updatedMeasure: IMeasure = measure.clone();
         if (measure.pushPause(stringId, noteDuration ? noteDuration : NoteDuration.Quarter)) {
@@ -112,16 +117,21 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return false;
     }
 
+    // clone here
     const addNote = (stringId: number, noteDuration?: NoteDuration): boolean => {
+        
         const updatedMeasure: IMeasure = measure.clone();
         if (measure.pushNote(0, stringId, noteDuration)) {
             tabulature.updateTablature(measure, updatedMeasure);
             setMeasure(updatedMeasure);
+            console.log(measure);
             return true;
         }
+        
         return false;
     }
 
+    // clone here
     const changeSignature = (numerator: number, denominator: number): boolean => {
         if (measure.changeSignature(numerator, denominator)) {
             const updatedMeasure: IMeasure = measure.clone();
@@ -133,6 +143,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         }
     }
 
+    // clone here
     const changeTempo = (tempo: number) => {
         measure.changeTempo(tempo);
         const updatedMeasure: IMeasure = measure.clone();
@@ -140,6 +151,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         setMeasure(updatedMeasure);
     }
 
+    // clone here
     const changeArticulation = (note: INote, stringId: number, articulation: Articulation) => {
         measure.changeArticulation(note, stringId, articulation)
         const updatedMeasure: IMeasure = measure.clone();

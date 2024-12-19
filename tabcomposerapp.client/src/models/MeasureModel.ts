@@ -6,6 +6,7 @@ export interface IMeasure {
     readonly numerator: number;
     readonly denominator: number;
     readonly measureDurationMs: number;
+    deepClone(): IMeasure;
     putNote(fret: number, stringId: number, timeStamp: number, noteDuration?: NoteDuration): INote | undefined;
     pushNote(fret: number, stringId: number, noteDuration?: NoteDuration): INote | undefined;
     getNotes(stringId: number): INote[];

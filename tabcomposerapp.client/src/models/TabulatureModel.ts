@@ -16,6 +16,7 @@ export interface ITabulature {
     addMeasure(tempo: number, numerator: number, denominator: number): void;
     deleteMeasure(measure: IMeasure): void;
     getMeasure(index: number): IMeasure | undefined;
+    addMeasureObject(measure: IMeasure): boolean;
     clone(): ITabulature;
 }
 
@@ -50,6 +51,16 @@ export class Tabulature implements ITabulature {
         const measure: MeasureService = new MeasureService(tempo, numerator, denominator, this.tuning, this.frets);
         this.measures.push(measure);
         return measure;
+    }
+
+    public addMeasureObject(measure: IMeasure): boolean {
+        const exists = this.measures.some(m => m === measure);
+
+        if (exists) {
+            return false;
+        }
+        this.measures.push(measure);
+        return true;
     }
 
     public deleteMeasure(measure: IMeasure) {

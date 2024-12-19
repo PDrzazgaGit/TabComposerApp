@@ -2,6 +2,7 @@ import { useState, ReactNode, useEffect } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
 import { TabulatureManagerApi } from '../api/TabulatureManagerApi';
+import { TabulatureView } from '../components/TabulatureView';
 
 interface TabulatureProviderProps {
     children: ReactNode;
@@ -46,9 +47,8 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         return await TabulatureManagerApi.updateTabulature(token);
     }
 
-    const deleteTabulature = async (token: string): Promise<boolean> => {
-        const success = await TabulatureManagerApi.deleteTabulature(token);
-        console.log(success);
+    const deleteTabulature = async (token: string, id: number): Promise<boolean> => {
+        const success = await TabulatureManagerApi.deleteTabulature(token, id);
         if (success) {
             setTabulature(null);
         }
@@ -82,6 +82,26 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         setTabulature(tabulatureNew);
         TabulatureManagerApi.updateTabulature(token);
     }
+    const copyMeasure = (measureId: number): boolean => {
+        if (!tabulature)
+            return false;
+        const tabulatureNew = TabulatureManagerApi.cloneTabulature();
+        if (!tabulatureNew) {
+            return false;
+        }
+        const measureToCopy = tabulatureNew.getMeasure(measureId);
+        if (!measureToCopy) {
+            return false;
+        }
+        const deepClonedMeasure = measureToCopy.deepClone();
+        tabulatureNew.addMeasureObject(deepClonedMeasure);
+        setTabulature(tabulatureNew);
+        return true;
+    }
+
+    const getMeasuresCount = () => {
+        return tabulature?.getLength() || 0;
+    }
 
     const value = {
         setTabulature,
@@ -113,7 +133,9 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         downloadTabulature,
         addTabulature,
         updateTabulature,
-        deleteTabulature
+        deleteTabulature,
+        getMeasuresCount,
+        copyMeasure
     }
 
     return (

@@ -1,3 +1,4 @@
+import { GuitarScale } from "../services";
 import { Sound, Notation, IPause } from "./";
 
 export enum Articulation {
@@ -38,7 +39,6 @@ export class Note extends Sound implements INote {
     public fret: number;
     public noteDuration: NoteDuration;
     public articulation: Articulation;
-    public linkedNote?: Note | undefined;
     private timeStamp: number;
     constructor(
         sound: Sound,
@@ -86,10 +86,11 @@ export class Note extends Sound implements INote {
     }
 
     public clone(): Note {
-        const note: Note = new Note(this, this.fret, this.getDurationMs(), this.noteDuration);
+        console.log(this.noteDuration)
+
+        const note: Note = GuitarScale.getNote(this.fret, this, this.getDurationMs(), this.noteDuration);
         note.setTimeStampMs(this.getTimeStampMs());
         note.articulation = this.articulation;
-        note.linkedNote = this.linkedNote;
         return note;
     }
 
@@ -101,7 +102,6 @@ export class Note extends Sound implements INote {
         this.articulation = articulation;
     }
 
-    public serialize()
 }
 
 

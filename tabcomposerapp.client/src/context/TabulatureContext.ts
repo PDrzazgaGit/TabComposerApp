@@ -1,6 +1,9 @@
 import { createContext } from 'react';
 import { IMeasure, ITabulature, NoteDuration } from '../models'
 interface TabulatureContextType {
+
+    getMeasuresCount: () => number;
+
     tabulature: ITabulature | null;
     setTabulature: (tabulature: ITabulature | null) => void;
 
@@ -31,9 +34,11 @@ interface TabulatureContextType {
 
     updateTabulature: (token: string) => Promise<boolean> 
 
-    deleteTabulature: (token: string) => Promise<boolean> 
+    deleteTabulature: (token: string, id: number) => Promise<boolean> 
 
     addMeasure: (tempo: number, numerator: number, denominator: number, token: string) => void;
+
+    copyMeasure: (measureId: number) => boolean;
 
     deleteMeasure: (measure: IMeasure, token: string) => void;
 }

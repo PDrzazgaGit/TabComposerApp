@@ -44,6 +44,21 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return measure;
     }
 
+    public deepClone(): MeasureService {
+        const measure: MeasureService = new MeasureService(this.tempo, this.numerator, this.denominator, this.tuning, this.frets);
+        this.forEach((notes, stringId) => {
+            const clonedNotes: (Note | Pause)[] = [];
+            console.log(notes);
+            notes.forEach(note => {
+                const clonedNote = note.clone();
+                console.log(clonedNote);
+                clonedNotes.push(clonedNote);
+            })
+            measure.set(Number(stringId), clonedNotes);
+        })
+        return measure;
+    }
+
     private assembleNote(
         fret: number,
         stringId: number,
@@ -359,8 +374,10 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
             notesData.forEach(note => {
                 if (note.kind === NoteKind.Note)
                     this.pushNote(note.fret, stringId, note.noteDuration)?.setArticulation(note.articulation);
+                    //this.putNote(note.fret, stringId, note.timeStamp, note.noteDuration)?.setArticulation(note.articulation);
                 else
                     this.pushPause(stringId, note.noteDuration);
+                    //this.putPause(stringId, note.timeStamp, note.noteDuration);
             })
         });
     }
@@ -378,7 +395,8 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
             throw new Error("Timestamp must be grater than 0.");
         }
 
-        const noteDurationMs = this.calculateNoteDurationMs(noteDuration);
+        //const noteDurationMs = this.calculateNoteDurationMs(noteDuration);
+        const noteDurationMs = this.calculateNoteDurationMs(noteDuration)
         const endTimestamp = timeStamp + noteDurationMs;
 
         if (!this.isWithinMeasure(timeStamp, noteDurationMs)) {
@@ -389,9 +407,12 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
             return notes.some(existingNote => {
                 const existingStart = existingNote.getTimeStampMs();
                 const existingEnd = existingStart + existingNote.getDurationMs();
-                return timeStamp < existingEnd && endTimestamp > existingStart;
+                console.log("Existing", existingStart, existingEnd)
+                console.log("new", timeStamp, endTimestamp)
+                return timeStamp < Math.floor(existingEnd) && endTimestamp > Math.floor(existingStart);
             });
         };
+
 
         if (Array.isArray(stringId)) {
             return !hasCollision(stringId);
@@ -422,6 +443,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         const canPutNote: boolean = this.canPutNote(stringNotes, timeStamp, noteDuration);
        
         if (!canPutNote) {
+            console.log("sadfsdf")
             return undefined;
         }
         note.setTimeStampMs(timeStamp);
