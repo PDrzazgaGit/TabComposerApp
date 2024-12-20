@@ -25,4 +25,6 @@ export interface IMeasure {
     moveNoteLeft(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
     canPushNote(stringId: number, noteDuration: NoteDuration): boolean;
     changeArticulation(note: INote, stringId: number, articulation: Articulation): void;
+    setSlide(note: INote, stringId: number, slide: boolean): void;
+    setOverflow(note: INote, stringId: number, overflow: boolean): void;
 }

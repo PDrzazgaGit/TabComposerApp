@@ -160,6 +160,20 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         return true;
     }
 
+    const setNodeSlide = (note: INote, stringId: number, slide: boolean): void => {
+        measure.setSlide(note, stringId, slide)
+        const updatedMeasure: IMeasure = measure.clone();
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
+    }
+
+    const setNodeOverflow = (note: INote, stringId: number, overflow: boolean): void => {
+        measure.setOverflow(note, stringId, overflow)
+        const updatedMeasure: IMeasure = measure.clone();
+        tabulature.updateTablature(measure, updatedMeasure);
+        setMeasure(updatedMeasure);
+    }
+
 
     const value = {
         measure,
@@ -177,7 +191,9 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, init
         addNote,
         changeSignature,
         changeTempo,
-        changeArticulation
+        changeArticulation,
+        setNodeSlide,
+        setNodeOverflow
     }
     
     return (

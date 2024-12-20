@@ -3,7 +3,6 @@ import { Sound, Notation, IPause } from "./";
 
 export enum Articulation {
     None,
-    Slide,
     Legato,
     BendHalf,
     BendHalfReturn,
@@ -30,12 +29,16 @@ export interface INote extends IPause{
     readonly octave: number,
     readonly fret: number;
     readonly articulation: Articulation;
+    slide: boolean;
+    overflow: boolean;
     clone(): Note;
     setArticulation(articulation: Articulation): void;
 }
 
 export class Note extends Sound implements INote {
     public readonly kind: NoteKind;
+    public slide: boolean;
+    public overflow: boolean;
     public fret: number;
     public noteDuration: NoteDuration;
     public articulation: Articulation;
@@ -76,6 +79,8 @@ export class Note extends Sound implements INote {
             this.articulation = Articulation.None
         }
         this.kind = NoteKind.Note;
+        this.slide = false;
+        this.overflow = true;
     }
 
     public setTimeStampMs(timeStampMs: number): void {

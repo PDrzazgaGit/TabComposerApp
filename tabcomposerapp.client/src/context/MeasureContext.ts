@@ -17,6 +17,8 @@ interface MeasureContextType {
     changeSignature: (numerator: number, denominator: number) => boolean;
     changeTempo: (tempo: number) => void;
     changeArticulation: (note: INote, stringId: number, articulation: Articulation) => boolean;
+    setNodeSlide: (note: INote, stringId: number, slide: boolean) => void;
+    setNodeOverflow: (note: INote, stringId: number, slide: boolean) => void;
 }
 
 export const MeasureContext = createContext<MeasureContextType | undefined>(undefined);

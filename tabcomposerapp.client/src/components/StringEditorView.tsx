@@ -222,8 +222,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                 style={{
                     position: 'absolute',
                     background: 'transparent',
-                    left: currentNoteTimeStamp !== 0 ? `calc(${startX}% + 0.6em)` : `${startX}%`,
-                    width: currentNoteTimeStamp !== 0 ? `calc(${length}% - 0.6em)` : `${length}%`,
+                    left: currentNoteTimeStamp !== 0 ? `calc(${startX}% + 0.3em)` : `${startX}%`,
+                    width: currentNoteTimeStamp !== 0 ? `calc(${length}% - 0.0em)` : `${length}%`,
                     top: `-0.25`,
                     height: '1.5em',
                     overflow: 'visible',
@@ -420,7 +420,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             return 0;
         }
 
-        return - 1 * stringMargin - prevNote.getDurationMs();
+        return  0 - stringMargin - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
     }
 
     return (
@@ -469,7 +469,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                         {notes.map((note, index) => {
                             const prevNote = index > 0 ? notes[index - 1] : null;
                             const nextNote = index < notes.length - 1 ? notes[index + 1] : null;
-                            const isSlide = note.articulation === Articulation.Slide;
+                            const isSlide = note.slide;
                             const isLegato = note.articulation === Articulation.Legato;
                             const isBendFull = note.articulation === Articulation.BendFull;
                             const isBendHalf = note.articulation === Articulation.BendHalf;
@@ -478,8 +478,10 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
                             return (
                                 <div key={ index}>
-                                    {isSlide &&
-                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)                 
+                                    {isSlide && note.overflow &&
+                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)       
+                                        || (isSlide && !note.overflow) &&
+                                    renderSlide(note.getTimeStampMs()-50, note.getTimeStampMs() + stringMargin, 100, false)
                                     }
                                     {isLegato && renderLegato(nextNote ? nextNote.getTimeStampMs() + stringMargin : calculateLegatoOverflow(), note.getTimeStampMs() + stringMargin, 100)}
                                     {isBendFull && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}

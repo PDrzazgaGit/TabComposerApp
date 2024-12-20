@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { INote, NoteDuration, NoteKind, IPause, Articulation } from '../models';
 import { useMeasure } from '../hooks/useMeasure';
-import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup } from 'react-bootstrap';
+import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup, FormCheck } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import { pauseRepresentationMap, noteRepresentationMap } from "../utils/noteUtils";
@@ -24,7 +24,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation } = useMeasure();
+    const [slide, setSlide] = useState(false);
+    const [overflow, setOverflow] = useState(true);
+
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation, setNodeSlide, setNodeOverflow } = useMeasure();
 
     const { shiftOnDelete } = useTabulature();
 
@@ -80,6 +83,22 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         if (!isNote(note))
             return; 
         changeArticulation(note, stringId, articulation);
+    }
+
+    const handleSlide = (checkBox: React.ChangeEvent<HTMLInputElement>) => {
+        if (!isNote(note))
+            return; 
+        const isChecked = checkBox.target.checked;
+        setSlide(isChecked);
+        setNodeSlide(note, stringId, isChecked);
+    }
+
+    const handleOverflow = (checkBox: React.ChangeEvent<HTMLInputElement>) => {
+        if (!isNote(note))
+            return;
+        const isChecked = checkBox.target.checked;
+        setOverflow(isChecked);
+        setNodeOverflow(note, stringId, isChecked);
     }
 
     const saveChanges = (newFret: number) => {
@@ -153,7 +172,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                 variant="light"
                                 className="border flex-grow-1"
                             >
-                                {`Articulation: ${Articulation[note.articulation]}`}
+                                {`${slide ? Articulation[note.articulation] + ' & Slide' : Articulation[note.articulation]}`}
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {Object.keys(Articulation)
@@ -165,7 +184,37 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                     >
                                             {Articulation[symbol as unknown as number]}
                                     </Dropdown.Item>
-                                ))}
+                                    ))}
+                                <Dropdown.Item
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <FormCheck
+                                        onClick={(e) => e.stopPropagation()}
+                                        checked={slide}
+                                        type="checkbox"
+                                        id={"setSlide"}
+                                        label="Slide"
+                                        reverse
+                                        className="text-start"
+                                        onChange={handleSlide}
+                                    />
+                                </Dropdown.Item>
+                                {slide && (
+                                    <Dropdown.Item
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <FormCheck
+                                            onClick={(e) => e.stopPropagation()}
+                                            checked={overflow}
+                                            type="checkbox"
+                                            id={"setSlide"}
+                                            label="Link"
+                                            reverse
+                                            className="text-start"
+                                            onChange={handleOverflow}
+                                        />
+                                    </Dropdown.Item>
+                                )} 
                             </Dropdown.Menu>
                         </Dropdown>
                     </InputGroup>

@@ -543,4 +543,34 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
         note.setArticulation(articulation);
     }
+
+    public setOverflow(note: Note, stringId: number, overflow: boolean) {
+        const stringNotes = this.get(stringId);
+
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+
+        const noteIndex = stringNotes.indexOf(note);
+
+        if (noteIndex === -1) {
+            throw new Error("Provided note does not exists.");
+        }
+        note.overflow = overflow;
+    }
+
+    public setSlide(note: Note, stringId: number, slide: boolean) {
+        const stringNotes = this.get(stringId);
+
+        if (!stringNotes) {
+            throw new Error("String with number " + stringId + " does not exist.");
+        }
+
+        const noteIndex = stringNotes.indexOf(note);
+
+        if (noteIndex === -1) {
+            throw new Error("Provided note does not exists.");
+        }
+        note.slide = slide;
+    }
 }
