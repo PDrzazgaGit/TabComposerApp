@@ -481,7 +481,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                                     {isSlide && note.overflow &&
                                         renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)       
                                         || (isSlide && !note.overflow) &&
-                                    renderSlide(note.getTimeStampMs()-50, note.getTimeStampMs() + stringMargin, 100, false)
+                                        renderSlide(note.getTimeStampMs()-50, note.getTimeStampMs() + stringMargin, 100, false)
                                     }
                                     {isLegato && renderLegato(nextNote ? nextNote.getTimeStampMs() + stringMargin : calculateLegatoOverflow(), note.getTimeStampMs() + stringMargin, 100)}
                                     {isBendFull && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}

@@ -30,6 +30,14 @@ export class TuningFactory {
             3: MusicScale.getSound(Notation.G, 3),
             2: MusicScale.getSound(Notation.B, 3),
             1: MusicScale.getSound(Notation.E, 4)
+        },
+        "D-Standard": {
+            6: MusicScale.getSound(Notation.D, 2),
+            5: MusicScale.getSound(Notation.G, 2),
+            4: MusicScale.getSound(Notation.C, 3),
+            3: MusicScale.getSound(Notation.F, 3),
+            2: MusicScale.getSound(Notation.A, 3),
+            1: MusicScale.getSound(Notation.D, 4)
         }
 
     }

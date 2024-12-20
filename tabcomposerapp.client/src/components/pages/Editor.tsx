@@ -1,7 +1,7 @@
 import { TuningFactory } from "../../services";
-import { ITabulature, Tabulature } from "../../models";
+import { Tabulature } from "../../models";
 import {TabulatureEditorView } from "../TabulatureEditorView"
-import { Button, Card, Container, Dropdown, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { Button, Container, Dropdown, FormControl, InputGroup } from "react-bootstrap";
 import { useState } from "react";
 import { useError } from "../../hooks/useError";
 import { useTabulature } from "../../hooks/useTabulature";
@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export const Editor = () => {
 
-    const { getToken } = useAuth();
+    const { getToken, user } = useAuth();
 
     const { tabulature, addTabulature } = useTabulature();
 
@@ -20,6 +20,8 @@ export const Editor = () => {
     const [tuning, setTuning] = useState<string | undefined>();
 
     const [maxFrets, setMaxFrets] = useState(24);
+
+    const [description, setDescription] = useState('');
 
     const navigate = useNavigate();
 
@@ -33,6 +35,10 @@ export const Editor = () => {
         setMaxFrets(event.target.valueAsNumber);
     }
 
+    const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setDescription(event.target.value);
+    }
+
     const handleTuningChange = (tuning: string) => {
         setTuning(tuning);
     }
@@ -40,13 +46,13 @@ export const Editor = () => {
     const handleCreateTabulature = async () => {
         if (tuning) {
             clearCreateTabulatureErrors();
-            const tuningModel = TuningFactory.getTuning(tuning);
-            const newTabulature = new Tabulature(tuningModel, maxFrets, title);
             const token = await getToken();
             if (!token) {
                 navigate('/login');
                 return;
             }
+            const tuningModel = TuningFactory.getTuning(tuning);
+            const newTabulature = new Tabulature(tuningModel, maxFrets, title, user?.username, description);
             const success = await addTabulature(token, newTabulature);
             if (!success) {
                 setCreateTabulatureErrors({ ["error"]: ["Cannot add tablature"] });
@@ -85,6 +91,16 @@ export const Editor = () => {
                             max={30}
                             value={maxFrets}
                             onChange={handleChangeMaxFrets}
+                        />
+                    </InputGroup>
+                    <InputGroup
+                        className="d-flex justify-content-center align-items-center column mb-3"
+                    >
+                        <InputGroup.Text>Description</InputGroup.Text>
+                        <FormControl
+                            type="text"
+                            value={description}
+                            onChange={handleChangeDescription}
                         />
                     </InputGroup>
                     <InputGroup className="d-flex justify-content-center align-items-center column mb-3">

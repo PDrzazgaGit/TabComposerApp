@@ -14,10 +14,17 @@ export class GuitarScale extends MusicScale {
         let frequency: number = base.frequency;
 
         if (fret > 0) {
-            notation = ((notation + fret) % 12);
-            octave += (fret / 12) | 0;  // | 0 oznacza uciêcie czêœci u³amkowej
+            // Dodaj przesuniêcie progów do notacji
+            const totalSteps = notation + fret;
+
+            // Oblicz now¹ notacjê i oktawê
+            notation = totalSteps % 12; // Ustal nutê w ramach oktawy
+            octave += Math.floor(totalSteps / 12); // Zwiêksz oktawê, jeœli przekroczyliœmy granicê
+
+            // Oblicz czêstotliwoœæ dla nowej nuty i oktawy
             frequency = this.calculateFrequency(notation, octave);
         }
+
         return new Note(frequency, notation, octave, fret, noteDurationMs, noteDuration);
     }
 

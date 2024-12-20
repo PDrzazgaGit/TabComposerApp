@@ -3,4 +3,5 @@ export interface TabulatureDataModel {
     created: string;
     length: number;
     tuning: { notation: number }[];
+    description: string;
 }

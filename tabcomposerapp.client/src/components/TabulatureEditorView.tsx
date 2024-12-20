@@ -1,4 +1,4 @@
-import { Card, Tab, Dropdown, FormControl, InputGroup, Tabs, FormCheck } from "react-bootstrap";
+import { Card, Tab, Dropdown, FormControl, InputGroup, Tabs, FormCheck, Button } from "react-bootstrap";
 import { MeasureProvider } from "../context/MeasureProvider";
 import { useTabulature } from "../hooks/useTabulature";
 import { AddMeasureView } from "./AddMeasureView";
@@ -7,9 +7,12 @@ import { MeasureView } from "./MeasureView";
 import { TabulatureContainer } from "./TabulatureContainer";
 import { useEffect, useState } from "react";
 import { StickyPanel } from "./StickyPanel";
-import { NoteDuration } from "../models";
+import { NoteDuration, Tabulature } from "../models";
 import { noteRepresentationMap } from "../utils/noteUtils";
 import { SerializationService } from "../services/SerializationService";
+import { MeasurePlayer } from "../services/MeasurePlayer";
+import { TabulaturePlayer } from "../services/TabulaturePlayer2";
+import { NotePlayer } from "../services/NotePlayer";
 
 export const TabulatureEditorView = () => {
 
@@ -149,7 +152,14 @@ export const TabulatureEditorView = () => {
     );
 
 
-
+    const play = () => {
+      
+        if (tabulature) {
+            //TabulaturePlayer.playTabulature(tabulature);
+            const tab = new TabulaturePlayer();
+            tab.playTabulature(tabulature);
+        }
+    }
 
     const renderFooterContent = () => (
         <Card>
@@ -170,6 +180,11 @@ export const TabulatureEditorView = () => {
                     <Tab
                         eventKey="player" title="Tab Player"
                     >
+                        <Button
+                            onClick={() => { play() } }
+                        >
+                            Play
+                        </Button>
                     </Tab>
                     <Tab
                         eventKey="recorder" title="Tab Recorder"

@@ -125,6 +125,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         const foundNote = stringNotes.find(n => n === note);
         if (foundNote) {
             note = this.assembleNote(fret, stringId, foundNote.noteDuration);
+            console.log(note);
             foundNote.fret = fret;
             foundNote.frequency = note.frequency;
             foundNote.notation = note.notation;

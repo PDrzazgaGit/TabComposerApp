@@ -1,4 +1,3 @@
-import { GuitarScale } from "../services";
 import { Sound, Notation, IPause } from "./";
 
 export enum Articulation {
@@ -93,7 +92,7 @@ export class Note extends Sound implements INote {
     public clone(): Note {
         console.log(this.noteDuration)
 
-        const note: Note = GuitarScale.getNote(this.fret, this, this.getDurationMs(), this.noteDuration);
+        const note: Note = new Note(this.frequency, this.notation, this.octave, this.fret , this.getDurationMs(), this.noteDuration);//GuitarScale.getNote(this.fret, this, this.getDurationMs(), this.noteDuration);
         note.setTimeStampMs(this.getTimeStampMs());
         note.articulation = this.articulation;
         return note;

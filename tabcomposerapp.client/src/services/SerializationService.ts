@@ -21,6 +21,7 @@ export interface SerializedTabulature {
     frets: number;         // Zak³adam, ¿e frets to liczba
     tuning: SerializedTuning;  // Serializowane dane o strojeniu
     measures: SerializedMeasure[];  // Tablica serializowanych miar
+    description: string;
 }
 
 export interface SerializedTuning {
@@ -35,7 +36,8 @@ export class SerializationService {
             author: tabulature.author,
             frets: tabulature.frets,
             tuning: this.serializeTuning(tabulature.tuning), // wywo³anie metody getData() na tuning
-            measures: tabulature.map(measure => this.serializeMeasure(measure)) // serializacja ka¿dej miary
+            measures: tabulature.map(measure => this.serializeMeasure(measure)), // serializacja ka¿dej miary
+            description: tabulature.description ? tabulature.description : ""
         }
         return JSON.stringify(serializedTabulature);
     }
@@ -48,8 +50,9 @@ export class SerializationService {
         const title = serializedTabulature.title;
         const author = serializedTabulature.author;
         const frets = serializedTabulature.frets;
+        const description = serializedTabulature.description;
 
-        const tabulature = new Tabulature(tuning, frets, title, author);
+        const tabulature = new Tabulature(tuning, frets, title, author, description);
 
         serializedTabulature.measures.forEach((serializedMeasure: SerializedMeasure) => {
             const tempo = serializedMeasure.tempo;

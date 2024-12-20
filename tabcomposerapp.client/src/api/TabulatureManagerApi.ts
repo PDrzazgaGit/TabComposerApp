@@ -42,6 +42,7 @@ export class TabulatureManagerApi {
                 'https://localhost:44366/api/Tablature/AddTablature',
                 tabulatureData,
                 {
+                    
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',

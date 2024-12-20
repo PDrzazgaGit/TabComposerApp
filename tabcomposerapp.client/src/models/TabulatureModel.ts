@@ -3,10 +3,10 @@ import { MeasureService, SerializedMeasure, SerializedNote } from "../services/M
 import { ITuning, IMeasure, SerializedTuning } from "./";
 
 export interface ITabulature {
-    id: number
     title: string;
     author: string;
     frets: number;
+    description?: string;
     readonly tuning: ITuning;
     getLength(): number;
     forEach(callback: (measure: IMeasure) => void): void;
@@ -23,7 +23,7 @@ export interface ITabulature {
 export class Tabulature implements ITabulature {
 
     private measures: IMeasure[] = [];
-    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public readonly id: number = 0) { }
+    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public description: string = "" ) { }
 
     public getLength(): number {
         return this.measures.length;

@@ -33,7 +33,6 @@ export const MyNavbar = () => {
                             <Form.Control
                                 type="search"
                                 placeholder="Search for Tabs"
-                                className="me-2"
                                 aria-label="Search for Tabs"
                             />
                             <InputGroup.Text>

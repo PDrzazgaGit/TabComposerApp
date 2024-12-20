@@ -42,7 +42,7 @@ namespace TabComposerApp.Server.Controllers
                 var tabulature = new Tablature
                 {
                     Data = _tablatureService.SerializeTablature(request),
-                    UserId = User.Claims.First(x => x.Type == "UserID").Value
+                    UserId = User.Claims.First(x => x.Type == "UserID").Value,
                 };
 
                 if (!_tablatureService.ValidateTablatureData(tabulature.Data))
@@ -135,14 +135,18 @@ namespace TabComposerApp.Server.Controllers
                         .Select(x => new { Notation = x.Notation })
                         .ToList();
                     var id = tab.Id;
+                    var description = data.Description;
+                    var author = data.Author;
 
                     // Dodaj dane do słownika
                     response[id] = new
                     {
+                        Author = author,
                         Title = title,
                         Length = length,
                         Created = created,
-                        Tuning = tuning
+                        Tuning = tuning,
+                        Description = description
                     };
                 }
                 return Ok(response);
@@ -207,13 +211,15 @@ namespace TabComposerApp.Server.Controllers
                         .ToList();
                     var id = tab.Id;
 
+                    var description = data.Description;
                     // Dodaj dane do słownika
                     response[id] = new
                     {
                         Title = title,
                         Length = length,
                         Created = created,
-                        Tuning = tuning
+                        Tuning = tuning,
+                        Description = description
                     };
                 }
                 return Ok(response);
