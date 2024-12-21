@@ -11,8 +11,7 @@ import { NoteDuration, Tabulature } from "../models";
 import { noteRepresentationMap } from "../utils/noteUtils";
 import { SerializationService } from "../services/SerializationService";
 import { MeasurePlayer } from "../services/MeasurePlayer";
-import { TabulaturePlayer } from "../services/TabulaturePlayer2";
-import { NotePlayer } from "../services/NotePlayer";
+import { TabulaturePlayer } from "../services/audio/TabulaturePlayer";
 
 export const TabulatureEditorView = () => {
 
@@ -37,6 +36,8 @@ export const TabulatureEditorView = () => {
     const [title, setTitle] = useState<string>(tabulature!.title);
 
     const [tabKey, setTabKey] = useState<string | null>(null);
+
+    const player: TabulaturePlayer = new TabulaturePlayer(tabulature!);
 
     const handleMeasuresPerRow = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMeasuresPerRow(event.target.valueAsNumber);
@@ -152,14 +153,48 @@ export const TabulatureEditorView = () => {
     );
 
 
-    const play = () => {
+    const play = async () => {
       
         if (tabulature) {
-            //TabulaturePlayer.playTabulature(tabulature);
-            const tab = new TabulaturePlayer();
-            tab.playTabulature(tabulature);
+            
+            await player.play();
+
+            //const tab = new TabulaturePlayer();
+            //tab.playTabulature(tabulature);
         }
     }
+
+    const pause = async () => {
+
+        if (tabulature) {
+
+            //player.pause();
+            player.changeTempo(1.75);
+            //const tab = new TabulaturePlayer();
+            //tab.playTabulature(tabulature);
+        }
+    }
+
+    const stop = async () => {
+
+        if (tabulature) {
+
+            player.stop();
+
+            //const tab = new TabulaturePlayer();
+            //tab.playTabulature(tabulature);
+        }
+    }
+
+    const [tempoFactor, setTempoFactor] = useState(1); // Domyœlnie 1
+
+    // Handler zmieniaj¹cy tempo transportu
+    const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(event.target.value);
+
+        player.changeTempo(value);
+        setTempoFactor(value);
+    };
 
     const renderFooterContent = () => (
         <Card>
@@ -185,6 +220,26 @@ export const TabulatureEditorView = () => {
                         >
                             Play
                         </Button>
+                        <Button
+                            onClick={() => { pause() }}
+                        >
+                            Pause
+                        </Button>
+                        <Button
+                            onClick={() => { stop() }}
+                        >
+                            Stop
+                        </Button>
+                        <h3>Speed {Math.round(tempoFactor * 100)} %</h3>
+                        <input
+                            type="range"
+                            min={0.25}
+                            max={2}
+                            step={0.05}
+                            value={tempoFactor}
+                            onChange={handleTempoChange}
+                            className="form-range"
+                        />
                     </Tab>
                     <Tab
                         eventKey="recorder" title="Tab Recorder"

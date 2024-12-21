@@ -9,7 +9,8 @@ import './../styles/NoteView.css';
 import { NoteView } from './NoteView';
 import { useError } from '../hooks/useError';
 import { useTabulature } from '../hooks/useTabulature';
-import { NotePlayer } from '../services/NotePlayer';
+import { NotePlayer } from '../services/audio/NotePlayer';
+//import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
@@ -270,17 +271,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             {noteEditorErrors["moveNote"]}
                         </div>
 
-                    </InputGroup>
-                )}
-                {isNote(note) && (
-                    <InputGroup className="w-100 d-flex justify-content-center align-items-center mb-3">
-                        <Button
-                            className="w-100"
-                            variant="success"
-                            //onClick={() => NotePlayer.play(note)}
-                        >
-                            Play Note
-                        </Button>
                     </InputGroup>
                 )}
                 <InputGroup className="w-100 d-flex justify-content-center align-items-center">
