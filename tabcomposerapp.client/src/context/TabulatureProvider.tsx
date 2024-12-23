@@ -2,15 +2,15 @@ import { useState, ReactNode, useEffect } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
 import { TabulatureManagerApi } from '../api/TabulatureManagerApi';
-import { TabulatureView } from '../components/TabulatureView';
 
 interface TabulatureProviderProps {
     children: ReactNode;
+    initialtabulature: ITabulature;
 }
 
-export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children}) => {
+export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children, initialtabulature }) => {
 
-    const [tabulature, setTabulature] = useState<ITabulature | null>();
+    const [tabulature, setTabulature] = useState<ITabulature>(initialtabulature);
 
     const [globalTempo, setGlobalTempo] = useState(100);
     const [globalNumerator, setGlobalNumerator] = useState(4);
@@ -23,37 +23,6 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     useEffect(() => {
 
     }, [tabulature])
-
-    const downloadTabulature = async (id: number): Promise<boolean> => {
-        const downloadedTab = await TabulatureManagerApi.downloadTabulature(id);
-        if (!downloadedTab) {
-            return false
-        }
-        setTabulature(downloadedTab);
-        return true;
-    }
-
-    const addTabulature = async (token: string, newTabulature: ITabulature): Promise<boolean> => {
-        const success = await TabulatureManagerApi.addTabulature(token, newTabulature);
-        console.log(success)
-        if (!success) {
-            return false
-        }
-        setTabulature(newTabulature);
-        return true;
-    }
-
-    const updateTabulature = async (token: string): Promise<boolean> => {
-        return await TabulatureManagerApi.updateTabulature(token);
-    }
-
-    const deleteTabulature = async (token: string, id: number): Promise<boolean> => {
-        const success = await TabulatureManagerApi.deleteTabulature(token, id);
-        if (success) {
-            setTabulature(null);
-        }
-        return success;
-    }
 
     const addMeasure = (tempo: number, numerator: number, denominator: number, token: string) => {
         if (!tabulature)
@@ -130,10 +99,6 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         shiftOnDelete,
         setShiftOnDelete,
 
-        downloadTabulature,
-        addTabulature,
-        updateTabulature,
-        deleteTabulature,
         getMeasuresCount,
         copyMeasure
     }

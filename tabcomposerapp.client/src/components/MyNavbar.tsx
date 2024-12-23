@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navbar, Nav, Container, Form, InputGroup } from "react-bootstrap";
 import { MyOffcanvas } from "./MyOffcanvas";
 import { useAuth } from "./../hooks/useAuth"
 import { Account } from "./Account";
+import { CreateTabulature } from "./tablature/CreateTabulature";
 
 
 
@@ -47,6 +48,7 @@ export const MyNavbar = () => {
                             
                             {user && (
                                 <>
+                                    <CreateTabulature navlink={true}></CreateTabulature>
                                     <Nav.Link as={Link} to="/mytabs">My Tabs</Nav.Link>
                                     <MyOffcanvas
                                         title={"Hello " + user?.username || ""}

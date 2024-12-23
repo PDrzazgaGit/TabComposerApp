@@ -1,10 +1,9 @@
-import { Button, ButtonGroup, Container, Dropdown, FormControl, InputGroup, Popover, Col, Row } from "react-bootstrap";
-import { useTabulature } from "../hooks/useTabulature";
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { NoteDuration, Articulation } from "../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
 import { useState } from "react";
+import { Container, Col, InputGroup, Button, FormControl } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
+import { useTabulature } from "../../../hooks/useTabulature";
+import { SessionExpired } from "../../SessionExpired";
 
 
 
@@ -16,12 +15,10 @@ export const AddMeasureView = () => {
 
     const [measureToCopy, setMeasureToCopy] = useState(getMeasuresCount()-1);
 
-    const navigate = useNavigate();
-
     const handleAddMeasure = async () => {
         const token = await getToken();
         if (!token) {
-            navigate('/login');
+            <SessionExpired/>
             return;
         }
         addMeasure(globalTempo, globalNumerator, globalDenominator, token);
@@ -30,7 +27,7 @@ export const AddMeasureView = () => {
     const handleCopyMeasure = async () => {
         const token = await getToken();
         if (!token) {
-            navigate('/login');
+            <SessionExpired />
             return;
         }
         copyMeasure(measureToCopy);

@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { INote, NoteDuration, NoteKind, IPause, Articulation } from '../models';
-import { useMeasure } from '../hooks/useMeasure';
-import { FormControl, InputGroup, OverlayTrigger, Popover, Button, ButtonGroup, FormCheck } from 'react-bootstrap';
-import Dropdown from 'react-bootstrap/Dropdown';
+import { useState } from "react";
+import { Popover, InputGroup, FormControl, Dropdown, FormCheck, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
+import { useError } from "../../../hooks/useError";
+import { useMeasure } from "../../../hooks/useMeasure";
+import { useTabulature } from "../../../hooks/useTabulature";
+import { INote, IPause, NoteKind, NoteDuration, Articulation } from "../../../models";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
+import { NoteView } from "./NoteView";
 
-import { pauseRepresentationMap, noteRepresentationMap } from "../utils/noteUtils";
-import './../styles/NoteView.css';
-import { NoteView } from './NoteView';
-import { useError } from '../hooks/useError';
-import { useTabulature } from '../hooks/useTabulature';
-import { NotePlayer } from '../services/audio/NotePlayer';
 //import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
     note: INote | IPause;

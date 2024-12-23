@@ -1,14 +1,13 @@
-import { useMemo, useCallback, useState, useEffect } from "react";
-import { useMeasure } from "../hooks/useMeasure";
-import { useTabulature } from "../hooks/useTabulature";
-import { NoteView } from "./NoteView";
-import './../styles/StringView.css';
-import { NoteEditorView } from "./NoteEditorView";
-import { Button, ButtonGroup, Dropdown, DropdownButton, FormControl, InputGroup, OverlayTrigger, Popover, Tooltip } from "react-bootstrap";
-import { Articulation, IMeasure, INote, IPause, NoteDuration, NoteKind, Sound } from "../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../utils/noteUtils";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { Popover, InputGroup, Dropdown, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
+import { useError } from "../../../hooks/useError";
+import { useMeasure } from "../../../hooks/useMeasure";
+import { useTabulature } from "../../../hooks/useTabulature";
+import { NoteDuration, Sound, NoteKind, IMeasure, INote, Articulation } from "../../../models";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
+import { NoteEditorView } from "../notes/NoteEditorView";
 import { v4 as uuidv4 } from 'uuid';
-import { useError } from "../hooks/useError";
+import "../../../styles/StringView.css"
 
 interface StringEditorViewProps {
     stringId: number;

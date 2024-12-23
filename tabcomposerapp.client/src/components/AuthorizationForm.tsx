@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-//import { apiErrorFormatter } from '../api/ApiErrorFormatter';
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom';
 

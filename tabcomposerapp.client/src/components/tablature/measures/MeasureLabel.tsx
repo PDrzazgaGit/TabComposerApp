@@ -1,5 +1,5 @@
-import { useMeasure } from "../hooks/useMeasure";
 import { forwardRef } from 'react';
+import { useMeasure } from '../../../hooks/useMeasure';
 
 interface MeasureLabelProps {
     isHovered?: boolean;

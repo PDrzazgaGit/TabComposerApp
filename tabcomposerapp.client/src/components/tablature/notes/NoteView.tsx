@@ -1,9 +1,8 @@
-import { useState, useEffect, forwardRef } from 'react';
-import { INote, NoteKind, IPause } from '../models';
-import { pauseRepresentationMap } from "../utils/noteUtils";
+import { forwardRef, useState, useEffect } from "react";
+import { INote, IPause, NoteKind } from "../../../models";
+import { pauseRepresentationMap } from "../../../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
-import './../styles/NoteView.css';
-import { relative } from 'path';
+import "../../../styles/NoteView.css"
 
 interface NoteViewProps {
     note: INote | IPause;

@@ -4,8 +4,7 @@ interface TabulatureContextType {
 
     getMeasuresCount: () => number;
 
-    tabulature: ITabulature | null;
-    setTabulature: (tabulature: ITabulature | null) => void;
+    tabulature: ITabulature;
 
     measuresPerRow: number;
     setMeasuresPerRow: (measures: number) => void;
@@ -27,14 +26,6 @@ interface TabulatureContextType {
 
     shiftOnDelete: boolean;
     setShiftOnDelete: (shift: boolean) => void;
-
-    downloadTabulature: (id: number) => Promise<boolean>
-
-    addTabulature: (token: string, newTabulature: ITabulature) => Promise<boolean>
-
-    updateTabulature: (token: string) => Promise<boolean> 
-
-    deleteTabulature: (token: string, id: number) => Promise<boolean> 
 
     addMeasure: (tempo: number, numerator: number, denominator: number, token: string) => void;
 

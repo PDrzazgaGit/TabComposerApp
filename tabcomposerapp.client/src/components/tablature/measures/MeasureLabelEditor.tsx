@@ -1,11 +1,11 @@
-import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
-import { useMeasure } from "../hooks/useMeasure";
 import { useState } from "react";
-import { useError } from "../hooks/useError";
+import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { useAuth } from "../../../hooks/useAuth";
+import { useError } from "../../../hooks/useError";
+import { useMeasure } from "../../../hooks/useMeasure";
+import { useTabulature } from "../../../hooks/useTabulature";
 import { MeasureLabel } from "./MeasureLabel";
-import { useTabulature } from "../hooks/useTabulature";
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { SessionExpired } from "../../SessionExpired";
 
 export const MeasureLabelEditor = () => {
 
@@ -22,8 +22,6 @@ export const MeasureLabelEditor = () => {
     const [numerator, setNumerator] = useState(measure.numerator);
     const [denominator, setDenominator] = useState(measure.denominator);
     const [tempo, setTempo] = useState(measure.tempo);
-
-    const navigate = useNavigate();
 
     const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newTempo = event.target.valueAsNumber;
@@ -62,7 +60,7 @@ export const MeasureLabelEditor = () => {
     const handleDeleteMeasure = async () => {
         const token = await getToken();
         if (!token) {
-            navigate('/login');
+            <SessionExpired />
             return;
         }
         deleteMeasure(measure, token);

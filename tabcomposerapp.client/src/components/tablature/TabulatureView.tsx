@@ -1,24 +1,16 @@
-import { MeasureProvider } from "../context/MeasureProvider";
-import { useTabulature } from "../hooks/useTabulature";
-import { MeasureLabel } from "./MeasureLabel";
-import { MeasureView } from "./MeasureView";
-import { StickyPanel } from "./StickyPanel";
+import { MeasureProvider } from "../../context/MeasureProvider";
+import { useTabulature } from "../../hooks/useTabulature";
+import { MeasureLabel } from "./measures/MeasureLabel";
+import { MeasureView } from "./measures/MeasureView";
 import { TabulatureContainer } from "./TabulatureContainer";
+import { EditorToolbar } from "./toolbar/EditorToolbar";
 
 export const TabulatureView = () => {
 
     const { tabulature, measuresPerRow } = useTabulature();
 
-    const renderFooterContent = () => {
-        return (
-            <div>
-                Hello
-            </div>
-        );
-    }
-
     return (
-        <StickyPanel content={renderFooterContent()}>
+        <EditorToolbar playerMode={ true }>
             <div
                 className="d-flex justify-content-center align-items-center mb-3 column"
             >
@@ -37,8 +29,6 @@ export const TabulatureView = () => {
                     )
                 })}
             </TabulatureContainer>
-
-
-        </StickyPanel>
+        </EditorToolbar>
     );
 }

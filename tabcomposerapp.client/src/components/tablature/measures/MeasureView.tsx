@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
-import {useMeasure } from "./../hooks/useMeasure"
-import { useTabulature } from "./../hooks/useTabulature"
-import { StringEditorView } from "./StringEditorView";
-import { StringView } from "./StringView";
+import { useMeasure } from "../../../hooks/useMeasure";
+import { useTabulature } from "../../../hooks/useTabulature";
+import { StringEditorView } from "../strings/StringEditorView";
+import { StringView } from "../strings/StringView";
+
 
 interface MeasureViewProps {
     isEditor?: boolean;

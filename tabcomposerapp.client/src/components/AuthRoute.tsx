@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { SessionExpired } from './SessionExpired';
 
 export const AuthRoute: React.FC = () => {
 
-    const { authorize, user } = useAuth();
+    const { authorize } = useAuth();
 
+    const [authorized, setAuthorized] = useState<boolean | undefined>();
+
+    const [rendered, setRendered] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchAuthorized = async () => {
-            await authorize();
+            const success = await authorize();
+            setAuthorized(success);
+            setRendered(true);
         }
         fetchAuthorized();
+        
     }, [authorize])
 
-    return user && <Outlet /> || (<Navigate to="/login" replace />);
+    //return authorized === undefined && <Outlet />;
+
+    return rendered && (authorized && <Outlet /> || (<SessionExpired/>));
 };

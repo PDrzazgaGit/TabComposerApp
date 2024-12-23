@@ -1,20 +1,27 @@
 import { Container } from "react-bootstrap";
-import { TabulatureView } from "../TabulatureView";
-import { useEffect } from "react";
-import { useTabulature } from "../../hooks/useTabulature";
-import { useNavigate } from "react-router-dom";
+import { TabulatureView } from "../tablature/TabulatureView";
+import { TabulatureProvider } from "../../context/TabulatureProvider";
+import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
+import { useEffect, useState } from "react";
+import { ITabulature } from "../../models";
 
 export const Player = () => {
 
-    const { tabulature } = useTabulature();
+    const [tabulature, setTabulature] = useState<ITabulature | null>();
 
-    //const navigate = useNavigate();
+    useEffect(() => {
+        setTabulature(TabulatureManagerApi.getTabualture())
+    }, [])
+
+    if (!tabulature)
+        return (<></>)
 
     return (
-        <Container className="mb-3">
-            {tabulature && (
+
+        <TabulatureProvider initialtabulature={tabulature}>
+            <Container className="mb-3">
                 <TabulatureView />
-            )}
-        </Container>
+            </Container>
+        </TabulatureProvider> 
     );
 }

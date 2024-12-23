@@ -1,21 +1,30 @@
-import { Container, Row, Col, Button, Badge, ButtonGroup, Dropdown, FormCheck, FormControl, InputGroup, Popover, OverlayTrigger, Card } from "react-bootstrap";
-import { getTabulature, getUserTabulaturesInfo } from "../../api/TabulatureService";
-import { useAuth } from "../../hooks/useAuth";
-import { Key, useEffect, useMemo, useReducer, useState } from "react";
-import { Notation } from "../../models/NotationModel";
-import { useTabulature } from "../../hooks/useTabulature";
-import { SerializationService } from "../../services/SerializationService";
+import { useState, useEffect, Key } from "react";
+import { Container, Row, Col, Card, ButtonGroup, Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { TabulatureDataModel } from "../../models/TabulatureDataModel";
 import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
-import { NoteDuration, Articulation } from "../../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../../utils/noteUtils";
+import { useAuth } from "../../hooks/useAuth";
+//import { useTabulature } from "../../hooks/useTabulature";
+import { Notation } from "../../models";
+import { TabulatureDataModel } from "../../models/TabulatureDataModel";
+import { CreateTabulature } from "../tablature/CreateTabulature";
+import { SessionExpired } from "../SessionExpired";
+
 
 
 export const UserTabs = () => {
     const { getToken } = useAuth();
-    const { setTabulature, downloadTabulature, deleteTabulature } = useTabulature();
+   // const { setTabulature, downloadTabulature, deleteTabulature } = useTabulature();
     const [tabInfo, setTabInfo] = useState<Record<number, TabulatureDataModel> | null>(null);
+
+    const [showDelete, setShowDelete] = useState(false);
+
+    const handleCloseDelete = (id?: number) => {
+        if (id) {
+            handleDelete(id);
+        }
+        setShowDelete(false)
+    };
+    const handleShowDelete = () => setShowDelete(true);
 
     const  navigate  = useNavigate();
 
@@ -30,7 +39,7 @@ export const UserTabs = () => {
                     //b³¹d
                 }
             } else {
-                navigate('/');
+                <SessionExpired/>
             }
         };
         fetchTablatureData();
@@ -38,20 +47,31 @@ export const UserTabs = () => {
 
 
     const handlePlay = async (id: number) => {
-        const success = await downloadTabulature(id);
-        console.log(success);
-        navigate("/player");
+
+        const result = await TabulatureManagerApi.downloadTabulature(id);
+        if (!result) {
+            //
+        } else {
+            navigate("/player");
+        }
+       
     }
 
     const handleEdit = async (id: number) => {
-        await downloadTabulature(id);
-        navigate("/editor");
+
+        const result = await TabulatureManagerApi.downloadTabulature(id);
+
+        if (!result) {
+            //
+        } else {
+            navigate("/editor");
+        }
     }
 
     const handleDelete = async (id: number) => {
         const token = await getToken();
         if (token) {
-            const success = await deleteTabulature(token, id);
+            const success = await TabulatureManagerApi.deleteTabulature(token, id)//await deleteTabulature(token, id);
             if (success) {
                 setTabInfo(prev => {
                     if (!prev) return prev;
@@ -61,47 +81,9 @@ export const UserTabs = () => {
                 });
             }
         } else {
-            navigate("/login");
+            <SessionExpired />
         }
     };
-
-    const handleNewTablature = () => {
-        setTabulature(null)
-        navigate("/editor");
-    }
-
-    const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>, id: number) => (
-        <Popover
-            id={"popover_delete_tab"}
-            onClick={(e) => e.stopPropagation()}
-            {...props}
-        >
-            <Popover.Header as="h3">Are you sure?</Popover.Header>
-            <Popover.Body className="d-flex justify-content-center align-items-center row gap-3">
-                
-                <InputGroup className="w-100">
-                    <Button
-                        variant="light"
-                        className="w-50"
-                        onClick={() => { document.body.click() }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="danger"
-                        className="w-50"
-                        onClick={() => { handleDelete(id)} }
-                    >
-                        Delete
-                    </Button>
-                    
-                </InputGroup>
-                <div className="d-flex justify-content-center align-items-center text-danger">
-                    You cannot undo this action
-                </div>
-            </Popover.Body>
-        </Popover>
-    )
 
     if (!tabInfo) return (<></>);
 
@@ -159,20 +141,27 @@ export const UserTabs = () => {
                                     >
                                         Edit
                                     </Button>
-                                    <OverlayTrigger
-                                        trigger="click"
-                                        placement="bottom-start"
-                                        overlay={(e) => renderPopover(e,Number(key))}
-                                        rootClose
-                                        flip
+                                    <Button
+                                        variant="danger"
+                                        className="w-100"
+                                        onClick={handleShowDelete}
                                     >
-                                        <Button
-                                            variant="danger"
-                                            className="w-100"
-                                        >
-                                            Delete
-                                        </Button>
-                                    </OverlayTrigger>
+                                        Delete
+                                    </Button>
+                                    <Modal show={showDelete} onHide={handleCloseDelete}>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Are your sure?</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>You cannot undo this action!</Modal.Body>
+                                        <Modal.Footer>
+                                            <Button variant="light" onClick={() => handleCloseDelete()}>
+                                                Cancel
+                                            </Button>
+                                            <Button variant="danger" onClick={() => handleCloseDelete(Number(key))}>
+                                                Delete
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
                                 </ButtonGroup>
                             </Col>
                         </Row>
@@ -184,12 +173,7 @@ export const UserTabs = () => {
             ))}
             <Row className="align-items-center mb-3">
                 <Col className="text-center">
-                    <Button
-                        variant="success"
-                        onClick={() => handleNewTablature()}
-                    >
-                        New Tablature
-                    </Button>
+                    <CreateTabulature/>
                 </Col>
             </Row>
         </Container>

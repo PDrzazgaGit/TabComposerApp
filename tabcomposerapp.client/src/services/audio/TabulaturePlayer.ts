@@ -61,10 +61,11 @@ export class TabulaturePlayer {
             this.transport.start();
             return;
         }
+        
         await Tone.start(); 
         this.scheduleNotes();
         this.transport.start();
-
+        console.log(this.transport.state)
     }
 
     public stop(time?: number): void {
