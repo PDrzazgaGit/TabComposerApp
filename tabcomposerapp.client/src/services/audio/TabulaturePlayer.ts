@@ -1,7 +1,5 @@
 import * as Tone from "tone";
 
-import { PlaybackState } from "tone";
-
 import { IMeasure, INote, IPause, ITabulature, NoteKind } from "../../models";
 import { TransportClass } from "tone/build/esm/core/clock/Transport";
 
@@ -10,29 +8,31 @@ export class TabulaturePlayer {
     private tabulature: ITabulature;
     private synth: Tone.PolySynth;
     private transport: TransportClass;
-    private defaultSpeed: number;
+    private readonly defaultSpeed: number;
+    private currentSpeed: number;
 
     constructor(tabulature: ITabulature) {
         this.tabulature = tabulature;
         this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
         this.transport = Tone.getTransport();
         this.defaultSpeed = this.transport.bpm.value;
+        this.currentSpeed = this.defaultSpeed;
     }
 
     private scheduleNotes(): void {
         let currentTime = 0;
-        console.log(currentTime)
+        let stopTime = 0;
         this.tabulature.forEach((measure: IMeasure) => {
             measure.forEach((notes: (INote | IPause)[]) => {
-                console.log()
                 notes.forEach(note => {
                     const duration = note.getDurationMs() / 1000; 
                     const timeStamp = note.getTimeStampMs() / 1000 + currentTime; 
                     if (note.kind === NoteKind.Pause) {
                         return;
                     }
+                    stopTime += duration;
                     this.transport.schedule((time) => {
-
+                        this.transport.bpm.value = this.currentSpeed;
                         this.synth.triggerAttackRelease(
                             (note as INote).frequency,
                             duration,
@@ -44,12 +44,10 @@ export class TabulaturePlayer {
             });
 
             currentTime += measure.measureDurationMs / 1000; // Przesuñ czas o d³ugoœæ taktu
-        });
+        }); 
         this.transport.scheduleOnce((time) => {
             this.stop();
-            console.log(time)
-
-        }, currentTime)
+        }, stopTime)
     }
 
     public async play(): Promise<void> {
@@ -61,18 +59,15 @@ export class TabulaturePlayer {
             this.transport.start();
             return;
         }
-        
         await Tone.start(); 
         this.scheduleNotes();
         this.transport.start();
-        console.log(this.transport.state)
     }
 
-    public stop(time?: number): void {
-        this.transport.stop(time);
-        this.transport.cancel(time);
-        //this.transport.dispose();
-        //Tone.
+    public stop(): void {
+        this.transport.stop();
+        this.transport.cancel();
+        this.transport.bpm.value = this.defaultSpeed;
     }
 
     public pause(): void {
@@ -83,25 +78,6 @@ export class TabulaturePlayer {
     }
 
     public changeTempo(factor: number): void {
-        if (factor < 0.25 || factor > 2) {
-            console.error('Factor must be between 0.25 and 2');
-            return;
-        }
-
-        // Zak³adaj¹c, ¿e mamy tempo bazowe
-        const currentBpm = Tone.Transport.bpm.value;
-        let newBpm;
-
-        if (factor === 1) {
-            // Jeœli faktor to 1, przywracamy tempo do pierwotnej wartoœci
-            newBpm = this.defaultSpeed; // U¿ywamy oryginalnego tempa
-        } else {
-            // Jeœli factor ró¿ni siê od 1, mno¿ymy przez factor
-            newBpm = currentBpm * factor;
-        }
-
-        // Stopniowa zmiana tempa (przejœcie do nowego tempa w ci¹gu 1 sekundy)
-        Tone.Transport.bpm.rampTo(newBpm, 1); // Zmieniamy tempo p³ynnie
-        console.log(`Nowe tempo: ${newBpm} BPM`);
+        this.currentSpeed = this.defaultSpeed * factor;
     }
 }

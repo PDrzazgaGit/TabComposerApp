@@ -4,24 +4,29 @@ import { TabulatureProvider } from "../../context/TabulatureProvider";
 import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { useState, useEffect } from "react";
 import { ITabulature } from "../../models";
+import { useNavigate } from "react-router-dom";
 
 export const Editor = () => {
 
     const [tabulature, setTabulature] = useState<ITabulature | null>();
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         setTabulature(TabulatureManagerApi.getTabualture())
     }, [])
 
-    if (!tabulature)
-        return (<></>)
-
     return (
-        <TabulatureProvider initialtabulature={tabulature}>
-            <Container className="mt-3">
-                <TabulatureEditorView />
-            </Container>
-        </TabulatureProvider>
+        <>
+            {tabulature && (
+                <TabulatureProvider initialtabulature={tabulature!}>
+                    <Container className="mt-3">
+                        <TabulatureEditorView />
+                    </Container>
+                </TabulatureProvider>
+            )}
+        </>
+        
         
     );
 }

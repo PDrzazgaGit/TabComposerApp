@@ -18,7 +18,7 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
     const [isHovered, setIsHovered] = useState(false);
 
     const [noteId] = useState<string>(`note-${uuidv4()}`);
-    
+
     useEffect(() => {
         if (onGenerateId) {
             onGenerateId(noteId);
