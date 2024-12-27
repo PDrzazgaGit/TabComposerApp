@@ -1,21 +1,20 @@
-import { FC, useCallback, useMemo } from "react"
+import { FC, useCallback } from "react"
 import { useMeasure } from "../../../hooks/useMeasure";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { Sound } from "../../../models";
 import { NoteView } from "../notes/NoteView";
 import "../../../styles/StringView.css"
+import { observer } from "mobx-react-lite";
 
 interface StringViewProps {
     stringId: number;
     isHovered?: boolean;
 }
 
-export const StringView: FC<StringViewProps> = ({
+export const StringView: FC<StringViewProps> = observer(({
     stringId,
     isHovered = false
 }) => {
-
-    //const [isHovered, setIsHovered] = useState(false);
 
     const { measureId, measure } = useMeasure();
 
@@ -24,14 +23,6 @@ export const StringView: FC<StringViewProps> = ({
     const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
 
     const stringMargin: number = 150;
-
-    const notes = useMemo(() => {
-        if (measure) {
-            return measure.getNotes(stringId);
-        }
-        return [];
-    }, [measure, stringId]);
-
 
     const calculatePosition = useCallback(
         (timestamp: number, containerWidth: number): number => {
@@ -66,7 +57,7 @@ export const StringView: FC<StringViewProps> = ({
                     }}
                 />
                 <div className="position-relative me-3">
-                    {notes
+                    {measure.getNotes(stringId)
                         .map((note, index) => (
                             <div key={index}
                                 style={{
@@ -81,6 +72,6 @@ export const StringView: FC<StringViewProps> = ({
                 </div>
             </div>
         </div>
-        
+
     )
-}
+})

@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeObservable, observable, computed, action } from 'mobx';
 import { Notation } from './NotationModel'
 
 export class Sound {
@@ -9,7 +9,18 @@ export class Sound {
         protected durationMs: number = 500
        
     ) {
-        makeAutoObservable(this);
+        //makeAutoObservable(this);
+        makeObservable(this, {
+            frequency: observable, // Obserwowalna w³aœciwoœæ
+            notation: observable,  // Obserwowalna w³aœciwoœæ
+            octave: observable,    // Obserwowalna w³aœciwoœæ
+            //durationMs: observable, // Chroniona, ale nadal obserwowalna
+
+            getName: action,     // Getter jako computed
+            getDurationMs: action, // Getter jako computed
+
+            setDurationMs: action, // Akcja
+        });
     }
 
     public getName(): string {

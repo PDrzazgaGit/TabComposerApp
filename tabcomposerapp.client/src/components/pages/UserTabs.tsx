@@ -62,8 +62,9 @@ export const UserTabs = () => {
         const result = await TabulatureManagerApi.downloadTabulature(id);
 
         if (!result) {
-            //
+            console.log("fd")
         } else {
+            
             navigate("/editor");
         }
     }

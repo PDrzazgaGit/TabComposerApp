@@ -6,6 +6,7 @@ import { useTabulature } from "../../../hooks/useTabulature";
 import { INote, IPause, NoteKind, NoteDuration, Articulation } from "../../../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
 import { NoteView } from "./NoteView";
+import { observer } from "mobx-react-lite";
 
 //import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
@@ -13,20 +14,23 @@ interface NoteEditorViewProps {
     stringId: number;
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, stringId }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
-     
+
     const [noteId, setNoteId] = useState<string | null>(null);
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
     const [slide, setSlide] = useState(false);
+
+    const [fret, setFret] = useState(isNote(note) ? note.fret : -1);
+
     const [overflow, setOverflow] = useState(true);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation, setNodeSlide, setNodeOverflow } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation, setNodeSlide, setNodeOverflow, measure } = useMeasure();
 
     const { shiftOnDelete } = useTabulature();
 
@@ -55,12 +59,12 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         }
     };
 
-    const handleDeleteNote = () => {  
+    const handleDeleteNote = () => {
         deleteNote(note, stringId, shiftOnDelete);
         document.body.click();
     }
 
-    const handleMoveRight = () => {     
+    const handleMoveRight = () => {
         if (moveNoteRight(note, stringId, selectedInterval)) {
             document.body.click();
             clearNoteEditorErrors();
@@ -75,18 +79,18 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             clearNoteEditorErrors();
         } else {
             setNoteEditorErrors({ ['moveNote']: ["Can't move left."] })
-        }     
+        }
     }
 
     const handleChangeArticulation = (articulation: Articulation) => {
         if (!isNote(note))
-            return; 
+            return;
         changeArticulation(note, stringId, articulation);
     }
 
     const handleSlide = (checkBox: React.ChangeEvent<HTMLInputElement>) => {
         if (!isNote(note))
-            return; 
+            return;
         const isChecked = checkBox.target.checked;
         setSlide(isChecked);
         setNodeSlide(note, stringId, isChecked);
@@ -102,17 +106,16 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
 
     const saveChanges = (newFret: number) => {
         if (!isNote(note))
-            return;  
-        else {
-            if (note.fret === newFret)
-                return;
+            return;
+        else { 
             changeFret(note, stringId, newFret);
+            setFret(newFret);
         }
     };
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
         <Popover
-            id={"popover_" + noteId} 
+            id={"popover_" + noteId}
             onClick={(e) => e.stopPropagation()}
             {...props}
         >
@@ -123,7 +126,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                         <InputGroup.Text>Fret</InputGroup.Text>
                         <FormControl
                             type="number"
-                            value={note.fret}
+                            value={fret}
                             onChange={handleFretChange}
                             onBlur={handleHide}
                             min={0}
@@ -133,7 +136,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                 )}
 
                 <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center" >
-                    <Dropdown 
+                    <Dropdown
                         drop="down-centered"
                     >
                         <Dropdown.Toggle
@@ -175,14 +178,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {Object.keys(Articulation)
-                                    .filter((key) => !isNaN(Number(key))) 
+                                    .filter((key) => !isNaN(Number(key)))
                                     .map((symbol) => (
-                                    <Dropdown.Item
-                                        key={symbol + "_articulation"}
+                                        <Dropdown.Item
+                                            key={symbol + "_articulation"}
                                             onClick={() => handleChangeArticulation(Number(symbol))}
-                                    >
+                                        >
                                             {Articulation[symbol as unknown as number]}
-                                    </Dropdown.Item>
+                                        </Dropdown.Item>
                                     ))}
                                 <Dropdown.Item
                                     onClick={(e) => e.stopPropagation()}
@@ -213,7 +216,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                             onChange={handleOverflow}
                                         />
                                     </Dropdown.Item>
-                                )} 
+                                )}
                             </Dropdown.Menu>
                         </Dropdown>
                     </InputGroup>
@@ -233,9 +236,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             <div className="flex-grow-1">
                                 {isNote(note) ? noteRepresentationMap[selectedInterval] : pauseRepresentationMap[selectedInterval]}
                             </div>
-                            <i className="bi bi-arrow-left flex-grow-1"></i>                         
+                            <i className="bi bi-arrow-left flex-grow-1"></i>
                         </Button>
-                        
+
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
                         <Dropdown.Menu>
                             {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
@@ -258,7 +261,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             <div className="flex-grow-1">
                                 {isNote(note) ? noteRepresentationMap[selectedInterval] : pauseRepresentationMap[selectedInterval]}
                             </div>
-                           
+
                         </Button>
                     </Dropdown>
                 </InputGroup>
@@ -274,9 +277,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                     <Button
                         className="w-100"
                         variant="danger"
-                        onClick={()=> handleDeleteNote()}
+                        onClick={() => handleDeleteNote()}
                     >
-                        Delete { isNote(note) && 'Note' || 'Pause' }
+                        Delete {isNote(note) && 'Note' || 'Pause'}
                     </Button>
                 </InputGroup>
             </Popover.Body>
@@ -301,10 +304,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             trigger="click"
             placement="bottom"
             overlay={renderPopover}
-            rootClose 
+            rootClose
             onEnter={handleEnter}
             flip
-            >
+        >
             <div
                 onClick={(e) => e.stopPropagation()}
                 style={{
@@ -313,9 +316,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                     padding: '0'
                 }}
             >
-                <NoteView note={note} onGenerateId={ handleGenerateId }></NoteView>
+                <NoteView note={note} onGenerateId={handleGenerateId}></NoteView>
             </div>
-            
+
         </OverlayTrigger>
     );
-};
+})

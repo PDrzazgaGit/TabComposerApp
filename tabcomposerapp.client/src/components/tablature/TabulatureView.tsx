@@ -21,7 +21,7 @@ export const TabulatureView = () => {
             <TabulatureContainer maxItemsPerRow={measuresPerRow} >
                 {tabulature!.map((measure, index) => {
                     return (
-                        <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
+                        <MeasureProvider key={index} measure={measure} initialMeasureId={index}>
                             <MeasureLabel />
                             <MeasureView isEditor={false} measurePerRow={measuresPerRow} />
 

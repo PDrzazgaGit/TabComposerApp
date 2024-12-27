@@ -3,6 +3,7 @@ import { INote, IPause, NoteKind } from "../../../models";
 import { pauseRepresentationMap } from "../../../utils/noteUtils";
 import { v4 as uuidv4 } from 'uuid';
 import "../../../styles/NoteView.css"
+import { observer } from "mobx-react-lite";
 
 interface NoteViewProps {
     note: INote | IPause;
@@ -10,7 +11,7 @@ interface NoteViewProps {
     onClick?: () => void; 
 }
 
-export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGenerateId, onClick }, ref) => {
+export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGenerateId, onClick }, ref) => {
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
@@ -24,11 +25,11 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
             onGenerateId(noteId);
         }
     }, [noteId, onGenerateId]);
-    
+
     return (
         <div
             ref={ref}
-            onClick={onClick} 
+            onClick={onClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{
@@ -40,7 +41,7 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
                 alignItems: "center"
             }}
         >
-        
+
             <div
                 className="note-square"
             >
@@ -56,4 +57,4 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
             </div>
         </div>
     );
-});
+}))

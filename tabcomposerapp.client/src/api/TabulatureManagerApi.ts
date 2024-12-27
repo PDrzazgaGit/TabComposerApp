@@ -27,10 +27,13 @@ export class TabulatureManagerApi {
         try {
             const response = await axios.get(`https://localhost:44366/api/Tablature/GetTablature/${id}`);
             const tabulatureData: string = response.data.tablature as string; 
+            
             this.tabulature = SerializationService.deserializeTabulature(tabulatureData);
+            
             this.tabulatureId = id;
             return this.tabulature;
-        } catch {
+        } catch (e) {
+            console.log(e)
             return null;
         }
     }

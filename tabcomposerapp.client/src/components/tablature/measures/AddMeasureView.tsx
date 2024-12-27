@@ -30,7 +30,7 @@ export const AddMeasureView = () => {
             <SessionExpired />
             return;
         }
-        copyMeasure(measureToCopy);
+        copyMeasure(measureToCopy, token);
     }
 
     return (

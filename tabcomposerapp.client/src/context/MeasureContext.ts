@@ -16,7 +16,7 @@ interface MeasureContextType {
     addPause: (stringId: number, noteDuration?: NoteDuration) => boolean;
     changeSignature: (numerator: number, denominator: number) => boolean;
     changeTempo: (tempo: number) => void;
-    changeArticulation: (note: INote, stringId: number, articulation: Articulation) => boolean;
+    changeArticulation: (note: INote, stringId: number, articulation: Articulation) => void;
     setNodeSlide: (note: INote, stringId: number, slide: boolean) => void;
     setNodeOverflow: (note: INote, stringId: number, slide: boolean) => void;
 }

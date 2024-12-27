@@ -10,9 +10,10 @@ import { Modal, Button, FormControl, InputGroup } from "react-bootstrap";
 import { useAuth } from "../../hooks/useAuth";
 import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { SessionExpired } from "../SessionExpired";
+import { observer } from "mobx-react-lite";
 
 
-export const TabulatureEditorView = () => {
+export const TabulatureEditorView = observer(() => {
 
     const {
         tabulature,
@@ -21,29 +22,24 @@ export const TabulatureEditorView = () => {
 
     const { getToken } = useAuth();
 
-    const [title, setTitle] = useState<string>(tabulature.title);
-
-    const [maxFrets, setMaxFrets] = useState(tabulature.frets);
-
-    const [description, setDescription] = useState(tabulature.description);
-
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(event.target.value);
+        tabulature.title = event.target.value;
     }
 
     const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setMaxFrets(event.target.valueAsNumber);
+        tabulature.frets = event.target.valueAsNumber;
     }
 
     const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDescription(event.target.value);
+        tabulature.description = event.target.value;
     }
 
     const handleCloseEditModal = () => {
         setShowEditModal(false)
     };
+
     const handleShowEditModal = () => setShowEditModal(true);
 
     const handleSaveEditModal = async () => {
@@ -51,9 +47,6 @@ export const TabulatureEditorView = () => {
 
         const token = await getToken();
         if (token) {
-            tabulature.description = description;
-            tabulature.frets = maxFrets;
-            tabulature.title = title;
             const success = await TabulatureManagerApi.updateTabulature(token);
             if (!success) {
                 //
@@ -74,7 +67,7 @@ export const TabulatureEditorView = () => {
                     }}
                     onClick={handleShowEditModal}
                 >
-                    {title}
+                    {tabulature.title}
                 </h1>
                 <Modal show={showEditModal} onHide={handleCloseEditModal}>
                     <Modal.Header closeButton>
@@ -87,7 +80,7 @@ export const TabulatureEditorView = () => {
                             <InputGroup.Text>Title</InputGroup.Text>
                             <FormControl
                                 type="text"
-                                value={title}
+                                value={tabulature.title}
                                 onChange={handleTitleChange}
                             />
                         </InputGroup>
@@ -99,7 +92,7 @@ export const TabulatureEditorView = () => {
                                 type="number"
                                 min={12}
                                 max={30}
-                                value={maxFrets}
+                                value={tabulature.frets}
                                 onChange={handleChangeMaxFrets}
                             />
                         </InputGroup>
@@ -109,7 +102,7 @@ export const TabulatureEditorView = () => {
                             <InputGroup.Text>Description</InputGroup.Text>
                             <FormControl
                                 type="text"
-                                value={description}
+                                value={tabulature.description}
                                 onChange={handleChangeDescription}
                             />
                         </InputGroup>
@@ -127,7 +120,7 @@ export const TabulatureEditorView = () => {
             <TabulatureContainer maxItemsPerRow={measuresPerRow} >
                 {tabulature.map((measure, index) => {
                     return (
-                        <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
+                        <MeasureProvider key={index} measure={measure} initialMeasureId={index}>
                             <MeasureLabelEditor />
                             <MeasureView isEditor={true} measurePerRow={measuresPerRow} />
                         </MeasureProvider>
@@ -136,6 +129,6 @@ export const TabulatureEditorView = () => {
                 <AddMeasureView></AddMeasureView>
             </TabulatureContainer>
         </EditorToolbar>
-  );
-}
+    );
+})
 

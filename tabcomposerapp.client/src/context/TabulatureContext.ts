@@ -29,7 +29,7 @@ interface TabulatureContextType {
 
     addMeasure: (tempo: number, numerator: number, denominator: number, token: string) => void;
 
-    copyMeasure: (measureId: number) => boolean;
+    copyMeasure: (measureId: number, token: string) => boolean;
 
     deleteMeasure: (measure: IMeasure, token: string) => void;
 }

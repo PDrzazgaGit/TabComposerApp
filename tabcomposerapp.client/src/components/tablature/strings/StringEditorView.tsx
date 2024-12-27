@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Popover, InputGroup, Dropdown, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
 import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
@@ -8,12 +8,13 @@ import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/no
 import { NoteEditorView } from "../notes/NoteEditorView";
 import { v4 as uuidv4 } from 'uuid';
 import "../../../styles/StringView.css"
+import { observer } from "mobx-react-lite";
 
 interface StringEditorViewProps {
     stringId: number;
 }
 
-export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) => {
+export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ stringId }) => {
 
     const { tabulature, globalNoteDuration, measuresPerRow } = useTabulature();
 
@@ -22,8 +23,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     const [pauseDuration, setPauseDuration] = useState<NoteDuration>(globalNoteDuration);
 
     const [isHovered, setIsHovered] = useState(false);
-    
-    const { measureId, measure, addNote, addPause } = useMeasure();  
+
+    const { measureId, measure, addNote, addPause } = useMeasure();
 
     const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
 
@@ -31,19 +32,10 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
     const stringMargin: number = 150;
 
-   // const [notes, setNotes] = useState<(INote | IPause)[]>(measure.getNotes(stringId));
-  
-    const notes = useMemo(() => {
-        if (measure) {
-            return measure.getNotes(stringId);
-        }
-        return [];
-    }, [measure, stringId]); 
-     
     useEffect(() => {
         setNoteDuration(globalNoteDuration);
     }, [globalNoteDuration])
-    
+
 
     const calculatePosition = useCallback(
         (timestamp: number, containerWidth: number): number => {
@@ -80,7 +72,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         }
     }
 
-    const handleSetPauseDuration = (pD: NoteDuration) => {  
+    const handleSetPauseDuration = (pD: NoteDuration) => {
         if (measure.canPushNote(stringId, pD)) {
             setPauseDuration(pD)
             clearStringEditorErrors();
@@ -90,8 +82,10 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     }
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
-        <Popover id={`${stringId}_${uuidv4()}`} onClick={(e) => e.stopPropagation()} {...props}
-            //style={{ position: "static" }}
+        <Popover
+            id={`${stringId}_${uuidv4()}`}
+            onClick={(e) => e.stopPropagation()}
+            {...props}
         >
             <Popover.Header as="h3">String {`${stringSound.getName()}${stringSound.octave}`}</Popover.Header>
             <Popover.Body >
@@ -99,7 +93,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     <Dropdown
                         as={ButtonGroup}
                         drop="end"
-                       
+
                     >
                         <Button
                             variant="light"
@@ -110,7 +104,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
 
                         </Button>
                         <Dropdown.Toggle className="flex-grow-1" split variant="light" id="dropdown-split-basic" />
-                      
+
                         <Dropdown.Menu>
                             {Object.entries(noteRepresentationMap).map(([key, symbol]) => (
                                 <Dropdown.Item
@@ -131,12 +125,12 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                         </div>
                     </InputGroup>
                 )}
-                
+
                 <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
                     <Dropdown
                         as={ButtonGroup}
                         drop="end"
-                       
+
                     >
                         <Button
                             variant="light"
@@ -157,14 +151,14 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                                 </Dropdown.Item>
                             ))}
                         </Dropdown.Menu>
-                    </Dropdown>                    
+                    </Dropdown>
                 </InputGroup>
                 {stringEditorErrors["pauseDuration"] && (
                     <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
                         <div className="text-danger">
                             {stringEditorErrors["pauseDuration"]}
                         </div>
-                        
+
                     </InputGroup>
                 )}
             </Popover.Body>
@@ -188,7 +182,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                     position: 'absolute',
                     left: prevNoteTimeStamp !== 0 ? `calc(${startX}% + 0.6em)` : `${startX}%`,
                     width: prevNoteTimeStamp !== 0 ? `calc(${dx}% - 0.6em)` : `${dx}%`,
-                   // top: '-0.25em',
+                    // top: '-0.25em',
                     height: '1.5em',
                     overflow: 'visible',
                 }}
@@ -245,57 +239,57 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         containerWidth: number,
         full: boolean
     ) => {
-    const startX = calculatePosition(noteTimeStamp, containerWidth);
-    const endX = calculatePosition(noteTimeStamp + noteDuration, containerWidth);
+        const startX = calculatePosition(noteTimeStamp, containerWidth);
+        const endX = calculatePosition(noteTimeStamp + noteDuration, containerWidth);
 
-    const length = endX - startX;
+        const length = endX - startX;
 
-    const lengthRatio = length * 3 / 4;
+        const lengthRatio = length * 3 / 4;
 
-    const text: string = full ? 'full' : '1/2'
+        const text: string = full ? 'full' : '1/2'
 
-    return (
-        <svg
-            style={{
-                position: 'absolute',
-                background: 'transparent',
-                left: `calc(${startX}% + 0.6em)`,
-                width: `calc(${length}% - 0.6em)`,
-                top: '-0.25em', 
-                height: '1.5em',
-                overflow: 'visible',
-            }}
-            viewBox={`0 -2 ${length} 3`} preserveAspectRatio="none"
-        >
-            <path
-                d={`M 0 0 Q ${lengthRatio} 0 ${(lengthRatio)} -3.5`}
-                stroke="gray"
-                strokeWidth="0.25"
-                fill="transparent"
-                strokeLinecap="round"
-            />
-            <polygon
-                points={`
+        return (
+            <svg
+                style={{
+                    position: 'absolute',
+                    background: 'transparent',
+                    left: `calc(${startX}% + 0.6em)`,
+                    width: `calc(${length}% - 0.6em)`,
+                    top: '-0.25em',
+                    height: '1.5em',
+                    overflow: 'visible',
+                }}
+                viewBox={`0 -2 ${length} 3`} preserveAspectRatio="none"
+            >
+                <path
+                    d={`M 0 0 Q ${lengthRatio} 0 ${(lengthRatio)} -3.5`}
+                    stroke="gray"
+                    strokeWidth="0.25"
+                    fill="transparent"
+                    strokeLinecap="round"
+                />
+                <polygon
+                    points={`
                     ${lengthRatio - 1},-3.5 
                     ${lengthRatio + 1},-3.5 
                     ${lengthRatio},-4.5
                 `}
-                fill="gray"
-            />
-            <text
-                x={lengthRatio}
-                y="-4.5"
-                textAnchor="middle"
-                fontSize="1.5"
-                fontWeight="700"
-                letterSpacing="0.2em"
-                fill="gray"
-                fontFamily="Arial, sans-serif"
-            >
-                {text}
-            </text>
-            
-        </svg>
+                    fill="gray"
+                />
+                <text
+                    x={lengthRatio}
+                    y="-4.5"
+                    textAnchor="middle"
+                    fontSize="1.5"
+                    fontWeight="700"
+                    letterSpacing="0.2em"
+                    fill="gray"
+                    fontFamily="Arial, sans-serif"
+                >
+                    {text}
+                </text>
+
+            </svg>
         );
     };
 
@@ -381,7 +375,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
     const calculateLegatoOverflow = (): number => {
         const nextMeasure: IMeasure | undefined = tabulature!.getMeasure(measureId + 1);
         if (!nextMeasure) {
-            return 0;  
+            return 0;
         }
         const notes = nextMeasure.getNotes(stringId);
 
@@ -392,11 +386,11 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         const nextNote: INote = notes[0];
 
         if (measureId % measuresPerRow === 2) {
-            return measure.measureDurationMs + 2* stringMargin;
+            return measure.measureDurationMs + 2 * stringMargin;
         }
 
         return measure.measureDurationMs + 3 * stringMargin + nextNote.getTimeStampMs();
-        
+
     }
 
     const calculateSlideOverFlow = (): number => {
@@ -413,13 +407,13 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
             return 0;
         }
 
-        const prevNote: INote = notes[notes.length-1];
+        const prevNote: INote = notes[notes.length - 1];
 
         if (measureId % measuresPerRow === 0) {
             return 0;
         }
 
-        return  0 - stringMargin - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
+        return 0 - stringMargin - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
     }
 
     return (
@@ -433,8 +427,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-100 d-flex align-items-center"     
-                style={{ height: "1.5em" } }
+                className="w-100 d-flex align-items-center"
+                style={{ height: "1.5em" }}
             >
 
 
@@ -448,26 +442,26 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                         position: "relative",
                         height: "100%",
                     }}
-                    
+
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
-          
+
                     <div
                         className='string-line'
                         style={{
                             borderColor: isHovered ? '#007bff' : 'black'
                         }}
                     />
-                    
+
                     <div className="position-relative"
                         style={{
-                            marginRight: `${calculatePosition(stringMargin*2,100)}%`
+                            marginRight: `${calculatePosition(stringMargin * 2, 100)}%`
                         }}
                     >
-                        {notes.map((note, index) => {
-                            const prevNote = index > 0 ? notes[index - 1] : null;
-                            const nextNote = index < notes.length - 1 ? notes[index + 1] : null;
+                        {measure.getNotes(stringId).map((note, index) => {
+                            const prevNote = index > 0 ? measure.getNotes(stringId)[index - 1] : null;
+                            const nextNote = index < measure.getNotes(stringId).length - 1 ? measure.getNotes(stringId)[index + 1] : null;
                             const isSlide = note.slide;
                             const isLegato = note.articulation === Articulation.Legato;
                             const isBendFull = note.articulation === Articulation.BendFull;
@@ -476,11 +470,11 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                             const isBendHalfReturn = note.articulation === Articulation.BendHalfReturn;
 
                             return (
-                                <div key={ index}>
+                                <div key={index}>
                                     {isSlide && note.overflow &&
-                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)       
+                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)
                                         || (isSlide && !note.overflow) &&
-                                        renderSlide(note.getTimeStampMs()-50, note.getTimeStampMs() + stringMargin, 100, false)
+                                        renderSlide(note.getTimeStampMs() - 50, note.getTimeStampMs() + stringMargin, 100, false)
                                     }
                                     {isLegato && renderLegato(nextNote ? nextNote.getTimeStampMs() + stringMargin : calculateLegatoOverflow(), note.getTimeStampMs() + stringMargin, 100)}
                                     {isBendFull && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}
@@ -498,14 +492,14 @@ export const StringEditorView: React.FC<StringEditorViewProps> = ({ stringId }) 
                                         <NoteEditorView note={note} stringId={stringId} />
                                     </div>
                                 </div>
-                                
+
                             );
                         })}
                     </div>
-                    
+
                 </div>
             </div>
-            
+
         </OverlayTrigger>
     );
-}
+})

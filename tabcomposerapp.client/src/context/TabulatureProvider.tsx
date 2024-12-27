@@ -25,51 +25,29 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     }, [tabulature])
 
     const addMeasure = (tempo: number, numerator: number, denominator: number, token: string) => {
-        if (!tabulature)
-            return
-      //  console.log("heheh")
-        const tabulatureNew = TabulatureManagerApi.cloneTabulature();
-        if (!tabulatureNew) {
-            return;
-        }
-
-        tabulatureNew.addMeasure(tempo, numerator, denominator);
-        setTabulature(tabulatureNew);
+        tabulature.addMeasure(tempo, numerator, denominator);
         TabulatureManagerApi.updateTabulature(token);
        
     }
 
     const deleteMeasure = (measure: IMeasure, token: string) => {
-        if (!tabulature)
-            return
-        const tabulatureNew = TabulatureManagerApi.cloneTabulature();
-        if (!tabulatureNew) {
-            return;
-        }
-
-        tabulatureNew.deleteMeasure(measure);
-        setTabulature(tabulatureNew);
+        tabulature.deleteMeasure(measure);
         TabulatureManagerApi.updateTabulature(token);
     }
-    const copyMeasure = (measureId: number): boolean => {
-        if (!tabulature)
-            return false;
-        const tabulatureNew = TabulatureManagerApi.cloneTabulature();
-        if (!tabulatureNew) {
-            return false;
-        }
-        const measureToCopy = tabulatureNew.getMeasure(measureId);
+    const copyMeasure = (measureId: number, token: string): boolean => {
+
+        const measureToCopy = tabulature.getMeasure(measureId);
         if (!measureToCopy) {
             return false;
         }
         const deepClonedMeasure = measureToCopy.deepClone();
-        tabulatureNew.addMeasureObject(deepClonedMeasure);
-        setTabulature(tabulatureNew);
+        tabulature.addMeasureObject(deepClonedMeasure);
+        TabulatureManagerApi.updateTabulature(token);
         return true;
     }
 
     const getMeasuresCount = () => {
-        return tabulature?.getLength() || 0;
+        return tabulature.getLength() || 0;
     }
 
     const value = {

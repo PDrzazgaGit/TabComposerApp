@@ -5,10 +5,11 @@ import { makeAutoObservable } from 'mobx';
 const MINUTE_IN_MS: number = 60000;
 
 
-export class MeasureService extends Map<number, (Note | Pause)[]> implements IMeasure {
+export class MeasureService implements IMeasure {
 
     public measureDurationMs: number;
     private wholeNoteDurationMs: number;
+    private strings: Map<number, (Note | Pause)[]>;
     constructor(
         public tempo: number,
         public numerator: number,
@@ -27,28 +28,31 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
             throw new Error("Denominator must be a positive integer.");
         }
 
-        super();
-
         this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
+        this.strings = new Map<number, (Note | Pause)[]>();
 
         tuning.forEach((stringId: number) => {
-            this.set(Number(stringId), new Array<Note>());     
+            this.strings.set(Number(stringId), new Array<Note>());     
         });
         makeAutoObservable(this);
     }
 
     public clone(): MeasureService {
         const measure: MeasureService = new MeasureService(this.tempo, this.numerator, this.denominator, this.tuning, this.frets);
-        this.forEach((notes, stringId) => {
-            measure.set(Number(stringId), notes);
+        this.strings.forEach((notes, stringId) => {
+            measure.strings.set(Number(stringId), notes);
         })
         return measure;
     }
 
+    public forEach(callback: (notes: Note[], stringId: number,) => void): void {
+        this.strings.forEach(callback);
+    }
+
     public deepClone(): MeasureService {
         const measure: MeasureService = new MeasureService(this.tempo, this.numerator, this.denominator, this.tuning, this.frets);
-        this.forEach((notes, stringId) => {
+        this.strings.forEach((notes, stringId) => {
             const clonedNotes: (Note | Pause)[] = [];
             console.log(notes);
             notes.forEach(note => {
@@ -56,7 +60,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
                 console.log(clonedNote);
                 clonedNotes.push(clonedNote);
             })
-            measure.set(Number(stringId), clonedNotes);
+            measure.strings.set(Number(stringId), clonedNotes);
         })
         return measure;
     }
@@ -79,12 +83,18 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         return GuitarScale.getNote(fret, baseSound, noteDurationMs, noteDuration);
     }
 
+    public map(callback: (notes: (Note | Pause)[], stringId: number) => void): void {
+        this.strings.forEach((notes, stringId) => {
+            callback(notes, stringId);
+        });
+    }
+
     private isWithinMeasure(timeStamp: number, noteDurationMs: number): boolean {
         return (timeStamp + noteDurationMs) <= this.measureDurationMs;
     }
 
     private hasString(stringId: number): boolean {
-        return this.has(stringId); // tutaj zawsze false
+        return this.strings.has(stringId); // tutaj zawsze false
     }
 
     private calculateNoteDurationMs(noteDuration: NoteDuration): number {
@@ -106,7 +116,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (!this.hasString(stringId)) {
             throw new Error("String with number " + stringId + " does not exist.");
         }
-        const stringNotes: Note[] = this.get(stringId)!
+        const stringNotes: Note[] = this.strings.get(stringId)!
         const foundNote = stringNotes.find(n => n === note);
 
         if (foundNote) {
@@ -123,7 +133,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (!this.hasString(stringId)) {
             throw new Error("String with number " + stringId + " does not exist.");
         }
-        const stringNotes: Note[] = this.get(stringId)!;
+        const stringNotes: Note[] = this.strings.get(stringId)!;
         const foundNote = stringNotes.find(n => n === note);
         if (foundNote) {
             note = this.assembleNote(fret, stringId, foundNote.noteDuration);
@@ -140,7 +150,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         newDuration: NoteDuration,
         stringId: number
     ): boolean {
-        const stringNotes: Note[] = this.get(stringId)!;
+        const stringNotes: Note[] = this.strings.get(stringId)!;
         const foundNote = stringNotes.find(n => n === note);
         if (foundNote) {
             const newDurationMs: number = this.calculateNoteDurationMs(newDuration);
@@ -193,7 +203,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public deleteNote(note: Note | Pause, stringId: number, shift: boolean) {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
         }
@@ -212,11 +222,11 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
         
         stringNotes.splice(index, 1);
-        this.set(Number(stringId), stringNotes);
+        this.strings.set(Number(stringId), stringNotes);
     }
 
     public moveNoteRight(note: Note | Pause, stringId: number, interval: NoteDuration = note.noteDuration): boolean {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
         }
@@ -273,7 +283,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public moveNoteLeft(note: Note | Pause, stringId: number, interval: NoteDuration = note.noteDuration): boolean {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
         }
@@ -336,7 +346,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
 
         let noteLoss:boolean = false;
 
-        this.forEach((notes) => {
+        this.strings.forEach((notes) => {
             const filteredNotes = notes.filter(note => {
                 return (note.getTimeStampMs() + note.getDurationMs()) <= newMeasureDurationMs;
             });
@@ -366,14 +376,14 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
 
         
 
-        this.forEach((notes, stringId) => {
+        this.strings.forEach((notes, stringId) => {
             const notesData = notes.map(note => ({
                 fret: note.fret,
                 noteDuration: note.noteDuration,
                 kind: note.kind,
                 articulation: note.articulation
             }))
-            this.set(Number(stringId), []);
+            this.strings.set(Number(stringId), []);
             notesData.forEach(note => {
                 if (note.kind === NoteKind.Note)
                     this.pushNote(note.fret, stringId, note.noteDuration)?.setArticulation(note.articulation);
@@ -389,7 +399,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (!this.hasString(stringId)) {
             throw new Error("String with number " + stringId + " does not exist.");
         }
-        return this.get(stringId)!;
+        return this.strings.get(stringId)!;
     }
 
     public canPutNote(stringId: number | Note[], timeStamp: number, noteDuration: NoteDuration): boolean {
@@ -420,7 +430,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         if (Array.isArray(stringId)) {
             return !hasCollision(stringId);
         } else {
-            const stringNotes = this.get(stringId);
+            const stringNotes = this.strings.get(stringId);
             if (!stringNotes) return false;
 
             return !hasCollision(stringNotes);
@@ -439,7 +449,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         }
 
         const note: Note = this.assembleNote(fret, stringId, noteDuration);
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) return undefined;
 
@@ -460,7 +470,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         noteDuration: NoteDuration = NoteDuration.Quarter
     ): Note | undefined {
         const note = this.assembleNote(fret, stringId, noteDuration);
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) return undefined;
 
@@ -478,7 +488,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public canPushNote(stringId: number, noteDuration: NoteDuration): boolean {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
@@ -497,7 +507,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         const pauseDurationMs = this.calculateNoteDurationMs(noteDuration);
         pause.setDurationMs(pauseDurationMs);
 
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) return undefined;
 
@@ -512,7 +522,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public pushPause(stringId: number, noteDuration: NoteDuration = NoteDuration.Quarter): Pause | undefined {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
         if (!stringNotes) return undefined;
 
         const pause = new Pause(noteDuration);
@@ -533,7 +543,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public changeArticulation(note: Note, stringId: number, articulation: Articulation) {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
@@ -548,7 +558,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public setOverflow(note: Note, stringId: number, overflow: boolean) {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
@@ -563,7 +573,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
     }
 
     public setSlide(note: Note, stringId: number, slide: boolean) {
-        const stringNotes = this.get(stringId);
+        const stringNotes = this.strings.get(stringId);
 
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");

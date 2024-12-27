@@ -53,7 +53,6 @@ export class SerializationService {
         const description = serializedTabulature.description;
 
         const tabulature = new Tabulature(tuning, frets, title, author, description);
-
         serializedTabulature.measures.forEach((serializedMeasure: SerializedMeasure) => {
             const tempo = serializedMeasure.tempo;
             const numerator = serializedMeasure.numerator;
@@ -72,6 +71,7 @@ export class SerializationService {
                 })
             })
         })
+
         return tabulature;
     }
 
