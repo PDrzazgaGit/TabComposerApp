@@ -1,3 +1,4 @@
+import { makeAutoObservable } from "mobx";
 import { TuningFactory } from "../services";
 import { MeasureService, SerializedMeasure, SerializedNote } from "../services/MeasureService";
 import { ITuning, IMeasure, SerializedTuning } from "./";
@@ -23,7 +24,9 @@ export interface ITabulature {
 export class Tabulature implements ITabulature {
 
     private measures: IMeasure[] = [];
-    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public description: string = "" ) { }
+    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public description: string = "") {
+        makeAutoObservable(this);
+    }
 
     public getLength(): number {
         return this.measures.length;

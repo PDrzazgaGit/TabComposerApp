@@ -1,5 +1,6 @@
 import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation } from '../models';
 import { GuitarScale } from '.';
+import { makeAutoObservable } from 'mobx';
 
 const MINUTE_IN_MS: number = 60000;
 
@@ -34,6 +35,7 @@ export class MeasureService extends Map<number, (Note | Pause)[]> implements IMe
         tuning.forEach((stringId: number) => {
             this.set(Number(stringId), new Array<Note>());     
         });
+        makeAutoObservable(this);
     }
 
     public clone(): MeasureService {

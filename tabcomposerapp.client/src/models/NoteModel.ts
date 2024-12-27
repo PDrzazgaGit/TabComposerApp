@@ -1,3 +1,4 @@
+import { makeAutoObservable } from "mobx";
 import { Sound, Notation, IPause } from "./";
 
 export enum Articulation {
@@ -80,6 +81,7 @@ export class Note extends Sound implements INote {
         this.kind = NoteKind.Note;
         this.slide = false;
         this.overflow = true;
+        makeAutoObservable(this);
     }
 
     public setTimeStampMs(timeStampMs: number): void {

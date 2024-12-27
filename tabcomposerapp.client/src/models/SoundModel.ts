@@ -1,3 +1,4 @@
+import { makeAutoObservable } from 'mobx';
 import { Notation } from './NotationModel'
 
 export class Sound {
@@ -6,7 +7,10 @@ export class Sound {
         public notation: Notation,
         public octave: number,
         protected durationMs: number = 500
-    ) { }
+       
+    ) {
+        makeAutoObservable(this);
+    }
 
     public getName(): string {
         return Notation[this.notation];

@@ -10,8 +10,6 @@ export const Editor = () => {
 
     const [tabulature, setTabulature] = useState<ITabulature | null>();
 
-    const navigate = useNavigate();
-
     useEffect(() => {
         setTabulature(TabulatureManagerApi.getTabualture())
     }, [])

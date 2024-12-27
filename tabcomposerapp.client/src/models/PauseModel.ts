@@ -1,3 +1,4 @@
+import { makeAutoObservable } from "mobx";
 import {Note, NoteKind, NoteDuration } from "./"
 export interface IPause {
     readonly kind: NoteKind;
@@ -13,6 +14,7 @@ export class Pause extends Note implements IPause {
     constructor(public noteDuration: NoteDuration = NoteDuration.Quarter, noteDurationMs: number = 500) {
         super(-1, 0, -1, -1, noteDurationMs);
         this.kind = NoteKind.Pause;
+        makeAutoObservable(this);
     }
     public override getName(): string {
         return NoteDuration[this.noteDuration] + "-Pause";
