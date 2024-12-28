@@ -20,6 +20,10 @@ interface ErrorContextType {
     createTabulatureErrors: AppErrors;
     setCreateTabulatureErrors: (newErrors: AppErrors) => void;
     clearCreateTabulatureErrors: () => void;
+
+    playerErrors: AppErrors;
+    setPlayerErrors: (newErrors: AppErrors) => void;
+    clearPlayerErrors: () => void;
 }
 
 export const ErrorContext = createContext<ErrorContextType | undefined>(undefined);

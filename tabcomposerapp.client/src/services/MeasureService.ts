@@ -54,10 +54,8 @@ export class MeasureService implements IMeasure {
         const measure: MeasureService = new MeasureService(this.tempo, this.numerator, this.denominator, this.tuning, this.frets);
         this.strings.forEach((notes, stringId) => {
             const clonedNotes: (Note | Pause)[] = [];
-            console.log(notes);
             notes.forEach(note => {
                 const clonedNote = note.clone();
-                console.log(clonedNote);
                 clonedNotes.push(clonedNote);
             })
             measure.strings.set(Number(stringId), clonedNotes);
@@ -137,7 +135,6 @@ export class MeasureService implements IMeasure {
         const foundNote = stringNotes.find(n => n === note);
         if (foundNote) {
             note = this.assembleNote(fret, stringId, foundNote.noteDuration);
-            console.log(note);
             foundNote.fret = fret;
             foundNote.frequency = note.frequency;
             foundNote.notation = note.notation;
@@ -420,8 +417,6 @@ export class MeasureService implements IMeasure {
             return notes.some(existingNote => {
                 const existingStart = existingNote.getTimeStampMs();
                 const existingEnd = existingStart + existingNote.getDurationMs();
-                console.log("Existing", existingStart, existingEnd)
-                console.log("new", timeStamp, endTimestamp)
                 return timeStamp < Math.floor(existingEnd) && endTimestamp > Math.floor(existingStart);
             });
         };
@@ -456,7 +451,6 @@ export class MeasureService implements IMeasure {
         const canPutNote: boolean = this.canPutNote(stringNotes, timeStamp, noteDuration);
        
         if (!canPutNote) {
-            console.log("sadfsdf")
             return undefined;
         }
         note.setTimeStampMs(timeStamp);

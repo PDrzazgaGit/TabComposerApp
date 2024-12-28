@@ -1,30 +1,20 @@
-import { forwardRef, useState, useEffect } from "react";
+import { forwardRef, useState } from "react";
 import { INote, IPause, NoteKind } from "../../../models";
 import { pauseRepresentationMap } from "../../../utils/noteUtils";
-import { v4 as uuidv4 } from 'uuid';
 import "../../../styles/NoteView.css"
 import { observer } from "mobx-react-lite";
 
 interface NoteViewProps {
     note: INote | IPause;
-    onGenerateId?: (id: string) => void;
     onClick?: () => void; 
 }
 
-export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGenerateId, onClick }, ref) => {
+export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ note, onClick }, ref) => {
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
 
     const [isHovered, setIsHovered] = useState(false);
-
-    const [noteId] = useState<string>(`note-${uuidv4()}`);
-
-    useEffect(() => {
-        if (onGenerateId) {
-            onGenerateId(noteId);
-        }
-    }, [noteId, onGenerateId]);
 
     return (
         <div
@@ -46,13 +36,16 @@ export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ no
                 className="note-square"
             >
                 <button
-                    id={noteId}
                     className="note-input-button"
                     style={{
-                        color: isHovered ? '#007bff' : 'black',
+                        color: isHovered || note.playing ? '#007bff' : 'black'
                     }}
                 >
-                    {isNote(note) ? (note.fret.toString() === 'NaN' ? '' : note.fret.toString()) : pauseRepresentationMap[note.noteDuration]}
+                    {isNote(note) ?
+                        (note.fret.toString() === 'NaN' ? ''
+                            : note.fret.toString())
+                        : pauseRepresentationMap[note.noteDuration]
+                    }
                 </button>
             </div>
         </div>

@@ -11,6 +11,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { SessionExpired } from "../SessionExpired";
 import { observer } from "mobx-react-lite";
+import { runInAction } from 'mobx';
 
 
 export const TabulatureEditorView = observer(() => {
@@ -25,15 +26,16 @@ export const TabulatureEditorView = observer(() => {
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        tabulature.title = event.target.value;
+        runInAction(() => tabulature.title = event.target.value);
+        
     }
 
     const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
-        tabulature.frets = event.target.valueAsNumber;
+        runInAction(() => tabulature.frets = event.target.valueAsNumber);
     }
 
     const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-        tabulature.description = event.target.value;
+        runInAction(() => tabulature.description = event.target.value);
     }
 
     const handleCloseEditModal = () => {

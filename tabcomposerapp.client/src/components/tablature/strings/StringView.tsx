@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react"
+import { FC } from "react"
 import { useMeasure } from "../../../hooks/useMeasure";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { Sound } from "../../../models";
@@ -24,13 +24,9 @@ export const StringView: FC<StringViewProps> = observer(({
 
     const stringMargin: number = 150;
 
-    const calculatePosition = useCallback(
-        (timestamp: number, containerWidth: number): number => {
-            return (timestamp / measure.measureDurationMs) * containerWidth;
-        },
-        [measure]
-    );
-
+    const calculatePosition = (timestamp: number, containerWidth: number): number => {
+        return (timestamp / measure.measureDurationMs) * containerWidth;
+    }
 
     return (
         <div
@@ -56,7 +52,12 @@ export const StringView: FC<StringViewProps> = observer(({
                         borderColor: isHovered ? '#17a2b8' : 'black'
                     }}
                 />
-                <div className="position-relative me-3">
+                <div
+                    className="position-relative"
+                    style={{
+                        marginRight: `${calculatePosition(stringMargin * 2, 100)}%`
+                    }}
+                >
                     {measure.getNotes(stringId)
                         .map((note, index) => (
                             <div key={index}

@@ -1,6 +1,7 @@
-import { action, makeObservable, observable } from "mobx";
+import { makeObservable } from "mobx";
 import {Note, NoteKind, NoteDuration } from "./"
 export interface IPause {
+    playing: boolean;
     readonly kind: NoteKind;
     readonly noteDuration: NoteDuration;
     getTimeStampMs(): number;
@@ -14,17 +15,19 @@ export class Pause extends Note implements IPause {
     constructor(public noteDuration: NoteDuration = NoteDuration.Quarter, noteDurationMs: number = 500) {
         super(-1, 0, -1, -1, noteDurationMs);
         this.kind = NoteKind.Pause;
-        //makeAutoObservable(this);
+
         makeObservable(this, {
-            kind: observable,
-            noteDuration: observable,
-            getTimeStampMs: action,
-            getEndTimeStampMs: action,
-            getDurationMs: action,
-            getName: action
+
         })
     }
     public override getName(): string {
         return NoteDuration[this.noteDuration] + "-Pause";
     }
+
+    public override clone(): Pause {
+        const pause: Pause = new Pause(this.noteDuration, this.getDurationMs());
+        pause.setTimeStampMs(this.getTimeStampMs());
+        return pause;
+    }
+
 }

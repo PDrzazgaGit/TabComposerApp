@@ -1,12 +1,10 @@
 import { createContext } from 'react';
 import { IMeasure, INote, IPause, NoteDuration, Articulation } from '../models/'
 interface MeasureContextType {
+    frets: number;
     measure: IMeasure;
     measureId: number;
     setMeasureId: (newId: number) => void;
-    getMaxFrets: () => number;
-    getMeasureDurationMs: () => number;
-    getStringNotes: (stringId: number) => INote[];
     changeFret: (note: INote, stringId: number, fret: number) => void;
     changeNoteDuration: (note: INote | IPause, newDuration: NoteDuration, stringId: number) => boolean;
     deleteNote: (note: INote | IPause, stringId: number, shift: boolean) => void;

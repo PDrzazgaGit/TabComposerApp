@@ -13,11 +13,14 @@ export const ErrorProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const [createTabulatureErrors, setCreateTabulatureErrors] = useState<AppErrors>({}); //measureEditorErrors
 
+    const [playerErrors, setPlayerErrors] = useState<AppErrors>({}); //measureEditorErrors
+
     const clearFormErrors = () => setFormErrors({});
     const clearStringEditorErrors = () => setStringEditorErrors({});
     const clearNoteEditorErrors = () => setNoteEditorErrors({});
     const clearMeasureEditorErrors = () => setMeasureEditorErrors({});
     const clearCreateTabulatureErrors = () => setCreateTabulatureErrors({});
+    const clearPlayerErrors = () => setPlayerErrors({});
 
     const value = useMemo(
         () => ({
@@ -39,9 +42,14 @@ export const ErrorProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
             createTabulatureErrors,
             setCreateTabulatureErrors,
-            clearCreateTabulatureErrors
+            clearCreateTabulatureErrors,
+
+            playerErrors,
+            setPlayerErrors,
+            clearPlayerErrors
+
         }),
-        [formErrors, stringEditorErrors, noteEditorErrors, measureEditorErrors, createTabulatureErrors]
+        [formErrors, stringEditorErrors, noteEditorErrors, measureEditorErrors, createTabulatureErrors, playerErrors]
     )
 
     return (

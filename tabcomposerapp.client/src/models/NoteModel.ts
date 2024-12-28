@@ -43,6 +43,7 @@ export class Note extends Sound implements INote {
     public noteDuration: NoteDuration;
     public articulation: Articulation;
     private timeStamp: number;
+    public playing: boolean;
     constructor(
         sound: Sound,
         fret: number,   
@@ -81,7 +82,7 @@ export class Note extends Sound implements INote {
         this.kind = NoteKind.Note;
         this.slide = false;
         this.overflow = true;
-
+        this.playing = false;
         makeObservable(this, {
             kind: observable,
             slide: observable,
@@ -89,6 +90,7 @@ export class Note extends Sound implements INote {
             fret: observable,
             noteDuration: observable,
             articulation: observable,
+            playing: observable,
             //timeStamp: observable,
 
             // Akcje

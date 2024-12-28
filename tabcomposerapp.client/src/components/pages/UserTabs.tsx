@@ -9,11 +9,11 @@ import { TabulatureDataModel } from "../../models/TabulatureDataModel";
 import { CreateTabulature } from "../tablature/CreateTabulature";
 import { SessionExpired } from "../SessionExpired";
 
-
-
 export const UserTabs = () => {
     const { getToken } = useAuth();
-   // const { setTabulature, downloadTabulature, deleteTabulature } = useTabulature();
+
+    const [authorized, setAuthorized] = useState(true);
+
     const [tabInfo, setTabInfo] = useState<Record<number, TabulatureDataModel> | null>(null);
 
     const [showDelete, setShowDelete] = useState(false);
@@ -28,24 +28,27 @@ export const UserTabs = () => {
 
     const  navigate  = useNavigate();
 
+    
     useEffect(() => {
+        console.log("useEffect")
         const fetchTablatureData = async () => {
             const token = await getToken();
             if (token) {
                 const data = await TabulatureManagerApi.getUserTabulaturesInfo(token);
+                setAuthorized(true);
                 if (data) {
                     setTabInfo(data);
+                    
                 } else {
                     //b³¹d
                 }
             } else {
-                <SessionExpired/>
+                setAuthorized(false);
             }
         };
         fetchTablatureData();
-    }, [getToken, navigate]);
-
-
+    }, []);
+    
     const handlePlay = async (id: number) => {
 
         const result = await TabulatureManagerApi.downloadTabulature(id);
@@ -86,7 +89,8 @@ export const UserTabs = () => {
         }
     };
 
-    if (!tabInfo) return (<></>);
+    if (!tabInfo && authorized) return (<></>);
+    if (!authorized) return (<SessionExpired></SessionExpired>);
 
     return (
         <Container className="mt-3">

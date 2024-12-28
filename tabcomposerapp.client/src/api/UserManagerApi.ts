@@ -84,7 +84,6 @@ export class UserManagerApi {
 
     public static async downloadUser(): Promise<IUser | null> {
         try {
-            this.getUserProfile();
             const profile = await this.getUserProfile();
             this.user = new User(profile.userName, profile.email);
             return this.user;

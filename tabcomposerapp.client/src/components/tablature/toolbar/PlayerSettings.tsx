@@ -1,51 +1,45 @@
-import { Button } from "react-bootstrap";
+import { Button, FormControl, InputGroup } from "react-bootstrap";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { useEffect, useState } from "react";
-import { TabulaturePlayer } from "../../../services/audio/TabulaturePlayer";
+import { observer } from "mobx-react-lite";
+import { useError } from "../../../hooks/useError";
 
-export const PlayerSettings = () => {
+export const PlayerSettings = observer(() => {
 
-    const { tabulature } = useTabulature();
+    const { tabulature, tabulaturePlayer } = useTabulature();
 
-    const [player, setPlayer] = useState<TabulaturePlayer | undefined>(undefined);
+    const { playerErrors, clearPlayerErrors, setPlayerErrors } = useError()
+
+    const [selectedMeasure, setSelectedMeasure] = useState(0);
 
     useEffect(() => {
-        if (tabulature) {
-            setPlayer(new TabulaturePlayer(tabulature));
+        return () => {
+            if (tabulaturePlayer) {
+                tabulaturePlayer.stop();
+            }
         }
-    }, [tabulature])
+    }, [tabulaturePlayer])
 
     const play = async () => {
-
-        if (player) {
-
-            await player.play();
-
-            //const tab = new TabulaturePlayer();
-            //tab.playTabulature(tabulature);
+        clearPlayerErrors();
+        if (selectedMeasure == 0) {
+            await tabulaturePlayer.play();
+        } else {
+            const start = tabulature.getMeasure(selectedMeasure);
+            if (start) {
+                await tabulaturePlayer.play(start);
+            } else {
+                setPlayerErrors({ ['playError']: [`There is no measure with id: ${selectedMeasure}.`] })
+            }
         }
     }
 
     const pause = async () => {
-
-        if (player) {
-
-            player.pause();
-            //player.changeTempo(1.75);
-            //const tab = new TabulaturePlayer();
-            //tab.playTabulature(tabulature);
-        }
+        tabulaturePlayer.pause();
     }
 
     const stop = async () => {
-
-        if (player) {
-
-            player.stop();
-
-            //const tab = new TabulaturePlayer();
-            //tab.playTabulature(tabulature);
-        }
+        tabulaturePlayer.stop();
     }
 
     const [tempoFactor, setTempoFactor] = useState(1); // Domyœlnie 1
@@ -53,11 +47,19 @@ export const PlayerSettings = () => {
     // Handler zmieniaj¹cy tempo transportu
     const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(event.target.value);
-        if (player) {
-            player.changeTempo(value);
-        }
+        tabulaturePlayer.changeTempo(value);
         setTempoFactor(value);
     };
+
+    const handleSelectMeasure = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedMeasure(event.target.valueAsNumber);
+    }
+
+    const handleBlurSelectMeasure = () => {
+        if (isNaN(selectedMeasure)) {
+            setSelectedMeasure(0);
+        }
+    }
 
     return (
         <div>
@@ -76,6 +78,33 @@ export const PlayerSettings = () => {
             >
                 Stop
             </Button>
+
+            {tabulature.getLength() > 1 && (
+                <InputGroup>
+                    <InputGroup.Text>
+                        Start on measure
+                    </InputGroup.Text>
+                    <FormControl
+                        type='number'
+                        min={0}
+                        value={selectedMeasure}
+                        max={tabulature.getLength() - 1}
+                        onChange={handleSelectMeasure}
+                        onBlur={handleBlurSelectMeasure}
+                    />
+                </InputGroup>
+            )}
+            {playerErrors['playError'] && (
+                <InputGroup className="d-flex justify-content-center align-items-center column mb-3">
+                    <div className="text-danger">
+                        {playerErrors["playError"]}
+                    </div>
+
+                </InputGroup>
+            )}
+
+            
+
             <h3>Speed {Math.round(tempoFactor * 100)} %</h3>
             <input
                 type="range"
@@ -88,4 +117,4 @@ export const PlayerSettings = () => {
             />
         </div>
     );
-}
+})

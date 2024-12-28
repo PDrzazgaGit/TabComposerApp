@@ -21,18 +21,7 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, meas
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchUpdate = async () => {
-            const token = await getToken();
-            if (!token) {
-                navigate("/login");
-                return;
-            }
-            TabulatureManagerApi.updateTabulature(token); 
-        }
-        fetchUpdate();
-
-    }, [measure])
+    const frets = measure.frets;
 
     const update = async () => {
         const token = await getToken();
@@ -41,13 +30,6 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, meas
             return;
         }
         TabulatureManagerApi.updateTabulature(token); 
-    }
-
-    const getMaxFrets = (): number => {
-        return measure.frets;
-    }
-    const getMeasureDurationMs = (): number => {
-        return measure.measureDurationMs;
     }
 
     const changeFret = (note: INote, stringId: number, fret: number): void => {
@@ -61,13 +43,6 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, meas
             return true;
         }
         return false;
-    }
-
-    const getStringNotes = (stringId: number): INote[] => {
-        const notes: INote[] = measure.getNotes(stringId);
-        if (!notes)
-            throw new Error("Measure do not have such string: " + stringId + ".");
-        return notes;
     }
 
     const deleteNote = (note: INote | IPause, stringId: number, shift: boolean) => {
@@ -136,16 +111,13 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, meas
         update();
     }
 
-
     const value = {
+        frets,
         measure,
         measureId,
         setMeasureId,
-        getMaxFrets,
-        getMeasureDurationMs,
         changeFret,
         changeNoteDuration,
-        getStringNotes,
         deleteNote,
         moveNoteRight,
         moveNoteLeft,

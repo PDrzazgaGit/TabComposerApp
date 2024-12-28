@@ -6,7 +6,6 @@ import { useTabulature } from "../../../hooks/useTabulature";
 import { INote, IPause, NoteKind, NoteDuration, Articulation } from "../../../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
 import { NoteView } from "./NoteView";
-import { observer } from "mobx-react-lite";
 
 //import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
@@ -14,13 +13,11 @@ interface NoteEditorViewProps {
     stringId: number;
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, stringId }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
-
-    const [noteId, setNoteId] = useState<string | null>(null);
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
@@ -30,26 +27,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, s
 
     const [overflow, setOverflow] = useState(true);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation, setNodeSlide, setNodeOverflow, measure } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets } = useMeasure();
 
     const { shiftOnDelete } = useTabulature();
 
     const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
-
-    const maxFrets: number = getMaxFrets();
-
-    const handleGenerateId = (id: string) => {
-        setNoteId(id);
-    };
-
-    const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!isNote(note))
-            return;
-        const newFret = event.target.valueAsNumber
-        if (newFret > maxFrets || newFret < 0)
-            return;
-        saveChanges(newFret)
-    };
 
     const handleDurationChange = (duration: NoteDuration) => {
         if (changeNoteDuration(note, duration, stringId)) {
@@ -104,22 +86,35 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, s
         setNodeOverflow(note, stringId, isChecked);
     }
 
-    const saveChanges = (newFret: number) => {
+    const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!isNote(note))
             return;
-        else { 
+        const newFret = event.target.valueAsNumber
+        if (newFret > frets || newFret < 0)
+            return;
+        setFret(newFret);
+        if (!isNaN(newFret)) {
             changeFret(note, stringId, newFret);
-            setFret(newFret);
+        } else {
+            changeFret(note, stringId, 0);
         }
+    };
+
+    const handleFretChangeBlur = () => {
+        if (isNaN(fret)) {
+            setFret(0)
+        }  
     };
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
         <Popover
-            id={"popover_" + noteId}
+            id={"popover_note"}
             onClick={(e) => e.stopPropagation()}
             {...props}
         >
-            <Popover.Header as="h3">Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}</Popover.Header>
+            <Popover.Header as="h3">
+                Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}
+            </Popover.Header>
             <Popover.Body className="">
                 {isNote(note) && (
                     <InputGroup className="mb-3">
@@ -128,9 +123,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, s
                             type="number"
                             value={fret}
                             onChange={handleFretChange}
-                            onBlur={handleHide}
+                            onBlur={handleFretChangeBlur}
                             min={0}
-                            max={maxFrets}
+                            max={frets}
                         />
                     </InputGroup>
                 )}
@@ -291,13 +286,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, s
         clearNoteEditorErrors();
     }
 
-    const handleHide = () => {
-        if (!isNote(note))
-            return false;
-        if (!note.fret)
-            saveChanges(0);
-        return true;
-    }
+
 
     return (
         <OverlayTrigger
@@ -316,9 +305,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = observer(({ note, s
                     padding: '0'
                 }}
             >
-                <NoteView note={note} onGenerateId={handleGenerateId}></NoteView>
+                <NoteView note={note}></NoteView>
             </div>
 
         </OverlayTrigger>
     );
-})
+}

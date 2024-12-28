@@ -65,10 +65,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const signOut = () => {
         UserManagerApi.signOut();
         setUser(null);
-        console.log("debug user is null reference changed")
     };
 
     const getToken = async (): Promise<string | null> => {
+        console.log('gettoken')
         const token = await UserManagerApi.getUserToken();
         if (!token) {
             signOut();
@@ -88,8 +88,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setErrors({});
     }
 
+    
     useEffect(() => {
-       
+        console.log("tutaj mam cie")
         const fetchUser = async () => {
             const token = await getToken();
             if (token) {
@@ -100,6 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             fetchUser();
         }
     })
+    
 
     const value = {
         user,

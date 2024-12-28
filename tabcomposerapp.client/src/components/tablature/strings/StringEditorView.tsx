@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Popover, InputGroup, Dropdown, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
 import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
@@ -37,12 +37,9 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
     }, [globalNoteDuration])
 
 
-    const calculatePosition = useCallback(
-        (timestamp: number, containerWidth: number): number => {
-            return (timestamp / measure.measureDurationMs) * containerWidth;
-        },
-        [measure]
-    );
+    const calculatePosition = (timestamp: number, containerWidth: number): number => {
+        return (timestamp / measure.measureDurationMs) * containerWidth;
+    }
 
     const handleAddItem = (kind: NoteKind) => {
         switch (kind) {

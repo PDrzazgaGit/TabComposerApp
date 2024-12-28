@@ -72,7 +72,6 @@ export class Tabulature implements ITabulature {
             throw Error("Cannot delete inexisting measure");
         }
         this.measures.splice(measureIndex, 1);
-        console.log(this.measures);
     }
 
     public getMeasure(index: number): IMeasure | undefined {
