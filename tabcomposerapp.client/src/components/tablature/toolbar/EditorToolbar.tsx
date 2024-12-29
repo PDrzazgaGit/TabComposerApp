@@ -1,10 +1,6 @@
 import { ReactNode, useState } from "react";
 import { StickyPanel } from "./StickyPanel";
-import { Card, Tabs, Tab, Button, Dropdown, FormCheck, FormControl, InputGroup } from "react-bootstrap";
-import { NoteDuration } from "../../../models";
-import { noteRepresentationMap } from "../../../utils/noteUtils";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { TabulaturePlayer } from "../../../services/audio/TabulaturePlayer";
+import { Card, Tabs, Tab} from "react-bootstrap";
 import { GlobalSettings } from "./GlobalSettings";
 import { PlayerSettings } from "./PlayerSettings";
 

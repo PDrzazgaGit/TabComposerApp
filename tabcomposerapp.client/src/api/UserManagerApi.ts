@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 import { IUser, User } from "../models/UserModel";
 import { SessionService } from "../services/SessionService";
 import { AppErrors } from "../models/AppErrorsModel";
-import { ClientApi, IClientApi } from "./clientApi";
+import { ClientApi, IClientApi, IClientAuth } from "./clientApi";
 export class UserManagerApi {
 
     private user: User | null;
@@ -77,6 +77,10 @@ export class UserManagerApi {
         } catch {
             return false;
         }
+    }
+
+    public getAuth(): IClientAuth {
+        return this.clientApi;
     }
 
     public getUserToken(): string | null {

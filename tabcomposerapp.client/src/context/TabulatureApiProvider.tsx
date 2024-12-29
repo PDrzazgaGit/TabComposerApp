@@ -37,7 +37,6 @@ export const TabulatureApiProvider: React.FC<TabulatureApiProviderProps> = ({ ch
     }
 
     const value = {
-        clientApi,
         getTabulature,
         updateTabulature,
         addTabulature,

@@ -1,22 +1,27 @@
 import { ITabulature } from "../models";
 import { TabulatureDataModel } from "../models/TabulatureDataModel";
 import { SerializationService } from "../services/SerializationService";
-import { ClientApi } from "./clientApi";
+import { ClientApi, IClientApi } from "./clientApi";
 
-export class TabulatureManagerApi extends ClientApi  {
+export class TabulatureManagerApi {
 
     public tabulatureId: number | undefined;
 
     public tabulature: ITabulature | null;
 
+    private previousUpdateTablature: string;
+
+    private clientApi: IClientApi;
+
     public constructor() {
-        super();
+        this.clientApi = ClientApi.getInstance();
         this.tabulature = null;
+        this.previousUpdateTablature = '';
     }
 
     public async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
         try {
-            const response = await this.client.get('/Tablature/GetUserTablaturesInfo', {
+            const response = await this.clientApi.use().get('/Tablature/GetUserTablaturesInfo', {
                 headers: {
                     Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
@@ -30,15 +35,14 @@ export class TabulatureManagerApi extends ClientApi  {
 
     public async downloadTabulature(id: number): Promise<ITabulature | null> {
         try {
-            const response = await this.client.get(`/Tablature/GetTablature/${id}`);
+            const response = await this.clientApi.use().get(`/Tablature/GetTablature/${id}`);
             const tabulatureData: string = response.data.tablature as string; 
             
             this.tabulature = SerializationService.deserializeTabulature(tabulatureData);
             
             this.tabulatureId = id;
             return this.tabulature;
-        } catch (e) {
-            console.log(e)
+        } catch {
             return null;
         }
     }
@@ -46,7 +50,7 @@ export class TabulatureManagerApi extends ClientApi  {
     public async addTabulature(token: string, tabulature: ITabulature): Promise<boolean> {
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(tabulature);
-            const response = await this.client.post(
+            const response = await this.clientApi.use().post(
                 '/Tablature/AddTablature',
                 tabulatureData,
                 {
@@ -71,7 +75,7 @@ export class TabulatureManagerApi extends ClientApi  {
 
     public async deleteTabulature(token: string, id: number): Promise<boolean> {
         try {
-            await this.client.post(`/Tablature/DeleteTablature/${id}`, null ,{
+            await this.clientApi.use().post(`/Tablature/DeleteTablature/${id}`, null ,{
                 headers: {
                     Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
@@ -92,7 +96,7 @@ export class TabulatureManagerApi extends ClientApi  {
         }
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(this.tabulature);
-            await this.client.post(
+            await this.clientApi.use().post(
                 `/Tablature/UpdateTablature/${this.tabulatureId}`,
                 tabulatureData,  
                 {
@@ -110,6 +114,11 @@ export class TabulatureManagerApi extends ClientApi  {
 
     public getTabulature(): ITabulature | null {
         return this.tabulature;
+    }
+
+    // porównanie jsonów hehe
+    public upToDate(): boolean {
+        throw new Error("Not implemented yet");
     }
     
 }

@@ -1,15 +1,18 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
-import { makeObservable, observable, runInAction } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 
-export interface IClientApi {
+export interface IClientAuth {
     readonly authorized: boolean;
-    use(): AxiosInstance;
+}
+
+export interface IClientApi extends IClientAuth {
+    use(): AxiosInstance; 
     setAuthorize(value: boolean): void;
 }
 
 /*
 
-Porobiæ interface do usermangerapi i tabulaturemanagerapi, zaktualizowaæ tabulaturemanagerapi do obs³ugi (nie dziedziczenia) singletonu
+Porobiæ interface do usermangerapi i tabulaturemanagerapi
 
 */
 
@@ -41,10 +44,7 @@ export class ClientApi implements IClientApi {
         })
         this.authorized = false;
 
-        makeObservable(this, {
-            authorized: observable
-        }); 
-
+       
         this.client.interceptors.response.use(
 
             (response: AxiosResponse) => {
@@ -64,5 +64,11 @@ export class ClientApi implements IClientApi {
                 return Promise.reject(error);
             }
         );
+
+        makeObservable(this, {
+            authorized: observable,
+            setAuthorize: action
+        }); 
+
     }
 }

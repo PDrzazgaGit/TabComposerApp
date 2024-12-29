@@ -1,11 +1,8 @@
 import { createContext } from 'react';
 import { ITabulature } from '../models';
 import { TabulatureDataModel } from '../models/TabulatureDataModel';
-import { IClientApi } from '../api/clientApi';
 
 interface TabulatureApiContextType {
-
-    clientApi: IClientApi;
 
     updateTabulature: (token: string) => Promise<boolean>;
 

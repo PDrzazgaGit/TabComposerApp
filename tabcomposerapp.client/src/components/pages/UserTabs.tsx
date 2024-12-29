@@ -1,4 +1,4 @@
-import { useState, useEffect, Key } from "react";
+import { useState, useEffect, Key, useMemo } from "react";
 import { Container, Row, Col, Card, ButtonGroup, Button, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -30,11 +30,12 @@ export const UserTabs = () => {
     };
     const handleShowDelete = () => setShowDelete(true);
 
-    const  navigate  = useNavigate();
+    const navigate = useNavigate();
+
+    const token = useMemo(() => getToken(), [getToken]);
     
     useEffect(() => {
         const fetchTablatureData = async () => {
-            const token = getToken();
             if (!token) {
                 setAuthorized(false);
                 return;

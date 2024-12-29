@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MeasureProvider } from "../../context/MeasureProvider";
 import { useTabulature } from "../../hooks/useTabulature";
 import { AddMeasureView } from "./measures/AddMeasureView";
@@ -8,7 +8,6 @@ import { TabulatureContainer } from "./TabulatureContainer";
 import { EditorToolbar } from "./toolbar/EditorToolbar";
 import { Modal, Button, FormControl, InputGroup } from "react-bootstrap";
 import { useAuth } from "../../hooks/useAuth";
-import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { SessionExpired } from "../SessionExpired";
 import { observer } from "mobx-react-lite";
 import { runInAction } from 'mobx';
@@ -22,31 +21,31 @@ export const TabulatureEditorView = observer(() => {
         measuresPerRow,
     } = useTabulature();
 
-    const { getToken } = useAuth();
+    const { getToken, clientAuth } = useAuth();
 
-    const { updateTabulature, clientApi } = useTabulatureApi();
+    const { updateTabulature } = useTabulatureApi();
+
+    const updateTimeMs: number = 5000;
+
+    const token = useMemo(() => getToken(), [getToken]);
 
     useEffect(() => {
-        // Funkcja, która bêdzie wywo³ywana co 1000 ms (1 sekunda)
+
         const intervalId = setInterval(async () => {
-            const token = getToken();
 
-            if (!token) {
-                return;
-            }
+            const success = await updateTabulature(token ? token : '');
 
-            const success = await updateTabulature(token);
-            console.log(clientApi.authorized)
             if (!success) {
-                //
+               //
             }
-        }, 1000);
 
-        // Funkcja cleanup - czyszczenie interwa³u po odmontowaniu komponentu
+        }, updateTimeMs);
+
         return () => {
             clearInterval(intervalId);
+            updateTabulature(token ? token : '');
         };
-    }, [getToken, updateTabulature]); 
+    }); 
 
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -81,8 +80,7 @@ export const TabulatureEditorView = observer(() => {
         }
     }
 
-    if (!clientApi.authorized) {
-
+    if (clientAuth.authorized === false) {
         return <SessionExpired />
     }
 

@@ -1,9 +1,11 @@
-import { InputGroup, FormControl, Dropdown, FormCheck } from "react-bootstrap";
+import { InputGroup, FormControl, Dropdown, FormCheck, Button } from "react-bootstrap";
 import { NoteDuration } from "../../../models";
 import { noteRepresentationMap } from "../../../utils/noteUtils";
 import { useTabulature } from "../../../hooks/useTabulature";
+import { useTabulatureApi } from "../../../hooks/useTabulatureApi";
+import { useAuth } from "../../../hooks/useAuth";
 
-export const GlobalSettings = () => {
+export const GlobalSettings: React.FC = () => {
 
     const {
         measuresPerRow,
@@ -22,13 +24,30 @@ export const GlobalSettings = () => {
         setShiftOnDelete
     } = useTabulature();
 
+    const { updateTabulature } = useTabulatureApi();
+    const { getToken } = useAuth();
+
     const handleMeasuresPerRow = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMeasuresPerRow(event.target.valueAsNumber);
     }
 
+    const handleClick = async () => {
+        const token = getToken();
+
+        if (!token) {
+            return;
+        }
+
+        const success = await updateTabulature(token);
+
+        if (!success) {
+            //
+        }
+    }
+
     return (
         <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
                 <InputGroup.Text>Display</InputGroup.Text>
                 <FormControl
                     type="number"
@@ -39,7 +58,7 @@ export const GlobalSettings = () => {
                 />
             </InputGroup>
 
-            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
                 <InputGroup.Text>Tempo</InputGroup.Text>
                 <FormControl
                     type="number"
@@ -50,7 +69,7 @@ export const GlobalSettings = () => {
                 />
             </InputGroup>
 
-            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
                 <InputGroup.Text>Numerator</InputGroup.Text>
                 <FormControl
                     type="number"
@@ -61,7 +80,7 @@ export const GlobalSettings = () => {
                 />
             </InputGroup>
 
-            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
                 <InputGroup.Text>Denominator</InputGroup.Text>
                 <FormControl
                     type="number"
@@ -72,7 +91,7 @@ export const GlobalSettings = () => {
                 />
             </InputGroup>
 
-            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
                 <Dropdown drop="down-centered">
                     <Dropdown.Toggle variant="light" className="border flex-grow-1">
                         {`Duration: ${NoteDuration[globalNoteDuration]}`}
@@ -87,7 +106,7 @@ export const GlobalSettings = () => {
                 </Dropdown>
             </InputGroup>
 
-            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
                 <Dropdown drop="down-centered">
                     <Dropdown.Toggle variant="light" className="border flex-grow-1">
                         {`Interval: ${NoteDuration[globalNoteInterval]}`}
@@ -102,7 +121,7 @@ export const GlobalSettings = () => {
                 </Dropdown>
             </InputGroup>
 
-            <InputGroup className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 15%' }}>
+            <InputGroup className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 20%' }}>
                 <FormCheck
                     checked={shiftOnDelete}
                     type="checkbox"
@@ -110,6 +129,16 @@ export const GlobalSettings = () => {
                     label="Shift on delete"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setShiftOnDelete(e.target.checked)}
                 />
+            </InputGroup>
+
+            <InputGroup className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 20%' }}>
+                <Button
+                    variant="success"
+                    onClick={() => handleClick()}
+                    className="w-100"
+                >
+                    Save Changes
+                </Button>
             </InputGroup>
         </div>
     );
