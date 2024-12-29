@@ -1,8 +1,13 @@
 import { createContext } from 'react';
 import { ITabulature } from '../models';
 import { TabulatureDataModel } from '../models/TabulatureDataModel';
+import { ITabulatureUpToDate } from '../api/TabulatureManagerApi';
 
 interface TabulatureApiContextType {
+
+    upToDate: boolean;
+
+    tabulatureManagerApi: ITabulatureUpToDate;
 
     updateTabulature: (token: string) => Promise<boolean>;
 

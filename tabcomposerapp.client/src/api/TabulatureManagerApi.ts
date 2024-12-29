@@ -1,22 +1,31 @@
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import { ITabulature } from "../models";
 import { TabulatureDataModel } from "../models/TabulatureDataModel";
 import { SerializationService } from "../services/SerializationService";
-import { ClientApi, IClientApi } from "./clientApi";
+import { ClientApi, IClientApi } from "./ClientApi";
 
-export class TabulatureManagerApi {
+export interface ITabulatureUpToDate {
+    get upToDate(): boolean
+}
+export class TabulatureManagerApi implements ITabulatureUpToDate {
 
     public tabulatureId: number | undefined;
 
     public tabulature: ITabulature | null;
 
-    private previousUpdateTablature: string;
+    public previousUpdateTablature: string | null;
 
     private clientApi: IClientApi;
 
     public constructor() {
         this.clientApi = ClientApi.getInstance();
         this.tabulature = null;
-        this.previousUpdateTablature = '';
+        this.previousUpdateTablature = null;
+        makeObservable(this, {
+            tabulature: observable,
+            previousUpdateTablature: observable,
+            upToDate: computed
+        });
     }
 
     public async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
@@ -37,9 +46,8 @@ export class TabulatureManagerApi {
         try {
             const response = await this.clientApi.use().get(`/Tablature/GetTablature/${id}`);
             const tabulatureData: string = response.data.tablature as string; 
-            
-            this.tabulature = SerializationService.deserializeTabulature(tabulatureData);
-            
+            runInAction(() => this.tabulature = SerializationService.deserializeTabulature(tabulatureData))
+            runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!))
             this.tabulatureId = id;
             return this.tabulature;
         } catch {
@@ -66,7 +74,8 @@ export class TabulatureManagerApi {
                 return false;
             }
             this.tabulatureId = id;
-            this.tabulature = tabulature
+            runInAction(() => this.tabulature = tabulature);
+            runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!));
             return true;
         } catch {
             return false
@@ -82,7 +91,8 @@ export class TabulatureManagerApi {
             });
             if (id === this.tabulatureId) {
                 this.tabulatureId = undefined;
-                this.tabulature = null;
+                runInAction(() => this.tabulature = null);
+                runInAction(() => this.previousUpdateTablature = null);
             }
             return true;
         } catch {
@@ -106,6 +116,7 @@ export class TabulatureManagerApi {
                     },
                 }
             );
+            runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!));
             return true;
         } catch {
             return false
@@ -116,9 +127,12 @@ export class TabulatureManagerApi {
         return this.tabulature;
     }
 
-    // porównanie jsonów hehe
-    public upToDate(): boolean {
-        throw new Error("Not implemented yet");
+    public get upToDate(): boolean {
+        if (!this.tabulature || !this.previousUpdateTablature) {
+            return false;
+        }
+        const currentTabulatureData = SerializationService.serializeTabulature(this.tabulature);
+        return this.previousUpdateTablature == currentTabulatureData;
     }
     
 }

@@ -10,12 +10,6 @@ export interface IClientApi extends IClientAuth {
     setAuthorize(value: boolean): void;
 }
 
-/*
-
-Porobiæ interface do usermangerapi i tabulaturemanagerapi
-
-*/
-
 export class ClientApi implements IClientApi {
     protected client: AxiosInstance;
 

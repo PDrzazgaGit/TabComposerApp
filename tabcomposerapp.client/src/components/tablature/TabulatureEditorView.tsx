@@ -10,7 +10,7 @@ import { Modal, Button, FormControl, InputGroup } from "react-bootstrap";
 import { useAuth } from "../../hooks/useAuth";
 import { SessionExpired } from "../SessionExpired";
 import { observer } from "mobx-react-lite";
-import { runInAction } from 'mobx';
+import { autorun, runInAction } from 'mobx';
 import { useTabulatureApi } from "../../hooks/useTabulatureApi";
 
 
@@ -29,8 +29,14 @@ export const TabulatureEditorView = observer(() => {
 
     const token = useMemo(() => getToken(), [getToken]);
 
-    useEffect(() => {
+    /* do zrobieniaa 
+    
+    update cykliczny tylko jeœli nie jest upToDate
 
+    */
+
+    useEffect(() => {
+        
         const intervalId = setInterval(async () => {
 
             const success = await updateTabulature(token ? token : '');
@@ -45,8 +51,8 @@ export const TabulatureEditorView = observer(() => {
             clearInterval(intervalId);
             updateTabulature(token ? token : '');
         };
-    }); 
-
+    });
+    
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

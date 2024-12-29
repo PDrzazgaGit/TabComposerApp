@@ -4,6 +4,8 @@ import { noteRepresentationMap } from "../../../utils/noteUtils";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { useTabulatureApi } from "../../../hooks/useTabulatureApi";
 import { useAuth } from "../../../hooks/useAuth";
+import { autorun } from "mobx";
+import { useEffect, useState } from "react";
 
 export const GlobalSettings: React.FC = () => {
 
@@ -24,13 +26,25 @@ export const GlobalSettings: React.FC = () => {
         setShiftOnDelete
     } = useTabulature();
 
-    const { updateTabulature } = useTabulatureApi();
+    const { updateTabulature, tabulatureManagerApi } = useTabulatureApi();
     const { getToken } = useAuth();
+
+    const [upToDate, setUpToDate] = useState(true);
 
     const handleMeasuresPerRow = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMeasuresPerRow(event.target.valueAsNumber);
     }
 
+    
+    useEffect(() => {
+
+        const disposer = autorun(() => {
+            setUpToDate(tabulatureManagerApi.upToDate);
+        });
+
+        return () => disposer();  // Czyszczenie efektu
+    }, [tabulatureManagerApi]);
+    
     const handleClick = async () => {
         const token = getToken();
 
@@ -133,11 +147,12 @@ export const GlobalSettings: React.FC = () => {
 
             <InputGroup className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 20%' }}>
                 <Button
-                    variant="success"
+                    variant={upToDate && "light" || "success"}
                     onClick={() => handleClick()}
                     className="w-100"
+                    disabled={ upToDate }
                 >
-                    Save Changes
+                    {upToDate && "Up to date" || "Save Changes"}
                 </Button>
             </InputGroup>
         </div>

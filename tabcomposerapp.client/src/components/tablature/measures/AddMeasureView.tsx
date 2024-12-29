@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Container, Col, InputGroup, Button, FormControl } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
@@ -11,26 +11,18 @@ export const AddMeasureView = () => {
 
     const { addMeasure, globalNumerator, globalDenominator, globalTempo, getMeasuresCount, copyMeasure } = useTabulature();
 
-    const { getTokenWithAuth } = useAuth();
+    //const { getToken } = useAuth();
 
     const [measureToCopy, setMeasureToCopy] = useState(getMeasuresCount()-1);
 
+    //const token = useMemo(() => getToken(), [getToken])
+
     const handleAddMeasure = async () => {
-        const token = await getTokenWithAuth();
-        if (!token) {
-            <SessionExpired/>
-            return;
-        }
-        addMeasure(globalTempo, globalNumerator, globalDenominator, token);
+        addMeasure(globalTempo, globalNumerator, globalDenominator);
     }
 
     const handleCopyMeasure = async () => {
-        const token = await getTokenWithAuth();
-        if (!token) {
-            <SessionExpired />
-            return;
-        }
-        copyMeasure(measureToCopy, token);
+        copyMeasure(measureToCopy);
     }
 
     return (
