@@ -30,11 +30,11 @@ interface TabulatureContextType {
     shiftOnDelete: boolean;
     setShiftOnDelete: (shift: boolean) => void;
 
-    addMeasure: (tempo: number, numerator: number, denominator: number, token: string) => void;
+    addMeasure: (tempo: number, numerator: number, denominator: number) => void;
 
-    copyMeasure: (measureId: number, token: string) => boolean;
+    copyMeasure: (measureId: number) => boolean;
 
-    deleteMeasure: (measure: IMeasure, token: string) => void;
+    deleteMeasure: (measure: IMeasure) => void;
 }
 
 export const TabulatureContext = createContext<TabulatureContextType | undefined>(undefined);

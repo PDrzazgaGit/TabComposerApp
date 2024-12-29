@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MeasureProvider } from "../../context/MeasureProvider";
 import { useTabulature } from "../../hooks/useTabulature";
 import { AddMeasureView } from "./measures/AddMeasureView";
@@ -12,6 +12,7 @@ import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { SessionExpired } from "../SessionExpired";
 import { observer } from "mobx-react-lite";
 import { runInAction } from 'mobx';
+import { useTabulatureApi } from "../../hooks/useTabulatureApi";
 
 
 export const TabulatureEditorView = observer(() => {
@@ -23,11 +24,34 @@ export const TabulatureEditorView = observer(() => {
 
     const { getToken } = useAuth();
 
+    const { updateTabulature, clientApi } = useTabulatureApi();
+
+    useEffect(() => {
+        // Funkcja, która bêdzie wywo³ywana co 1000 ms (1 sekunda)
+        const intervalId = setInterval(async () => {
+            const token = getToken();
+
+            if (!token) {
+                return;
+            }
+
+            const success = await updateTabulature(token);
+            console.log(clientApi.authorized)
+            if (!success) {
+                //
+            }
+        }, 1000);
+
+        // Funkcja cleanup - czyszczenie interwa³u po odmontowaniu komponentu
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [getToken, updateTabulature]); 
+
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        runInAction(() => tabulature.title = event.target.value);
-        
+        runInAction(() => tabulature.title = event.target.value); 
     }
 
     const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,15 +71,19 @@ export const TabulatureEditorView = observer(() => {
     const handleSaveEditModal = async () => {
         handleCloseEditModal();
 
-        const token = await getToken();
-        if (token) {
-            const success = await TabulatureManagerApi.updateTabulature(token);
-            if (!success) {
-                //
-            }
-        } else {
-            <SessionExpired />
+        const token = getToken();
+        if (!token) {
+            return;
         }
+        const success = await updateTabulature(token);
+        if (!success) {
+            //
+        }
+    }
+
+    if (!clientApi.authorized) {
+
+        return <SessionExpired />
     }
 
     return (

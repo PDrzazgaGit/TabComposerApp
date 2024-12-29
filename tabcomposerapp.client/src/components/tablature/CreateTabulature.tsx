@@ -7,11 +7,14 @@ import { Tabulature } from "../../models";
 import { TuningFactory } from "../../services";
 import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { SessionExpired } from "../SessionExpired";
+import { useTabulatureApi } from "../../hooks/useTabulatureApi";
 
 
 export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = false }) => {
 
-    const { getToken, user } = useAuth();
+    const { getTokenWithAuth, user } = useAuth();
+
+    const { addTabulature } = useTabulatureApi();
 
     const [tuning, setTuning] = useState<string | undefined>();
 
@@ -52,14 +55,14 @@ export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = fa
     const handleCreateTabulature = async () => {
         if (tuning) {
             clearCreateTabulatureErrors();
-            const token = await getToken();
+            const token = await getTokenWithAuth();
             if (!token) {
                 <SessionExpired />
                 return;
             }
             const tuningModel = TuningFactory.getTuning(tuning);
             const newTabulature = new Tabulature(tuningModel, maxFrets, title, user?.username, description);
-            const success = await TabulatureManagerApi.addTabulature(token, newTabulature);
+            const success = await addTabulature(token, newTabulature);
             if (!success) {
                 setCreateTabulatureErrors({ ["error"]: ["Cannot add tablature"] });
             }

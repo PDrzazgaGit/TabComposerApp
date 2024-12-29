@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 
 export const SessionExpired = () => {
@@ -9,8 +10,11 @@ export const SessionExpired = () => {
 
     const [show, setShow] = useState(true);
 
+    const { signOut } = useAuth();
+
     const handleClose = () => {
         setShow(false);
+        signOut();
         navigate("/login");   
     }
 

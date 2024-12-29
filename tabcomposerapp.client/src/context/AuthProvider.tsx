@@ -1,6 +1,4 @@
-import { useState, ReactNode, useEffect } from 'react';
-//import { signUpApi, signInApi } from '../api/AuthService';
-//import { getUserProfileApi } from '../api/UserService';
+import { useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { AuthContext } from './AuthContext';
 import { IUser } from '../models/UserModel';
 import { UserManagerApi } from '../api/UserManagerApi';
@@ -11,6 +9,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [errors, setErrors] = useState<AppErrors>({});
 
     const [user, setUser] = useState<IUser | null>(null);
+
+    const clientApi = useMemo(() => new UserManagerApi(), []);
 
     const signIn = async (username: string, password: string, remember: boolean = false): Promise<boolean> => { 
         clearErrors();
@@ -26,12 +26,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return false;
         }
         
-        const success = await UserManagerApi.signIn(username, password, remember);
+        const success = await clientApi.signIn(username, password, remember);
         if (success) {
-            setUser(UserManagerApi.getUser());
+            setUser(clientApi.getUser());
             return true;
         } else {
-            setErrors(UserManagerApi.getErrors() ?? {});
+            setErrors(clientApi.getErrors() ?? {});
             return false;
         }
     };
@@ -52,24 +52,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setErrors(preErrors);
             return false;
         }
-        const success = await UserManagerApi.signUp(email, username, password);
+        const success = await clientApi.signUp(email, username, password);
         if (success) {
             return true;
         } else {
-            setErrors(UserManagerApi.getErrors() ?? {});
+            setErrors(clientApi.getErrors() ?? {});
             return false;
         }
         
     };
 
-    const signOut = () => {
-        UserManagerApi.signOut();
+    const signOut = useCallback(() => {
+        clientApi.signOut();
         setUser(null);
-    };
+    }, [clientApi]);
 
-    const getToken = async (): Promise<string | null> => {
-        console.log('gettoken')
-        const token = await UserManagerApi.getUserToken();
+    const getToken = (): string | null => {
+        return clientApi.getUserToken();
+    }
+
+    const getTokenWithAuth = async (): Promise<string | null> => {
+        const token = await clientApi.getUserTokenWithAuth();
         if (!token) {
             signOut();
         }
@@ -77,7 +80,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     const authorize = async (): Promise<boolean> => {
-        const success = await UserManagerApi.authorize();
+        const success = await clientApi.authorize();
         if (!success) {
             signOut();
         }
@@ -90,28 +93,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     
     useEffect(() => {
-        console.log("tutaj mam cie")
+        console.log("wywo³anie autoryzacji w auth provider")
         const fetchUser = async () => {
-            const token = await getToken();
-            if (token) {
-                setUser(await UserManagerApi.downloadUser());
+            const userData = await clientApi.downloadUser();
+            if (!userData) {
+                signOut();
+            } else {
+                setUser(userData);
             }
         }
-        if (!user) {
-            fetchUser();
-        }
-    })
+        fetchUser();
+    }, [signOut, clientApi])
     
 
     const value = {
+        clientApi,
         user,
         errors,
         clearErrors,
-        getToken,
+        getTokenWithAuth,
         signUp,
         signIn,
         signOut,
-        authorize
+        authorize,
+        getToken
     }
 
     return (

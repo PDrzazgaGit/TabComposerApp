@@ -1,18 +1,26 @@
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { IUser, User } from "../models/UserModel";
 import { SessionService } from "../services/SessionService";
 import { AppErrors } from "../models/AppErrorsModel";
-
+import { ClientApi, IClientApi } from "./clientApi";
 export class UserManagerApi {
 
-    private static user: User | null;
+    private user: User | null;
 
-    private static errors: AppErrors | null;
+    private errors: AppErrors | null;
 
-    public static async signIn(username: string, password: string, remember: boolean): Promise<boolean> {
+    private clientApi: IClientApi;
+    
+    constructor() {
+        this.clientApi = ClientApi.getInstance();
+        this.errors = null;
+        this.user = null;
+    }
+
+    public async signIn(username: string, password: string, remember: boolean): Promise<boolean> {
         this.clearErrors();
         try {
-            const response = await axios.post('https://localhost:44366/api/auth/signin', {
+            const response = await this.clientApi.use().post('/auth/signin', {
                 username,
                 password
             });
@@ -24,6 +32,7 @@ export class UserManagerApi {
             SessionService.setJWT(token, remember);
             const profile = await this.getUserProfile();
             this.user = new User(profile.userName, profile.email)
+            this.clientApi.setAuthorize(true);
             return true;
         } catch (error) {
             this.errors = this.apiErrorFormatter(error, { message: "message" })
@@ -31,10 +40,10 @@ export class UserManagerApi {
         }
     }
 
-    public static async signUp(email: string, username: string, password: string): Promise<boolean> {
+    public async signUp(email: string, username: string, password: string): Promise<boolean> {
         this.clearErrors();
         try {
-            await axios.post('https://localhost:44366/api/auth/signup', {
+            await await this.clientApi.use().post('/auth/signup', {
                 email,
                 username,
                 password
@@ -50,15 +59,16 @@ export class UserManagerApi {
         }
     }
 
-    public static signOut(): void {
+    public signOut(): void {
         SessionService.removeJWT();
         this.user = null;
+        this.clientApi.setAuthorize(false);
     }
 
-    public static async authorize(): Promise<boolean> {
+    public async authorize(): Promise<boolean> {
         try {
             const token = SessionService.getJWT();
-            await axios.get('https://localhost:44366/api/auth/authorize', {
+            await this.clientApi.use().get('/auth/authorize', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -69,7 +79,11 @@ export class UserManagerApi {
         }
     }
 
-    public static async getUserToken(): Promise<string | null> {
+    public getUserToken(): string | null {
+        return SessionService.getJWT();
+    }
+
+    public async getUserTokenWithAuth(): Promise<string | null> {
         const auth = await this.authorize(); 
         if (auth) {
             return SessionService.getJWT();
@@ -78,11 +92,11 @@ export class UserManagerApi {
         }
     }
 
-    public static getUser(): IUser | null {
+    public getUser(): IUser | null {
         return this.user;
     }
 
-    public static async downloadUser(): Promise<IUser | null> {
+    public async downloadUser(): Promise<IUser | null> {
         try {
             const profile = await this.getUserProfile();
             this.user = new User(profile.userName, profile.email);
@@ -92,27 +106,27 @@ export class UserManagerApi {
         }
     }
 
-    public static getErrors(): AppErrors | null {
+    public getErrors(): AppErrors | null {
         return this.errors;
     }
-    private static clearErrors(): void {
+    private clearErrors(): void {
         this.errors = null;
     }
 
-    private static async getUserProfile() {
+    private async getUserProfile() {
         const token = SessionService.getJWT();
-        const response = await axios.get('https://localhost:44366/api/Account', {
+        const response = await this.clientApi.use().get('/account', {
             headers: {
-                Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
+                Authorization: `Bearer ${token}` 
             }
         });
         return response.data;
     }
 
-    private static apiErrorFormatter(error: unknown, keywords: { [key: string]: string }): AppErrors {
+    private apiErrorFormatter(error: unknown, keywords: { [key: string]: string }): AppErrors {
         const formattedErrors: AppErrors = {};
 
-        if (axios.isAxiosError(error) && error.response) {
+        if (isAxiosError(error) && error.response) {
             const serverErrors = error.response.data;
             if (Array.isArray(serverErrors)) {
                 serverErrors.forEach((err: { code: string; description: string }) => {

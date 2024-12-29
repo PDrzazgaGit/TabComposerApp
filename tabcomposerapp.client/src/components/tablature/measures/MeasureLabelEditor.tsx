@@ -15,7 +15,7 @@ export const MeasureLabelEditor = () => {
 
     const { measureEditorErrors, setMeasureEditorErrors, clearMeasureEditorErrors } = useError();
 
-    const { getToken } = useAuth();
+    const { getTokenWithAuth } = useAuth();
 
     const [isHovered, setIsHovered] = useState(false);
 
@@ -58,7 +58,7 @@ export const MeasureLabelEditor = () => {
     };
 
     const handleDeleteMeasure = async () => {
-        const token = await getToken();
+        const token = await getTokenWithAuth();
         if (!token) {
             <SessionExpired />
             return;

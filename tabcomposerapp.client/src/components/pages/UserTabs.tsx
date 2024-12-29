@@ -1,18 +1,22 @@
 import { useState, useEffect, Key } from "react";
-import { Container, Row, Col, Card, ButtonGroup, Button, Modal } from "react-bootstrap";
+import { Container, Row, Col, Card, ButtonGroup, Button, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { useAuth } from "../../hooks/useAuth";
-//import { useTabulature } from "../../hooks/useTabulature";
 import { Notation } from "../../models";
 import { TabulatureDataModel } from "../../models/TabulatureDataModel";
 import { CreateTabulature } from "../tablature/CreateTabulature";
 import { SessionExpired } from "../SessionExpired";
+import { useTabulatureApi } from "../../hooks/useTabulatureApi";
+import { useError } from "../../hooks/useError";
 
 export const UserTabs = () => {
     const { getToken } = useAuth();
 
-    const [authorized, setAuthorized] = useState(true);
+    const { userTabsErrors, setUserTabsErrors, clearUserTabsErrors } = useError();
+
+    const {getUserTabulatureInfo, downloadTabulature, deleteTabulature} = useTabulatureApi();
+
+    const [authorized, setAuthorized] = useState<boolean | undefined>();
 
     const [tabInfo, setTabInfo] = useState<Record<number, TabulatureDataModel> | null>(null);
 
@@ -27,33 +31,30 @@ export const UserTabs = () => {
     const handleShowDelete = () => setShowDelete(true);
 
     const  navigate  = useNavigate();
-
     
     useEffect(() => {
-        console.log("useEffect")
         const fetchTablatureData = async () => {
-            const token = await getToken();
-            if (token) {
-                const data = await TabulatureManagerApi.getUserTabulaturesInfo(token);
-                setAuthorized(true);
-                if (data) {
-                    setTabInfo(data);
-                    
-                } else {
-                    //b³¹d
-                }
-            } else {
+            const token = getToken();
+            if (!token) {
                 setAuthorized(false);
-            }
+                return;
+            } 
+            const data = await getUserTabulatureInfo(token);
+            if (!data) {
+                setAuthorized(false);
+                return;
+            } 
+            setAuthorized(true);
+            setTabInfo(data);        
         };
         fetchTablatureData();
     }, []);
     
     const handlePlay = async (id: number) => {
-
-        const result = await TabulatureManagerApi.downloadTabulature(id);
+        clearUserTabsErrors();
+        const result = await downloadTabulature(id);
         if (!result) {
-            //
+            setUserTabsErrors({ [`download_${id}`]:['Cannot load this tablature.']})
         } else {
             navigate("/player");
         }
@@ -61,40 +62,40 @@ export const UserTabs = () => {
     }
 
     const handleEdit = async (id: number) => {
-
-        const result = await TabulatureManagerApi.downloadTabulature(id);
-
+        clearUserTabsErrors();
+        const result = await downloadTabulature(id);
         if (!result) {
-            console.log("fd")
-        } else {
-            
+            setUserTabsErrors({ [`download_${id}`]: ['Cannot load this tablature.'] })
+        } else { 
             navigate("/editor");
         }
     }
 
     const handleDelete = async (id: number) => {
-        const token = await getToken();
-        if (token) {
-            const success = await TabulatureManagerApi.deleteTabulature(token, id)//await deleteTabulature(token, id);
-            if (success) {
-                setTabInfo(prev => {
-                    if (!prev) return prev;
-                    const updatedTabs = { ...prev };
-                    delete updatedTabs[id];
-                    return updatedTabs;
-                });
-            }
-        } else {
-            <SessionExpired />
+        clearUserTabsErrors();
+        const token = getToken();
+        if (!token) {
+            setAuthorized(false);
+            return; 
         }
+        const success = await deleteTabulature(token, id);
+        if (!success) {
+            setAuthorized(false);
+            return; 
+        }
+        setTabInfo(prev => {
+            if (!prev) return prev;
+            const updatedTabs = { ...prev };
+            delete updatedTabs[id];
+            return updatedTabs;
+        });
     };
 
-    if (!tabInfo && authorized) return (<></>);
-    if (!authorized) return (<SessionExpired></SessionExpired>);
+    if (authorized === false) return (<SessionExpired></SessionExpired>);
 
     return (
         <Container className="mt-3">
-            {Object.entries(tabInfo).length === 0 && (
+            {tabInfo && Object.entries(tabInfo!).length === 0 && (
                 <div className="mb-3">
                     <Row className="align-items-center">
                         <Col className="text-center">
@@ -103,8 +104,8 @@ export const UserTabs = () => {
                     </Row>
                 </div>
             )}
-            {Object.entries(tabInfo).map(([key, tab]) => (
-                <Card key={key} className="mb-4 shadow-sm">
+            {tabInfo && Object.entries(tabInfo!).map(([key, tab]) => (
+                <Card key={key} className="mb-3">
                     <Card.Header className="fw-bold mb-1">{tab.title}</Card.Header>
                     <Card.Body>
                         <Row className="align-items-center w-100">
@@ -124,6 +125,10 @@ export const UserTabs = () => {
 
                                 <Card.Text className="text-muted">Description:</Card.Text>
                                 {tab.description}
+
+                                {userTabsErrors[`download_${key}`] && (
+                                    <Card.Text className="text-danger">{userTabsErrors[`download_${key}`]}</Card.Text>
+                                )}
                                 
                             </Col>
                             
@@ -176,11 +181,22 @@ export const UserTabs = () => {
                     </Card.Footer>
                 </Card>
             ))}
-            <Row className="align-items-center mb-3">
-                <Col className="text-center">
-                    <CreateTabulature/>
-                </Col>
-            </Row>
+            {tabInfo && (
+                <Row className="align-items-center mb-3">
+                    <Col className="text-center">
+                        <CreateTabulature />
+                    </Col>
+                </Row>
+            ) || (
+                <Row className="align-items-center">
+                    <Col className="text-center">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
+                    </Col>
+                </Row>
+            )}
+            
         </Container>
 
     );

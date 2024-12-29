@@ -11,12 +11,12 @@ export const AddMeasureView = () => {
 
     const { addMeasure, globalNumerator, globalDenominator, globalTempo, getMeasuresCount, copyMeasure } = useTabulature();
 
-    const { getToken } = useAuth();
+    const { getTokenWithAuth } = useAuth();
 
     const [measureToCopy, setMeasureToCopy] = useState(getMeasuresCount()-1);
 
     const handleAddMeasure = async () => {
-        const token = await getToken();
+        const token = await getTokenWithAuth();
         if (!token) {
             <SessionExpired/>
             return;
@@ -25,7 +25,7 @@ export const AddMeasureView = () => {
     }
 
     const handleCopyMeasure = async () => {
-        const token = await getToken();
+        const token = await getTokenWithAuth();
         if (!token) {
             <SessionExpired />
             return;

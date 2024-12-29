@@ -1,27 +1,39 @@
-import { Container } from "react-bootstrap";
+import { Container, Row, Col,Spinner } from "react-bootstrap";
 import { TabulatureView } from "../tablature/TabulatureView";
 import { TabulatureProvider } from "../../context/TabulatureProvider";
-import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
-import { useEffect, useState } from "react";
-import { ITabulature } from "../../models";
+import { useEffect } from "react";
+import { useTabulatureApi } from "../../hooks/useTabulatureApi";
+import { useNavigate } from "react-router-dom";
 
 export const Player = () => {
 
-    const [tabulature, setTabulature] = useState<ITabulature | null>();
+    const { getTabulature } = useTabulatureApi();
+
+    const navigate = useNavigate();
+
+    const tabulature = getTabulature();
 
     useEffect(() => {
-        setTabulature(TabulatureManagerApi.getTabualture())
-    }, [])
-
-    if (!tabulature)
-        return (<></>)
+        if (!tabulature) {
+            navigate('/mytabs');
+        }
+    }, [navigate, tabulature])
 
     return (
-
-        <TabulatureProvider initialtabulature={tabulature}>
-            <Container className="mb-3">
-                <TabulatureView />
-            </Container>
-        </TabulatureProvider> 
+        <Container className="mb-3">
+            {tabulature && (
+                <TabulatureProvider initialtabulature={tabulature}>
+                    <TabulatureView />
+                </TabulatureProvider> 
+            ) || (
+                <Row className="align-items-center">
+                    <Col className="text-center">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
+                    </Col>
+                </Row>
+            )}  
+        </Container>
     );
 }

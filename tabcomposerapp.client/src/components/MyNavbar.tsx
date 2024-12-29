@@ -10,14 +10,7 @@ import { CreateTabulature } from "./tablature/CreateTabulature";
 
 export const MyNavbar = () => {
 
-    const { authorize, user } = useAuth();
-
-    useEffect(() => {
-        const fetchAuthorize = async () => {
-            await authorize();
-        }
-        fetchAuthorize();
-    }, [user, authorize])
+    const { user } = useAuth();
 
     return (
         <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">

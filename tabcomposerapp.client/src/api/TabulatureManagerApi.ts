@@ -1,17 +1,22 @@
-import axios from "axios";
 import { ITabulature } from "../models";
 import { TabulatureDataModel } from "../models/TabulatureDataModel";
 import { SerializationService } from "../services/SerializationService";
+import { ClientApi } from "./clientApi";
 
-export class TabulatureManagerApi {
+export class TabulatureManagerApi extends ClientApi  {
 
-    static tabulatureId: number | undefined;
+    public tabulatureId: number | undefined;
 
-    static tabulature: ITabulature | null;
+    public tabulature: ITabulature | null;
 
-    public static async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
+    public constructor() {
+        super();
+        this.tabulature = null;
+    }
+
+    public async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
         try {
-            const response = await axios.get('https://localhost:44366/api/Tablature/GetUserTablaturesInfo', {
+            const response = await this.client.get('/Tablature/GetUserTablaturesInfo', {
                 headers: {
                     Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
@@ -23,9 +28,9 @@ export class TabulatureManagerApi {
         
     }
 
-    public static async downloadTabulature(id: number): Promise<ITabulature | null> {
+    public async downloadTabulature(id: number): Promise<ITabulature | null> {
         try {
-            const response = await axios.get(`https://localhost:44366/api/Tablature/GetTablature/${id}`);
+            const response = await this.client.get(`/Tablature/GetTablature/${id}`);
             const tabulatureData: string = response.data.tablature as string; 
             
             this.tabulature = SerializationService.deserializeTabulature(tabulatureData);
@@ -38,11 +43,11 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static async addTabulature(token: string, tabulature: ITabulature): Promise<boolean> {
+    public async addTabulature(token: string, tabulature: ITabulature): Promise<boolean> {
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(tabulature);
-            const response = await axios.post(
-                'https://localhost:44366/api/Tablature/AddTablature',
+            const response = await this.client.post(
+                '/Tablature/AddTablature',
                 tabulatureData,
                 {
                     
@@ -64,9 +69,9 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static async deleteTabulature(token: string, id: number): Promise<boolean> {
+    public async deleteTabulature(token: string, id: number): Promise<boolean> {
         try {
-            await axios.post(`https://localhost:44366/api/Tablature/DeleteTablature/${id}`, null ,{
+            await this.client.post(`/Tablature/DeleteTablature/${id}`, null ,{
                 headers: {
                     Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
@@ -81,14 +86,14 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static async updateTabulature(token: string): Promise<boolean> {
+    public async updateTabulature(token: string): Promise<boolean> {
         if (this.tabulatureId === undefined || this.tabulature === null) {
             return false;
         }
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(this.tabulature);
-            await axios.post(
-                `https://localhost:44366/api/Tablature/UpdateTablature/${this.tabulatureId}`,
+            await this.client.post(
+                `/Tablature/UpdateTablature/${this.tabulatureId}`,
                 tabulatureData,  
                 {
                     headers: {
@@ -103,13 +108,7 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static cloneTabulature(): ITabulature | null {
-        const clone = this.tabulature?.clone() || null;
-        this.tabulature = clone;
-        return clone;
-    }
-
-    public static getTabualture(): ITabulature | null {
+    public getTabulature(): ITabulature | null {
         return this.tabulature;
     }
     

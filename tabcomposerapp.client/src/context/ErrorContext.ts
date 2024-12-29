@@ -24,6 +24,10 @@ interface ErrorContextType {
     playerErrors: AppErrors;
     setPlayerErrors: (newErrors: AppErrors) => void;
     clearPlayerErrors: () => void;
+
+    userTabsErrors: AppErrors;
+    setUserTabsErrors: (newErrors: AppErrors) => void;
+    clearUserTabsErrors: () => void;
 }
 
 export const ErrorContext = createContext<ErrorContextType | undefined>(undefined);

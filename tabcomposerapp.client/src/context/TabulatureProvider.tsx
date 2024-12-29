@@ -1,7 +1,6 @@
 import { useState, ReactNode } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
-import { TabulatureManagerApi } from '../api/TabulatureManagerApi';
 import { TabulaturePlayer } from '../services/audio/TabulaturePlayer';
 
 interface TabulatureProviderProps {
@@ -23,17 +22,15 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
 
     const tabulaturePlayer: TabulaturePlayer = new TabulaturePlayer(tabulature);
 
-    const addMeasure = (tempo: number, numerator: number, denominator: number, token: string) => {
-        tabulature.addMeasure(tempo, numerator, denominator);
-        TabulatureManagerApi.updateTabulature(token);
-       
+    const addMeasure = (tempo: number, numerator: number, denominator: number) => {
+        tabulature.addMeasure(tempo, numerator, denominator);     
     }
 
-    const deleteMeasure = (measure: IMeasure, token: string) => {
+    const deleteMeasure = (measure: IMeasure) => {
         tabulature.deleteMeasure(measure);
-        TabulatureManagerApi.updateTabulature(token);
     }
-    const copyMeasure = (measureId: number, token: string): boolean => {
+
+    const copyMeasure = (measureId: number): boolean => {
 
         const measureToCopy = tabulature.getMeasure(measureId);
         if (!measureToCopy) {
@@ -41,7 +38,6 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
         }
         const deepClonedMeasure = measureToCopy.deepClone();
         tabulature.addMeasureObject(deepClonedMeasure);
-        TabulatureManagerApi.updateTabulature(token);
         return true;
     }
 
@@ -50,6 +46,7 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     }
 
     const value = {
+
         tabulaturePlayer,
         setTabulature,
         tabulature,
