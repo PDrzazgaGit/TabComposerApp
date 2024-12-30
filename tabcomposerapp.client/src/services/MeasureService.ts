@@ -334,6 +334,8 @@ export class MeasureService implements IMeasure {
         return true;
     }
 
+    // przerobiæ measure service aby iteracja po nutkach by³a zawsze po ich timestampach.
+
     public changeSignature(numerator: number, denominator: number): boolean {
         if (numerator <= 0) {
             throw new Error("Numerator must be a positive integer.");
