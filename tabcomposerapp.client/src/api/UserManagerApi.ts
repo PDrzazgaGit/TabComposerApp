@@ -2,10 +2,10 @@ import { isAxiosError } from "axios";
 import { IUser, User } from "../models/UserModel";
 import { SessionService } from "../services/SessionService";
 import { AppErrors } from "../models/AppErrorsModel";
-import { ClientApi, IClientApi, IClientAuth } from "./clientApi";
+import { ClientApi, IClientApi, IClientAuth } from "./ClientApi";
 export class UserManagerApi {
 
-    private user: User | null;
+    //private user: User | null;
 
     private errors: AppErrors | null;
 
@@ -14,7 +14,7 @@ export class UserManagerApi {
     constructor() {
         this.clientApi = ClientApi.getInstance();
         this.errors = null;
-        this.user = null;
+        //this.user = null;
     }
 
     public async signIn(username: string, password: string, remember: boolean): Promise<boolean> {
@@ -31,11 +31,13 @@ export class UserManagerApi {
             }
             SessionService.setJWT(token, remember);
             const profile = await this.getUserProfile();
-            this.user = new User(profile.userName, profile.email)
+            const user: IUser = new User(profile.userName, profile.email);
+            SessionService.setUser(user, remember);
             this.clientApi.setAuthorize(true);
             return true;
         } catch (error) {
             this.errors = this.apiErrorFormatter(error, { message: "message" })
+            this.signOut();
             return false;
         }
     }
@@ -61,7 +63,7 @@ export class UserManagerApi {
 
     public signOut(): void {
         SessionService.removeJWT();
-        this.user = null;
+        SessionService.removeUser();
         this.clientApi.setAuthorize(false);
     }
 
@@ -97,14 +99,16 @@ export class UserManagerApi {
     }
 
     public getUser(): IUser | null {
-        return this.user;
+        return SessionService.getUser();
     }
 
     public async downloadUser(): Promise<IUser | null> {
         try {
             const profile = await this.getUserProfile();
-            this.user = new User(profile.userName, profile.email);
-            return this.user;
+            const user: IUser = new User(profile.userName, profile.email);
+            if (!SessionService.updateUser(user))
+                return null
+            return user;
         } catch {
             return null;
         }

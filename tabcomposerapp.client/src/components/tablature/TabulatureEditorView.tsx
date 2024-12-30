@@ -23,26 +23,23 @@ export const TabulatureEditorView = observer(() => {
 
     const { getToken, clientAuth } = useAuth();
 
-    const { updateTabulature } = useTabulatureApi();
+    const { updateTabulature, tabulatureManagerApi } = useTabulatureApi();
 
     const updateTimeMs: number = 5000;
 
     const token = useMemo(() => getToken(), [getToken]);
 
-    /* do zrobieniaa 
-    
-    update cykliczny tylko jeœli nie jest upToDate
-
-    */
-
     useEffect(() => {
-        
+        console.log("Meow")
         const intervalId = setInterval(async () => {
 
-            const success = await updateTabulature(token ? token : '');
+            if (!tabulatureManagerApi.upToDate) {
+                
+                const success = await updateTabulature(token ? token : '');
 
-            if (!success) {
-               //
+                if (!success) {
+                    //
+                }
             }
 
         }, updateTimeMs);
@@ -51,7 +48,8 @@ export const TabulatureEditorView = observer(() => {
             clearInterval(intervalId);
             updateTabulature(token ? token : '');
         };
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tabulature]);
     
     const [showEditModal, setShowEditModal] = useState(false);
 

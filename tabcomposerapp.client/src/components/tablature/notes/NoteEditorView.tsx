@@ -11,9 +11,10 @@ import { NoteView } from "./NoteView";
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
+    onMouseMoveString?: (event: React.MouseEvent<HTMLDivElement>) => void; // Callback przekazany przez rodzica
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onMouseMoveString }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
@@ -286,7 +287,58 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         clearNoteEditorErrors();
     }
 
+    const [startX, setStartX] = useState(0); // Pozycja pocz¹tkowa myszy
+    const [isDragging, setIsDragging] = useState(false); // Czy przeci¹ganie jest aktywne
 
+    const moveLeft = (steps: number): void => {
+        console.log(`Moved left by ${steps} steps`);
+    };
+
+    const moveRight = (steps: number): void => {
+        console.log(`Moved right by ${steps} steps`);
+    };
+
+    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>): void => {
+        console.log(event.clientX)
+        setIsDragging(true);
+        setStartX(event.clientX); // Ustawiamy pozycjê pocz¹tkow¹
+    };
+
+    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
+        console.log("move")
+        if (!isDragging) return;
+
+        const currentX = event.clientX;
+        const deltaX = currentX - startX; // Obliczamy przesuniêcie
+
+        if (Math.abs(deltaX) >= 50) { // Próg przesuniêcia, np. co 50px
+            const steps = Math.floor(Math.abs(deltaX) / 50);
+            if (deltaX > 0) {
+                moveRight(steps); // W prawo
+            } else {
+                moveLeft(steps); // W lewo
+            }
+            setStartX(currentX); // Resetujemy punkt pocz¹tkowy
+        }
+    };
+
+    const handleMouseUp = (): void => {
+        console.log("mup")
+        if (isDragging) {
+            setIsDragging(false); // Koñczymy przeci¹ganie
+        }
+    };
+
+    const handleDragStart = (event: React.DragEvent) => {
+        console.log(event.clientX)
+        console.log(event.nativeEvent.clientX)
+    }
+
+    const handleDragEnd = (event: React.DragEvent) => {
+        console.log(event.clientX)
+        console.log(event.nativeEvent.clientX)
+
+    }
 
     return (
         <OverlayTrigger
@@ -298,6 +350,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             flip
         >
             <div
+
+                draggable="true"
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     height: '100%',

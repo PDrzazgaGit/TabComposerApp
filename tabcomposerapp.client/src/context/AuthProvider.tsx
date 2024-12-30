@@ -9,7 +9,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const [errors, setErrors] = useState<AppErrors>({});
 
-    const [user, setUser] = useState<IUser | null>(null);
+    const [user, setUser] = useState<IUser | undefined | null>();
 
     const userManagerApi = useMemo(() => new UserManagerApi(), []);
 
@@ -94,7 +94,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setErrors({});
     }
 
-    
+    useEffect(() => {
+        const user = userManagerApi.getUser();
+        if (!user) {
+            signOut();
+        } else {
+            setUser(user);
+        }
+    }, [signOut, userManagerApi])
+
+    /*
     useEffect(() => {
         console.log("wywo³anie autoryzacji w auth provider")
         const fetchUser = async () => {
@@ -105,9 +114,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 setUser(userData);
             }
         }
-        fetchUser();
+        //fetchUser();
     }, [signOut, userManagerApi])
-    
+    */
 
     const value = {
         clientAuth,

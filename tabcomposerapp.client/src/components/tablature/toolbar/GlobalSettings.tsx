@@ -1,4 +1,4 @@
-import { InputGroup, FormControl, Dropdown, FormCheck, Button } from "react-bootstrap";
+import { InputGroup, FormControl, Dropdown, FormCheck, Button, Spinner } from "react-bootstrap";
 import { NoteDuration } from "../../../models";
 import { noteRepresentationMap } from "../../../utils/noteUtils";
 import { useTabulature } from "../../../hooks/useTabulature";
@@ -29,13 +29,14 @@ export const GlobalSettings: React.FC = () => {
     const { updateTabulature, tabulatureManagerApi } = useTabulatureApi();
     const { getToken } = useAuth();
 
-    const [upToDate, setUpToDate] = useState(true);
+    
 
     const handleMeasuresPerRow = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMeasuresPerRow(event.target.valueAsNumber);
     }
 
-    
+    const [upToDate, setUpToDate] = useState(true);
+
     useEffect(() => {
 
         const disposer = autorun(() => {
@@ -152,7 +153,19 @@ export const GlobalSettings: React.FC = () => {
                     className="w-100"
                     disabled={ upToDate }
                 >
-                    {upToDate && "Up to date" || "Save Changes"}
+                    {upToDate && "Up to date" || (
+                        <>
+                            <span className="me-1">Saving...</span>
+                            <Spinner
+                                animation="border"
+                                role="status"
+                                size="sm"
+                            >
+                                <span className="visually-hidden">Loading...</span>
+
+                            </Spinner>
+                        </>
+                    )}
                 </Button>
             </InputGroup>
         </div>

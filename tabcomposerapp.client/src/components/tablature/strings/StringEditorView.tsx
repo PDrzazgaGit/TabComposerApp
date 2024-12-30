@@ -413,6 +413,26 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
         return 0 - stringMargin - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
     }
 
+    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
+        console.log(event.clientX)
+        /*
+        if (!isDragging) return;
+
+        const currentX = event.clientX;
+        const deltaX = currentX - startX; // Obliczamy przesuniêcie
+
+        if (Math.abs(deltaX) >= 50) { // Próg przesuniêcia, np. co 50px
+            const steps = Math.floor(Math.abs(deltaX) / 50);
+            if (deltaX > 0) {
+                moveRight(steps); // W prawo
+            } else {
+                moveLeft(steps); // W lewo
+            }
+            setStartX(currentX); // Resetujemy punkt pocz¹tkowy
+        }
+        */
+    };
+
     return (
         <OverlayTrigger
             trigger="click"
@@ -442,6 +462,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
 
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
+                    //onMouseMove={handleMouseMove }
                 >
 
                     <div

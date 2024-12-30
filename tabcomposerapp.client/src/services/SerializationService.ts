@@ -1,34 +1,19 @@
-import { ITabulature, ITuning, Tabulature, IMeasure, Sound, Articulation, INote, IPause, NoteKind, Notation, NoteDuration } from "../models";
+import { ITabulature, ITuning, Tabulature, IMeasure, Sound, Articulation, INote, IPause, NoteKind } from "../models";
+import { SerializedTabulature, SerializedMeasure, SerializedNote, SerializedTuning } from "../models/SerializedTabulatureModel";
+import { IUser } from "../models/UserModel";
 import { MusicScale } from "./MusicScale";
 import { TuningFactory } from "./TuningFactory";
 
-export interface SerializedNote {
-    fret: number,
-    timeStamp: number;
-    noteDuration: NoteDuration,
-    articulation: Articulation
-}
-export interface SerializedMeasure {
-    tempo: number;
-    numerator: number;
-    denominator: number;
-    notes: Record<string, SerializedNote[]>;  // Mapowanie id struny na tablicê nut
-}
-
-export interface SerializedTabulature {
-    title: string;
-    author: string;
-    frets: number;         // Zak³adam, ¿e frets to liczba
-    tuning: SerializedTuning;  // Serializowane dane o strojeniu
-    measures: SerializedMeasure[];  // Tablica serializowanych miar
-    description: string;
-}
-
-export interface SerializedTuning {
-    tuning: Record<number, { notation: Notation, octave: number }>
-}
-
 export class SerializationService {
+
+    public static serializeUser(user: IUser): string {
+        return JSON.stringify(user);
+    }
+
+    public static deserializeUser(data: string): IUser {
+        const user: IUser = JSON.parse(data);
+        return user;
+    }
 
     public static serializeTabulature(tabulature: ITabulature): string {
         const serializedTabulature: SerializedTabulature = {
