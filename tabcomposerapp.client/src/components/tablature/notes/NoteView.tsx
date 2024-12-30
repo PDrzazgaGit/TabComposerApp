@@ -7,9 +7,10 @@ import { observer } from "mobx-react-lite";
 interface NoteViewProps {
     note: INote | IPause;
     onClick?: () => void; 
+    cursor?: string;
 }
 
-export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ note, onClick }, ref) => {
+export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ note, onClick, cursor = "auto" }, ref) => {
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
@@ -38,7 +39,8 @@ export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ no
                 <button
                     className="note-input-button"
                     style={{
-                        color: isHovered || note.playing ? '#007bff' : 'black'
+                        color: isHovered || note.playing  ? '#007bff' : 'black',
+                        cursor: cursor
                     }}
                 >
                     {isNote(note) ?

@@ -244,7 +244,6 @@ export class MeasureService implements IMeasure {
 
             const newEndTime = note.getEndTimeStampMs() + intervalMs;
 
-
             const isCollision = stringNotes.some((otherNote, i) => {
                 if (i !== index) {
 
@@ -261,16 +260,17 @@ export class MeasureService implements IMeasure {
             });
 
             if (isCollision) {
-                //return false;
+
                 const rightNote = stringNotes[index + 1];
+
                 if (rightNote.getDurationMs() === note.getDurationMs()) {
                     newStartTime = rightNote.getTimeStampMs();
                     rightNote.setTimeStampMs(note.getTimeStampMs());
                 } else {
-                    //return false;
                     newStartTime = note.getTimeStampMs() + rightNote.getDurationMs();
                     rightNote.setTimeStampMs(note.getTimeStampMs());
                 }
+
                 stringNotes[index + 1] = note;
                 stringNotes[index] = rightNote;
             }
@@ -314,7 +314,9 @@ export class MeasureService implements IMeasure {
             });
 
             if (isCollision) {
+
                 const leftNote = stringNotes[index - 1];
+
                 if (leftNote.getDurationMs() === note.getDurationMs()) {
                     newStartTime = leftNote.getTimeStampMs();
                     leftNote.setTimeStampMs(note.getTimeStampMs());                    
@@ -323,6 +325,7 @@ export class MeasureService implements IMeasure {
                     newStartTime = leftNote.getTimeStampMs();
                     leftNote.setTimeStampMs(newStartTime + note.getDurationMs());
                 }
+                
                 stringNotes[index - 1] = note;
                 stringNotes[index] = leftNote;
             }

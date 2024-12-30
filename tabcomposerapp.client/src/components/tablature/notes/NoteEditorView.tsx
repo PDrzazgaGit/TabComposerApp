@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Popover, InputGroup, FormControl, Dropdown, FormCheck, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
 import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
@@ -11,16 +11,16 @@ import { NoteView } from "./NoteView";
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
-    onMouseMoveString?: (event: React.MouseEvent<HTMLDivElement>) => void; // Callback przekazany przez rodzica
+    onNoteDragChange: (moved: boolean) => void;
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onMouseMoveString }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
 
-    const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
+
 
     const [slide, setSlide] = useState(false);
 
@@ -30,7 +30,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
 
     const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets } = useMeasure();
 
-    const { shiftOnDelete } = useTabulature();
+    const { shiftOnDelete, globalNoteInterval } = useTabulature();
+
+    const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(globalNoteInterval);
 
     const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
 
@@ -287,57 +289,57 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
         clearNoteEditorErrors();
     }
 
-    const [startX, setStartX] = useState(0); // Pozycja pocz¹tkowa myszy
-    const [isDragging, setIsDragging] = useState(false); // Czy przeci¹ganie jest aktywne
+    const [startX, setStartX] = useState<number | null>(null); 
+    const [step, setStep] = useState<number | null>(null);
+    const [isDragging, setIsDragging] = useState(false); 
 
-    const moveLeft = (steps: number): void => {
-        console.log(`Moved left by ${steps} steps`);
-    };
-
-    const moveRight = (steps: number): void => {
-        console.log(`Moved right by ${steps} steps`);
-    };
-
-    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>): void => {
-        console.log(event.clientX)
-        setIsDragging(true);
-        setStartX(event.clientX); // Ustawiamy pozycjê pocz¹tkow¹
-    };
-
-    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
-        console.log("move")
-        if (!isDragging) return;
-
-        const currentX = event.clientX;
-        const deltaX = currentX - startX; // Obliczamy przesuniêcie
-
-        if (Math.abs(deltaX) >= 50) { // Próg przesuniêcia, np. co 50px
-            const steps = Math.floor(Math.abs(deltaX) / 50);
-            if (deltaX > 0) {
-                moveRight(steps); // W prawo
-            } else {
-                moveLeft(steps); // W lewo
-            }
-            setStartX(currentX); // Resetujemy punkt pocz¹tkowy
-        }
-    };
-
-    const handleMouseUp = (): void => {
-        console.log("mup")
-        if (isDragging) {
-            setIsDragging(false); // Koñczymy przeci¹ganie
-        }
-    };
-
-    const handleDragStart = (event: React.DragEvent) => {
-        console.log(event.clientX)
-        console.log(event.nativeEvent.clientX)
+    const calculateStep = (): number => {
+        return 200 * selectedInterval;
     }
 
-    const handleDragEnd = (event: React.DragEvent) => {
-        console.log(event.clientX)
-        console.log(event.nativeEvent.clientX)
+    const handleDragStart = (event: React.DragEvent) => {
+        setIsDragging(true);
+        setStep(calculateStep());
+        setStartX(event.clientX);
+        onNoteDragChange(false);
+    }
 
+    const handleDragEnd = () => {
+        setIsDragging(false);
+        setStep(null);
+        setStartX(null);
+        onNoteDragChange(false);
+    }
+
+    const handleDrag = (event: React.DragEvent) => {
+        if (isDragging && startX != null && step != null) {
+            const newX = event.clientX;
+            if (newX === 0)
+                return
+
+            const value = Math.abs(newX - startX);
+
+            if (newX > startX) {
+                
+                if (value >= step) {
+                    moveNoteRight(note, stringId, selectedInterval);
+                    setStartX(newX);
+                    onNoteDragChange(true);
+                } else {
+                    onNoteDragChange(false);
+                }
+                
+            } else if (newX < startX) {
+                
+                if (value >= step) {
+                    moveNoteLeft(note, stringId, selectedInterval);
+                    setStartX(newX);
+                    onNoteDragChange(true);
+                } else {
+                    onNoteDragChange(false);
+                }
+            }
+        }
     }
 
     return (
@@ -350,18 +352,22 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
             flip
         >
             <div
-
                 draggable="true"
+                
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
+                onDrag={handleDrag}
+               // onDragExit={() => document.body.click()}
+                //onDragLeave={() => document.body.click()}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     height: '100%',
                     margin: '0',
-                    padding: '0'
+                    padding: '0',
+                    cursor: isDragging ? "grabbing" : "move"
                 }}
             >
-                <NoteView note={note}></NoteView>
+                <NoteView note={note} cursor={isDragging ? 'grabbing' : 'grab'}></NoteView>
             </div>
 
         </OverlayTrigger>

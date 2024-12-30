@@ -28,6 +28,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
 
     const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
 
+    const [noteMoved, setNoteMoved] = useState<boolean>(false);
+
     const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
 
     const stringMargin: number = 150;
@@ -36,6 +38,9 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
         setNoteDuration(globalNoteDuration);
     }, [globalNoteDuration])
 
+    useEffect(() => {
+
+    }, [noteMoved])
 
     const calculatePosition = (timestamp: number, containerWidth: number): number => {
         return (timestamp / measure.measureDurationMs) * containerWidth;
@@ -413,26 +418,6 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
         return 0 - stringMargin - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
     }
 
-    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
-        console.log(event.clientX)
-        /*
-        if (!isDragging) return;
-
-        const currentX = event.clientX;
-        const deltaX = currentX - startX; // Obliczamy przesuniêcie
-
-        if (Math.abs(deltaX) >= 50) { // Próg przesuniêcia, np. co 50px
-            const steps = Math.floor(Math.abs(deltaX) / 50);
-            if (deltaX > 0) {
-                moveRight(steps); // W prawo
-            } else {
-                moveLeft(steps); // W lewo
-            }
-            setStartX(currentX); // Resetujemy punkt pocz¹tkowy
-        }
-        */
-    };
-
     return (
         <OverlayTrigger
             trigger="click"
@@ -506,8 +491,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                                             left: `calc(${calculatePosition(note.getTimeStampMs() + stringMargin, 100)}%)`,
                                         }}
                                     >
-
-                                        <NoteEditorView note={note} stringId={stringId} />
+                                        <NoteEditorView note={note} stringId={stringId} onNoteDragChange={ (moved: boolean) => setNoteMoved(moved) } />
                                     </div>
                                 </div>
 
