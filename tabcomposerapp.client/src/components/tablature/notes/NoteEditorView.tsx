@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Popover, InputGroup, FormControl, Dropdown, FormCheck, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
 import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
@@ -19,8 +19,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
-
-
 
     const [slide, setSlide] = useState(false);
 
@@ -302,6 +300,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
         setStep(calculateStep());
         setStartX(event.clientX);
         onNoteDragChange(false);
+
+        //event.preventDefault();
+        //const img = new Image();
+        //img.src = '';
+        //event.dataTransfer.setDragImage(img, 0, 0);
     }
 
     const handleDragEnd = () => {
@@ -312,6 +315,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     }
 
     const handleDrag = (event: React.DragEvent) => {
+        //event.defaultPrevented = false;
         if (isDragging && startX != null && step != null) {
             const newX = event.clientX;
             if (newX === 0)

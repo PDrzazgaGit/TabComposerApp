@@ -19,6 +19,7 @@ export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ no
 
     return (
         <div
+            draggable='false'
             ref={ref}
             onClick={onClick}
             onMouseEnter={() => setIsHovered(true)}
@@ -37,6 +38,7 @@ export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ no
                 className="note-square"
             >
                 <button
+                    draggable='false'
                     className="note-input-button"
                     style={{
                         color: isHovered || note.playing  ? '#007bff' : 'black',

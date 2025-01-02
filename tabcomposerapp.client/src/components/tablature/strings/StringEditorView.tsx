@@ -32,7 +32,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
 
     const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
 
-    const stringMargin: number = 150;
+    const stringMargin: number = 0; //150
 
     useEffect(() => {
         setNoteDuration(globalNoteDuration);
@@ -459,7 +459,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
 
                     <div className="position-relative"
                         style={{
-                            marginRight: `${calculatePosition(stringMargin * 2, 100)}%`
+                           // marginRight: "20px",//`${calculatePosition(stringMargin * 2, 100)}%`
+                           // marginLeft: "20px"//`${calculatePosition(stringMargin * 2, 100)}%`
                         }}
                     >
                         {measure.getNotes(stringId).map((note, index) => {
@@ -488,7 +489,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                                         style={{
                                             position: "absolute",
                                             height: "1.5em",
-                                            left: `calc(${calculatePosition(note.getTimeStampMs() + stringMargin, 100)}%)`,
+                                            left: `calc(${calculatePosition(note.getTimeStampMs() + stringMargin, 100) }%)`,
                                         }}
                                     >
                                         <NoteEditorView note={note} stringId={stringId} onNoteDragChange={ (moved: boolean) => setNoteMoved(moved) } />

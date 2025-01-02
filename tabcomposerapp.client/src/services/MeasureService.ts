@@ -1,4 +1,4 @@
-import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation } from '../models';
+import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation, Notation } from '../models';
 import { GuitarScale } from '.';
 import { makeAutoObservable } from 'mobx';
 
@@ -88,7 +88,7 @@ export class MeasureService implements IMeasure {
     }
 
     private isWithinMeasure(timeStamp: number, noteDurationMs: number): boolean {
-        return (timeStamp + noteDurationMs) <= this.measureDurationMs;
+        return (Math.floor(timeStamp + noteDurationMs)) <= this.measureDurationMs;
     }
 
     private hasString(stringId: number): boolean {
@@ -175,7 +175,7 @@ export class MeasureService implements IMeasure {
                     let canFit = true;
                     for (let i = noteIndex + 1; i < stringNotes.length; i++) {
                         const newStartTime = stringNotes[i].getTimeStampMs() + timeDiff;
-                        if (newStartTime + stringNotes[i].getDurationMs() > this.measureDurationMs) {
+                        if (Math.floor(newStartTime + stringNotes[i].getDurationMs()) > this.measureDurationMs) {
                             canFit = false;
                             break;
                         }
@@ -236,7 +236,7 @@ export class MeasureService implements IMeasure {
         const intervalMs = this.calculateNoteDurationMs(interval);
         let newStartTime = note.getTimeStampMs() + intervalMs;
 
-        if (newStartTime + note.getDurationMs() > this.measureDurationMs) {
+        if (Math.floor(newStartTime + note.getDurationMs()) > this.measureDurationMs) {
             return false;
         }
 
@@ -350,11 +350,17 @@ export class MeasureService implements IMeasure {
 
         this.strings.forEach((notes) => {
             const filteredNotes = notes.filter(note => {
-                return (note.getTimeStampMs() + note.getDurationMs()) <= newMeasureDurationMs;
+                return (Math.floor(note.getTimeStampMs() + note.getDurationMs())) <= newMeasureDurationMs;
             });
 
-            if (notes.length != filteredNotes.length)
-                noteLoss = true;;
+            if (notes.length != filteredNotes.length) {
+                console.log("notes", notes)
+                console.log("filtered", filteredNotes)
+                console.log("new duration", newMeasureDurationMs)
+                noteLoss = true;
+            }
+            
+                
         });
         if (noteLoss) {
             return false;
@@ -372,27 +378,42 @@ export class MeasureService implements IMeasure {
             throw new Error("Tempo must be a positive integer.");
         }
 
+        const oldMeasureDuration = this.measureDurationMs;
+
         this.tempo = tempo;
         this.measureDurationMs = this.calculateMeasureDurationMs(this.tempo, this.numerator, this.denominator);
         this.wholeNoteDurationMs = this.calculateWholeNoteDurationMs();
 
-        
+        const timeScale = this.measureDurationMs / oldMeasureDuration;
 
         this.strings.forEach((notes, stringId) => {
-            const notesData = notes.map(note => ({
-                fret: note.fret,
-                noteDuration: note.noteDuration,
-                kind: note.kind,
-                articulation: note.articulation
-            }))
+
+            const notesData = notes.map(note => {
+                return {
+                    fret: note.fret,
+                    noteDuration: note.noteDuration,
+                    kind: note.kind,
+                    articulation: note.articulation,
+                    timeStamp: note.getTimeStampMs()
+                };
+            });
             this.strings.set(Number(stringId), []);
             notesData.forEach(note => {
-                if (note.kind === NoteKind.Note)
-                    this.pushNote(note.fret, stringId, note.noteDuration)?.setArticulation(note.articulation);
+                if (note.kind === NoteKind.Note) {
+                    const noteToMove = this.pushNote(note.fret, stringId, note.noteDuration);
+                    if (noteToMove) {
+                        noteToMove.setArticulation(note.articulation);
+                        noteToMove.setTimeStampMs(note.timeStamp * timeScale)
+                    }
                     //this.putNote(note.fret, stringId, note.timeStamp, note.noteDuration)?.setArticulation(note.articulation);
-                else
-                    this.pushPause(stringId, note.noteDuration);
+                } else {
+                    const pauseToMove = this.pushPause(stringId, note.noteDuration);
+                    if (pauseToMove) {
+                        pauseToMove.setTimeStampMs(note.timeStamp * timeScale)
+                    }
                     //this.putPause(stringId, note.timeStamp, note.noteDuration);
+                }
+                    
             })
         });
     }
@@ -410,7 +431,6 @@ export class MeasureService implements IMeasure {
             throw new Error("Timestamp must be grater than 0.");
         }
 
-        //const noteDurationMs = this.calculateNoteDurationMs(noteDuration);
         const noteDurationMs = this.calculateNoteDurationMs(noteDuration)
         const endTimestamp = timeStamp + noteDurationMs;
 
