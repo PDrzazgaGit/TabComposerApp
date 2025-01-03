@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { useAuth } from "../../../hooks/useAuth";
-import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { MeasureLabel } from "./MeasureLabel";
 import { SessionExpired } from "../../SessionExpired";
+import { AppErrors } from "../../../models/AppErrorsModel";
 
 export const MeasureLabelEditor = () => {
 
@@ -13,11 +13,15 @@ export const MeasureLabelEditor = () => {
 
     const { deleteMeasure } = useTabulature();
 
-    const { measureEditorErrors, setMeasureEditorErrors, clearMeasureEditorErrors } = useError();
+    const [measureEditorErrors, setMeasureEditorErrors] = useState<AppErrors>({});
+
+    const clearMeasureEditorErrors = () => setMeasureEditorErrors({});
 
     const { getTokenWithAuth } = useAuth();
 
-    const [isHovered, setIsHovered] = useState(false);
+    //const [isHovered, setIsHovered] = useState(false);
+
+    const divToHover = useRef<HTMLDivElement>(null);
 
     const [numerator, setNumerator] = useState(measure.numerator);
     const [denominator, setDenominator] = useState(measure.denominator);
@@ -63,7 +67,7 @@ export const MeasureLabelEditor = () => {
             <SessionExpired />
             return;
         }
-        deleteMeasure(measure, token);
+        deleteMeasure(measure);
     }
 
     const handleEnter = () => {
@@ -162,10 +166,11 @@ export const MeasureLabelEditor = () => {
             flip
         >
             <div
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
+                onMouseEnter={() => { if (divToHover.current) divToHover.current.style.color = '#007bff' }}
+                onMouseLeave={() => { if (divToHover.current) divToHover.current.style.color = 'black' }}
             >
-                <MeasureLabel isHovered={isHovered} />
+                <MeasureLabel divToHover={divToHover} //isHovered={isHovered}
+                />
             </div>
         </OverlayTrigger>
         

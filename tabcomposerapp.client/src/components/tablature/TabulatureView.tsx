@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import { MeasureProvider } from "../../context/MeasureProvider";
 import { useTabulature } from "../../hooks/useTabulature";
 import { MeasureLabel } from "./measures/MeasureLabel";
@@ -5,12 +6,12 @@ import { MeasureView } from "./measures/MeasureView";
 import { TabulatureContainer } from "./TabulatureContainer";
 import { EditorToolbar } from "./toolbar/EditorToolbar";
 
-export const TabulatureView = () => {
+export const TabulatureView = observer(() => {
 
     const { tabulature, measuresPerRow } = useTabulature();
 
     return (
-        <EditorToolbar playerMode={ true }>
+        <EditorToolbar playerMode={true}>
             <div
                 className="d-flex justify-content-center align-items-center mb-3 column"
             >
@@ -31,4 +32,4 @@ export const TabulatureView = () => {
             </TabulatureContainer>
         </EditorToolbar>
     );
-}
+})

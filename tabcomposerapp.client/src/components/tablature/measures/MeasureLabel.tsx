@@ -1,41 +1,31 @@
-import { forwardRef } from 'react';
+//import { forwardRef } from 'react';
 import { useMeasure } from '../../../hooks/useMeasure';
 
 interface MeasureLabelProps {
-    isHovered?: boolean;
+    divToHover?: React.RefObject<HTMLDivElement>;
 }
 
-export const MeasureLabel = forwardRef<HTMLDivElement, MeasureLabelProps>(({ isHovered = false }, ref) => {
+export const MeasureLabel: React.FC<MeasureLabelProps> = ({ divToHover }) => {
 
     const { measure, measureId } = useMeasure();
 
     return (
         <div
             className="d-flex align-items-center justify-content-between px-3"
-            ref={ ref }
+            ref={divToHover}
         >
-            <span
-                style={{
-                    color: isHovered ? '#007bff' : "black",
-                }}
-            >
-                {measureId}
-            </span>
             <div>
-                <span
-                    style={{
-                        color: isHovered ? '#007bff' : "black",
-                    }}
-                >{measure.numerator}\{measure.denominator}</span>
+                <span>
+                    {measureId}
+                </span>
+            </div>
+            <div>
+                <span>{measure.numerator}\{measure.denominator}</span>
             </div>
 
             <div>
-                <span
-                    style={{
-                        color: isHovered ? '#007bff' : "black",
-                    }}
-                > &#9833; = {measure.tempo} </span>
+                <span> &#9833; = {measure.tempo} </span>
             </div>
         </div>
     );
-});
+}

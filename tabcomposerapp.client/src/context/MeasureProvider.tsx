@@ -29,15 +29,15 @@ export const MeasureProvider: React.FC<MeasureProviderProps> = ({ children, meas
         measure.deleteNote(note, stringId, shift);
     }
 
-    const moveNoteRight = (note: INote | IPause, stringId: number, interval?: NoteDuration): boolean => {
-        if (measure.moveNoteRight(note, stringId, interval)) {
+    const moveNoteRight = (note: INote | IPause, stringId: number, jump: boolean, interval?: NoteDuration): boolean => {
+        if (measure.moveNoteRight(note, stringId, jump ,interval)) {
             return true;
         }
         return false;
     }
 
-    const moveNoteLeft = (note: INote | IPause, stringId: number, interval?: NoteDuration): boolean => {
-        if (measure.moveNoteLeft(note, stringId, interval)) {
+    const moveNoteLeft = (note: INote | IPause, stringId: number, jump: boolean, interval?: NoteDuration): boolean => {
+        if (measure.moveNoteLeft(note, stringId, jump, interval)) {
             return true;
         }
         return false;

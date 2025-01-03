@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Popover, InputGroup, Dropdown, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
-import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { NoteDuration, Sound, NoteKind, IMeasure, INote, Articulation } from "../../../models";
@@ -9,6 +8,7 @@ import { NoteEditorView } from "../notes/NoteEditorView";
 import { v4 as uuidv4 } from 'uuid';
 import "../../../styles/StringView.css"
 import { observer } from "mobx-react-lite";
+import { AppErrors } from "../../../models/AppErrorsModel";
 
 interface StringEditorViewProps {
     stringId: number;
@@ -22,25 +22,23 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
 
     const [pauseDuration, setPauseDuration] = useState<NoteDuration>(globalNoteDuration);
 
-    const [isHovered, setIsHovered] = useState(false);
-
     const { measureId, measure, addNote, addPause } = useMeasure();
 
-    const { stringEditorErrors, setStringEditorErrors, clearStringEditorErrors } = useError();
+    const [stringEditorErrors, setStringEditorErrors] = useState<AppErrors>({});
 
-    const [noteMoved, setNoteMoved] = useState<boolean>(false);
+    const clearStringEditorErrors = () => setStringEditorErrors({});
 
-    const stringSound: Sound = tabulature!.tuning.getStringSound(stringId);
+    const [noteMoved, setNoteMoved] = useState<number | undefined>();
 
-    const stringMargin: number = 0; //150
+    const stringSound: Sound = useMemo(() => {
+        return tabulature!.tuning.getStringSound(stringId)
+    }, [tabulature, stringId]);
+
+    const hoverDiv = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setNoteDuration(globalNoteDuration);
     }, [globalNoteDuration])
-
-    useEffect(() => {
-
-    }, [noteMoved])
 
     const calculatePosition = (timestamp: number, containerWidth: number): number => {
         return (timestamp / measure.measureDurationMs) * containerWidth;
@@ -166,11 +164,6 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
             </Popover.Body>
         </Popover>
     )
-
-    const handleEnter = () => {
-        document.body.click();
-        clearStringEditorErrors();
-    }
 
     const renderSlide = (prevNoteTimeStamp: number, currentNoteTimeStamp: number, containerWidth: number, down: boolean) => {
         const startX = calculatePosition(prevNoteTimeStamp, containerWidth); // pocz¹tek prawej nuty
@@ -388,10 +381,10 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
         const nextNote: INote = notes[0];
 
         if (measureId % measuresPerRow === 2) {
-            return measure.measureDurationMs + 2 * stringMargin;
+            return measure.measureDurationMs;
         }
 
-        return measure.measureDurationMs + 3 * stringMargin + nextNote.getTimeStampMs();
+        return measure.measureDurationMs + nextNote.getTimeStampMs();
 
     }
 
@@ -415,7 +408,11 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
             return 0;
         }
 
-        return 0 - stringMargin - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
+        return - (prevMeasure.measureDurationMs - prevNote.getTimeStampMs());
+    }
+    const handleEnter = () => {
+        document.body.click();
+        clearStringEditorErrors();
     }
 
     return (
@@ -432,8 +429,6 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                 className="w-100 d-flex align-items-center"
                 style={{ height: "1.5em" }}
             >
-
-
                 {measureId === 0 && (
                     <div style={{ flex: "0 0 auto", minWidth: "1em" }}>{stringSound.getName()}</div>
                 )}
@@ -445,24 +440,16 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                         height: "100%",
                     }}
 
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                    //onMouseMove={handleMouseMove }
+                    onMouseEnter={() => { if (hoverDiv.current) hoverDiv.current.style.borderColor = '#007bff' }}
+                    onMouseLeave={() => { if (hoverDiv.current) hoverDiv.current.style.borderColor = 'black' }}
                 >
 
                     <div
+                        ref={ hoverDiv }
                         className='string-line'
-                        style={{
-                            borderColor: isHovered ? '#007bff' : 'black'
-                        }}
                     />
 
-                    <div className="position-relative"
-                        style={{
-                           // marginRight: "20px",//`${calculatePosition(stringMargin * 2, 100)}%`
-                           // marginLeft: "20px"//`${calculatePosition(stringMargin * 2, 100)}%`
-                        }}
-                    >
+                    <div className="position-relative">
                         {measure.getNotes(stringId).map((note, index) => {
                             const prevNote = index > 0 ? measure.getNotes(stringId)[index - 1] : null;
                             const nextNote = index < measure.getNotes(stringId).length - 1 ? measure.getNotes(stringId)[index + 1] : null;
@@ -472,27 +459,36 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                             const isBendHalf = note.articulation === Articulation.BendHalf;
                             const isBendFullReturn = note.articulation === Articulation.BendFullReturn;
                             const isBendHalfReturn = note.articulation === Articulation.BendHalfReturn;
-
                             return (
                                 <div key={index}>
                                     {isSlide && note.overflow &&
-                                        renderSlide(prevNote ? prevNote.getTimeStampMs() + stringMargin : calculateSlideOverFlow(), note.getTimeStampMs() + stringMargin, 100, prevNote ? prevNote.fret > note.fret : false)
+                                        renderSlide(prevNote ? prevNote.getTimeStampMs() : calculateSlideOverFlow(), note.getTimeStampMs(), 100, prevNote ? prevNote.fret > note.fret : false)
                                         || (isSlide && !note.overflow) &&
-                                        renderSlide(note.getTimeStampMs() - 50, note.getTimeStampMs() + stringMargin, 100, false)
+                                        renderSlide(note.getTimeStampMs() - 50, note.getTimeStampMs(), 100, false)
                                     }
-                                    {isLegato && renderLegato(nextNote ? nextNote.getTimeStampMs() + stringMargin : calculateLegatoOverflow(), note.getTimeStampMs() + stringMargin, 100)}
-                                    {isBendFull && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}
-                                    {isBendHalf && renderBend(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, false)}
-                                    {isBendFullReturn && renderBendReturn(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, true)}
-                                    {isBendHalfReturn && renderBendReturn(note.getTimeStampMs() + stringMargin, note.getDurationMs(), 100, false)}
+                                    {isLegato && renderLegato(nextNote ? nextNote.getTimeStampMs() : calculateLegatoOverflow(), note.getTimeStampMs(), 100)}
+                                    {isBendFull && renderBend(note.getTimeStampMs(), note.getDurationMs(), 100, true)}
+                                    {isBendHalf && renderBend(note.getTimeStampMs(), note.getDurationMs(), 100, false)}
+                                    {isBendFullReturn && renderBendReturn(note.getTimeStampMs(), note.getDurationMs(), 100, true)}
+                                    {isBendHalfReturn && renderBendReturn(note.getTimeStampMs(), note.getDurationMs(), 100, false)}
                                     <div
                                         style={{
                                             position: "absolute",
                                             height: "1.5em",
-                                            left: `calc(${calculatePosition(note.getTimeStampMs() + stringMargin, 100) }%)`,
+                                            left: `calc(${calculatePosition(note.getTimeStampMs(), 100) }%)`,
                                         }}
                                     >
-                                        <NoteEditorView note={note} stringId={stringId} onNoteDragChange={ (moved: boolean) => setNoteMoved(moved) } />
+                                        <NoteEditorView
+                                            note={note}
+                                            stringId={stringId}
+                                            onNoteDragChange={(moved: number) => {
+                                                if (moved != noteMoved) {
+                                                    setNoteMoved(moved)
+                                                }
+                                            }}
+                                            
+
+                                        />
                                     </div>
                                 </div>
 

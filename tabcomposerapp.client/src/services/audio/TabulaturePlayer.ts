@@ -2,7 +2,7 @@ import * as Tone from "tone";
 
 import { IMeasure, INote, IPause, ITabulature, NoteKind } from "../../models";
 import { TransportClass } from "tone/build/esm/core/clock/Transport";
-import { runInAction } from 'mobx';
+import { makeObservable, observable, runInAction } from 'mobx';
 
 export class TabulaturePlayer {
 
@@ -11,6 +11,7 @@ export class TabulaturePlayer {
     private transport: TransportClass;
     private readonly defaultSpeed: number;
     private currentSpeed: number;
+    public isPlaying: boolean | null;
 
     constructor(tabulature: ITabulature) {
         this.tabulature = tabulature;
@@ -18,6 +19,10 @@ export class TabulaturePlayer {
         this.transport = Tone.getTransport();
         this.defaultSpeed = this.transport.bpm.value;
         this.currentSpeed = this.defaultSpeed;
+        this.isPlaying = null;
+        makeObservable(this, {
+            isPlaying: observable
+        })
     }
 
     private scheduleNotes(startMeasure?: IMeasure): void {
@@ -69,7 +74,7 @@ export class TabulaturePlayer {
         if (this.transport.state === "started") {
             return;
         }
-
+        runInAction(() => this.isPlaying = true)
         if (this.transport.state === "paused") {
             this.transport.start();
             return;
@@ -84,12 +89,14 @@ export class TabulaturePlayer {
         this.transport.cancel();
         this.transport.bpm.value = this.defaultSpeed;
         this.tabulature.forEach(m => m.forEach(s => s.forEach(n => runInAction(() => n.playing = false))));
+        runInAction(() => this.isPlaying = null)
     }
 
     public pause(): void {
         if (this.transport.state === "stopped") {
             return;
         }
+        runInAction(() => this.isPlaying = false)
         this.transport.pause();
     }
 

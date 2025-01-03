@@ -7,12 +7,14 @@ import { TabulatureDataModel } from "../../models/TabulatureDataModel";
 import { CreateTabulature } from "../tablature/CreateTabulature";
 import { SessionExpired } from "../SessionExpired";
 import { useTabulatureApi } from "../../hooks/useTabulatureApi";
-import { useError } from "../../hooks/useError";
+import { AppErrors } from "../../models/AppErrorsModel";
 
 export const UserTabs = () => {
     const { getToken } = useAuth();
 
-    const { userTabsErrors, setUserTabsErrors, clearUserTabsErrors } = useError();
+    const [userTabsErrors, setUserTabsErrors] = useState<AppErrors>({});
+
+    const clearUserTabsErrors = () => setUserTabsErrors({});
 
     const {getUserTabulatureInfo, downloadTabulature, deleteTabulature} = useTabulatureApi();
 

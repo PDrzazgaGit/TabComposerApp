@@ -10,7 +10,7 @@ import { Modal, Button, FormControl, InputGroup } from "react-bootstrap";
 import { useAuth } from "../../hooks/useAuth";
 import { SessionExpired } from "../SessionExpired";
 import { observer } from "mobx-react-lite";
-import { autorun, runInAction } from 'mobx';
+import { runInAction } from 'mobx';
 import { useTabulatureApi } from "../../hooks/useTabulatureApi";
 
 
@@ -30,7 +30,6 @@ export const TabulatureEditorView = observer(() => {
     const token = useMemo(() => getToken(), [getToken]);
 
     useEffect(() => {
-        console.log("Meow")
         const intervalId = setInterval(async () => {
 
             if (!tabulatureManagerApi.upToDate) {

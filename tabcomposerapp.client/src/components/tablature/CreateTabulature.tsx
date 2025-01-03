@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Modal, Button, Dropdown, FormControl, InputGroup, Nav } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { useError } from "../../hooks/useError";
 import { Tabulature } from "../../models";
 import { TuningFactory } from "../../services";
-import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
 import { SessionExpired } from "../SessionExpired";
 import { useTabulatureApi } from "../../hooks/useTabulatureApi";
+import { AppErrors } from "../../models/AppErrorsModel";
 
 
 export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = false }) => {
@@ -34,7 +33,10 @@ export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = fa
         setShowCreate(false);
     }
 
-    const { createTabulatureErrors, setCreateTabulatureErrors, clearCreateTabulatureErrors } = useError();
+
+    const [createTabulatureErrors, setCreateTabulatureErrors] = useState<AppErrors>({});
+
+    const clearCreateTabulatureErrors = () => setCreateTabulatureErrors({});
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);

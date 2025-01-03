@@ -1,4 +1,4 @@
-import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation, Notation } from '../models';
+import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation } from '../models';
 import { GuitarScale } from '.';
 import { makeAutoObservable } from 'mobx';
 
@@ -222,7 +222,7 @@ export class MeasureService implements IMeasure {
         this.strings.set(Number(stringId), stringNotes);
     }
 
-    public moveNoteRight(note: Note | Pause, stringId: number, interval: NoteDuration = note.noteDuration): boolean {
+    public moveNoteRight(note: Note | Pause, stringId: number, jump: boolean, interval: NoteDuration = note.noteDuration): boolean {
         const stringNotes = this.strings.get(stringId);
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
@@ -260,7 +260,8 @@ export class MeasureService implements IMeasure {
             });
 
             if (isCollision) {
-
+                if (!jump)
+                    return false;
                 const rightNote = stringNotes[index + 1];
 
                 if (rightNote.getDurationMs() === note.getDurationMs()) {
@@ -279,7 +280,7 @@ export class MeasureService implements IMeasure {
         return true;
     }
 
-    public moveNoteLeft(note: Note | Pause, stringId: number, interval: NoteDuration = note.noteDuration): boolean {
+    public moveNoteLeft(note: Note | Pause, stringId: number, jump: boolean ,interval: NoteDuration = note.noteDuration): boolean {
         const stringNotes = this.strings.get(stringId);
         if (!stringNotes) {
             throw new Error("String with number " + stringId + " does not exist.");
@@ -314,18 +315,18 @@ export class MeasureService implements IMeasure {
             });
 
             if (isCollision) {
-
+                if (!jump)
+                    return false;
                 const leftNote = stringNotes[index - 1];
 
                 if (leftNote.getDurationMs() === note.getDurationMs()) {
                     newStartTime = leftNote.getTimeStampMs();
                     leftNote.setTimeStampMs(note.getTimeStampMs());                    
                 } else {
-                    //return false;
                     newStartTime = leftNote.getTimeStampMs();
                     leftNote.setTimeStampMs(newStartTime + note.getDurationMs());
                 }
-                
+
                 stringNotes[index - 1] = note;
                 stringNotes[index] = leftNote;
             }
@@ -354,9 +355,6 @@ export class MeasureService implements IMeasure {
             });
 
             if (notes.length != filteredNotes.length) {
-                console.log("notes", notes)
-                console.log("filtered", filteredNotes)
-                console.log("new duration", newMeasureDurationMs)
                 noteLoss = true;
             }
             

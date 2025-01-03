@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Popover, InputGroup, FormControl, Dropdown, FormCheck, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
-import { useError } from "../../../hooks/useError";
 import { useMeasure } from "../../../hooks/useMeasure";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { INote, IPause, NoteKind, NoteDuration, Articulation } from "../../../models";
 import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
 import { NoteView } from "./NoteView";
+import { AppErrors } from "../../../models/AppErrorsModel";
 
 //import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
-    onNoteDragChange: (moved: boolean) => void;
+    onNoteDragChange?: (moved: number) => void;
 }
 
 export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange }) => {
@@ -32,7 +32,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
 
     const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(globalNoteInterval);
 
-    const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
+
+    const [noteEditorErrors, setNoteEditorErrors] = useState<AppErrors>({});
+
+    const clearNoteEditorErrors = () => setNoteEditorErrors({});
 
     const handleDurationChange = (duration: NoteDuration) => {
         if (changeNoteDuration(note, duration, stringId)) {
@@ -48,7 +51,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     }
 
     const handleMoveRight = () => {
-        if (moveNoteRight(note, stringId, selectedInterval)) {
+        if (moveNoteRight(note, stringId, true ,selectedInterval)) {
             document.body.click();
             clearNoteEditorErrors();
         } else {
@@ -57,7 +60,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     }
 
     const handleMoveLeft = () => {
-        if (moveNoteLeft(note, stringId, selectedInterval)) {
+        if (moveNoteLeft(note, stringId, true, selectedInterval)) {
             document.body.click();
             clearNoteEditorErrors();
         } else {
@@ -104,7 +107,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     const handleFretChangeBlur = () => {
         if (isNaN(fret)) {
             setFret(0)
-        }  
+        }
     };
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
@@ -287,35 +290,35 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
         clearNoteEditorErrors();
     }
 
-    const [startX, setStartX] = useState<number | null>(null); 
+    const [startX, setStartX] = useState<number | null>(null);
     const [step, setStep] = useState<number | null>(null);
-    const [isDragging, setIsDragging] = useState(false); 
+    const [isDragging, setIsDragging] = useState(false);
 
     const calculateStep = (): number => {
         return 200 * selectedInterval;
     }
 
     const handleDragStart = (event: React.DragEvent) => {
+        if (!onNoteDragChange)
+            return;
         setIsDragging(true);
         setStep(calculateStep());
         setStartX(event.clientX);
-        onNoteDragChange(false);
-
-        //event.preventDefault();
-        //const img = new Image();
-        //img.src = '';
-        //event.dataTransfer.setDragImage(img, 0, 0);
+        handleEnter();
     }
 
     const handleDragEnd = () => {
+        if (!onNoteDragChange)
+            return;
         setIsDragging(false);
         setStep(null);
         setStartX(null);
-        onNoteDragChange(false);
     }
 
     const handleDrag = (event: React.DragEvent) => {
-        //event.defaultPrevented = false;
+        if (!onNoteDragChange)
+            return;
+
         if (isDragging && startX != null && step != null) {
             const newX = event.clientX;
             if (newX === 0)
@@ -324,24 +327,25 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
             const value = Math.abs(newX - startX);
 
             if (newX > startX) {
-                
+
                 if (value >= step) {
-                    moveNoteRight(note, stringId, selectedInterval);
-                    setStartX(newX);
-                    onNoteDragChange(true);
-                } else {
-                    onNoteDragChange(false);
-                }
-                
+                    if (moveNoteRight(note, stringId, false, selectedInterval)){
+                        onNoteDragChange(newX);
+                        setStartX(newX);
+                    }
+                    
+                    
+                } 
+
             } else if (newX < startX) {
-                
+
                 if (value >= step) {
-                    moveNoteLeft(note, stringId, selectedInterval);
-                    setStartX(newX);
-                    onNoteDragChange(true);
-                } else {
-                    onNoteDragChange(false);
-                }
+                    if (moveNoteLeft(note, stringId, false ,selectedInterval)) {
+                        onNoteDragChange(newX);
+                        setStartX(newX);
+                    }
+                   
+                } 
             }
         }
     }
@@ -357,11 +361,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
         >
             <div
                 draggable="true"
-                
+
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 onDrag={handleDrag}
-               // onDragExit={() => document.body.click()}
+                // onDragExit={() => document.body.click()}
                 //onDragLeave={() => document.body.click()}
                 onClick={(e) => e.stopPropagation()}
                 style={{
@@ -371,7 +375,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
                     cursor: isDragging ? "grabbing" : "move"
                 }}
             >
-                <NoteView note={note} cursor={isDragging ? 'grabbing' : 'grab'}></NoteView>
+                <NoteView note={note} isDragging={isDragging}></NoteView>
             </div>
 
         </OverlayTrigger>
