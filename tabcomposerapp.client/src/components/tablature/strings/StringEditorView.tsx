@@ -415,6 +415,8 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
         clearStringEditorErrors();
     }
 
+    
+
     return (
         <OverlayTrigger
             trigger="click"
@@ -486,6 +488,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                                                     setNoteMoved(moved)
                                                 }
                                             }}
+                                            stringWidthPx={hoverDiv.current!.getBoundingClientRect().width}
                                             
 
                                         />

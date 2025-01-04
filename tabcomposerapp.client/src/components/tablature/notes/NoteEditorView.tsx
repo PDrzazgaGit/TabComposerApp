@@ -11,10 +11,11 @@ import { AppErrors } from "../../../models/AppErrorsModel";
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
+    stringWidthPx?: number;
     onNoteDragChange?: (moved: number) => void;
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange, stringWidthPx }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
@@ -26,7 +27,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
 
     const [overflow, setOverflow] = useState(true);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets, measure } = useMeasure();
 
     const { shiftOnDelete, globalNoteInterval } = useTabulature();
 
@@ -295,7 +296,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     const [isDragging, setIsDragging] = useState(false);
 
     const calculateStep = (): number => {
-        return 200 * selectedInterval;
+        if(stringWidthPx)
+            return (stringWidthPx * selectedInterval);
+        else
+            return (300 * selectedInterval);
     }
 
     const handleDragStart = (event: React.DragEvent) => {
@@ -313,12 +317,12 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
         setIsDragging(false);
         setStep(null);
         setStartX(null);
+
     }
 
     const handleDrag = (event: React.DragEvent) => {
         if (!onNoteDragChange)
             return;
-
         if (isDragging && startX != null && step != null) {
             const newX = event.clientX;
             if (newX === 0)
@@ -365,6 +369,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 onDrag={handleDrag}
+                onDragEnter={ (e: React.DragEvent) => e.preventDefault()}
                 // onDragExit={() => document.body.click()}
                 //onDragLeave={() => document.body.click()}
                 onClick={(e) => e.stopPropagation()}
@@ -372,7 +377,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
                     height: '100%',
                     margin: '0',
                     padding: '0',
-                    cursor: isDragging ? "grabbing" : "move"
+                    cursor: isDragging ? "grabbing" : "grab"
                 }}
             >
                 <NoteView note={note} isDragging={isDragging}></NoteView>

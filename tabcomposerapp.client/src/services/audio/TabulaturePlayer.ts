@@ -4,10 +4,13 @@ import { IMeasure, INote, IPause, ITabulature, NoteKind } from "../../models";
 import { TransportClass } from "tone/build/esm/core/clock/Transport";
 import { makeObservable, observable, runInAction } from 'mobx';
 
+
 export class TabulaturePlayer {
 
     private tabulature: ITabulature;
-    private synth: Tone.PolySynth;
+
+      private synth: Tone.PolySynth<Tone.FMSynth>;
+
     private transport: TransportClass;
     private readonly defaultSpeed: number;
     private currentSpeed: number;
@@ -15,7 +18,8 @@ export class TabulaturePlayer {
 
     constructor(tabulature: ITabulature) {
         this.tabulature = tabulature;
-        this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        //this.synth = new GuitarSynth();
+        this.synth = new Tone.PolySynth<Tone.FMSynth>().toDestination();
         this.transport = Tone.getTransport();
         this.defaultSpeed = this.transport.bpm.value;
         this.currentSpeed = this.defaultSpeed;
@@ -38,21 +42,42 @@ export class TabulaturePlayer {
             }
             if (play) {
                 measure.forEach((notes: (INote | IPause)[]) => {
-                    notes.forEach(note => {
+                    notes.forEach((note, index) => {
                         const duration = note.getDurationMs() / 1000;
                         const timeStamp = note.getTimeStampMs() / 1000 + currentTime;
                         if (note.kind === NoteKind.Pause) {
                             return;
                         }
+                        
                         stopTime += duration;
                         this.transport.schedule((time) => {
                             runInAction(() => note.playing = true);
                             this.transport.bpm.value = this.currentSpeed;
+
+                            /*
+
+                            runInAction(() => {
+                                if (index === 0 && (note as INote).slide === true) {
+                                    // TO DO
+                                } else if (index === notes.length - 1) {
+                                    // TO DO
+                                } else {
+                                    if ((notes[index + 1] as INote).slide === true) {
+                                        this.synth.portamento = note.getDurationMs() / 1000;
+                                    } else {
+                                        this.synth.portamento = 0;
+                                    }
+                                }
+                            })
+
+                            */
+                            
                             this.synth.triggerAttackRelease(
                                 (note as INote).frequency,
                                 duration,
                                 time
                             );
+
                         }, timeStamp);
 
                         this.transport.schedule(() => {

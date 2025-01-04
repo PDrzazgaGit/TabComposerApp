@@ -129,7 +129,7 @@ export const PlayerSettings = observer(() => {
                             onChange={handleSelectMeasure}
                             onBlur={handleBlurSelectMeasure}
                             className="w-50"
-                            disabled={tabulaturePlayer.isPlaying === true}
+                            disabled={tabulaturePlayer.isPlaying === true || tabulaturePlayer.isPlaying === false}
                         />
                     </>
                 )}
@@ -171,106 +171,3 @@ export const PlayerSettings = observer(() => {
         </div>
     );
 })
-
-/*
-
-<div className="d-flex justify-content-center align-items-center gap-3 row">
-
-            <div
-                className="d-flex justify-content-center align-items-center w-75 gap-3"
-            >
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center w-50"
-                >
-                    <Button
-                        onClick={() => { pause() }}
-                        variant={tabulaturePlayer.isPlaying === false ? "secondary" : "light"}
-                        className="border flex-grow-1"
-                    >
-                        <PauseFill />
-                    </Button>
-                    <Button
-                        onClick={() => { play() }}
-                        variant={tabulaturePlayer.isPlaying === true ? "secondary" : "light"}
-                        className="border flex-grow-1"
-                    >
-                        <PlayFill />
-                    </Button>
-
-                    <Button
-                        onClick={() => { stop() }}
-                        variant="light"
-                        className="border flex-grow-1"
-                    >
-                        <StopFill />
-                    </Button>
-                </InputGroup>
-
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center w-50"
-                >
-                    <InputGroup.Text
-                        className="d-flex justify-content-center align-items-center w-100"
-                    >
-                        &#8203;
-                        <input
-                            className="flex-grow-1"
-                            type="range"
-                            min={0.25}
-                            max={2}
-                            step={0.05}
-                            value={tempoFactor}
-                            onChange={handleTempoChange}
-                        />
-                    </InputGroup.Text>
-                    
-                </InputGroup>
-
-            </div>
-              
-            {playerErrors['playError'] && (
-                <InputGroup className="d-flex justify-content-center align-items-center column w-75">
-                    <div className="text-danger">
-                        {playerErrors["playError"]}
-                    </div>
-
-                </InputGroup>
-            )}
-
-            <InputGroup
-                className="d-flex justify-content-center align-items-center w-75 gap-3"
-            >
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center w-50"
-                >
-
-                </InputGroup>
-                <InputGroup
-                    className="d-flex justify-content-center align-items-center w-50"
-                >
-                    {tabulature.getLength() > 1 && (
-                        <>
-                            <InputGroup.Text>
-                                Start at measure:
-                            </InputGroup.Text>
-                            <FormControl
-                                type='number'
-                                min={0}
-                                value={selectedMeasure}
-                                max={tabulature.getLength() - 1}
-                                onChange={handleSelectMeasure}
-                                onBlur={handleBlurSelectMeasure}
-                                className="flex-grow-1"
-                                disabled={tabulaturePlayer.isPlaying === true}
-                            />
-                        </>
-                    )}
-                </InputGroup>
-                
-
-            </InputGroup>
-
-            
-        </div>
-
-*/
