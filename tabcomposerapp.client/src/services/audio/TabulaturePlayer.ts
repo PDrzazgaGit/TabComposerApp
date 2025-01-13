@@ -42,7 +42,7 @@ export class TabulaturePlayer {
             }
             if (play) {
                 measure.forEach((notes: (INote | IPause)[]) => {
-                    notes.forEach((note, index) => {
+                    notes.forEach((note) => {
                         const duration = note.getDurationMs() / 1000;
                         const timeStamp = note.getTimeStampMs() / 1000 + currentTime;
                         if (note.kind === NoteKind.Pause) {

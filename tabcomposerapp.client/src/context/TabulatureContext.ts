@@ -1,9 +1,12 @@
 import { createContext } from 'react';
 import { IMeasure, ITabulature, NoteDuration } from '../models'
 import { TabulaturePlayer } from '../services/audio/TabulaturePlayer';
+import { TabulatureRecorder } from '../services/audio/TabulatureRecorder';
 interface TabulatureContextType {
 
     tabulaturePlayer: TabulaturePlayer;
+
+    tabulatureRecorder: TabulatureRecorder;
 
     getMeasuresCount: () => number;
 

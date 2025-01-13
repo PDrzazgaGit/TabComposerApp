@@ -6,7 +6,7 @@ import { AppErrors } from "../../../models/AppErrorsModel";
 import { PlayFill, PauseFill, StopFill } from 'react-bootstrap-icons';
 
 
-export const PlayerSettings = observer(() => {
+export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playing }) => {
 
     const { tabulature, tabulaturePlayer } = useTabulature();
 
@@ -20,11 +20,15 @@ export const PlayerSettings = observer(() => {
 
     useEffect(() => {
         return () => {
-            if (tabulaturePlayer) {
-                tabulaturePlayer.stop();
-            }
+            tabulaturePlayer.stop();
         }
     }, [tabulaturePlayer])
+
+    useEffect(() => {
+        if (!playing) {
+            tabulaturePlayer.stop();
+        }
+    }, [tabulaturePlayer, playing])
 
     const play = async () => {
         clearPlayerErrors();

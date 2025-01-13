@@ -3,6 +3,7 @@ import { StickyPanel } from "./StickyPanel";
 import { Card, Tabs, Tab} from "react-bootstrap";
 import { GlobalSettings } from "./GlobalSettings";
 import { PlayerSettings } from "./PlayerSettings";
+import { RecorderSettings } from "./RecorderSettings";
 
 interface EditorToolbarProps {
     children: ReactNode;
@@ -35,12 +36,13 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMo
                     <Tab
                         eventKey="player" title="Tab Player"
                     >
-                        <PlayerSettings/>
+                        <PlayerSettings playing={tabKey === "player"} />
                     </Tab>
                     {!playerMode && (
                         <Tab
                             eventKey="recorder" title="Tab Recorder"
                         >
+                            <RecorderSettings/>
                         </Tab>
                     )} 
                 </Tabs>

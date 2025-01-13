@@ -488,7 +488,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                                                     setNoteMoved(moved)
                                                 }
                                             }}
-                                            stringWidthPx={hoverDiv.current!.getBoundingClientRect().width}
+                                            stringWidthPx={hoverDiv.current ? hoverDiv.current.getBoundingClientRect().width : undefined}
                                             
 
                                         />
