@@ -1,26 +1,70 @@
-import { Button, InputGroup, Modal } from "react-bootstrap";
+import { Button, Dropdown, InputGroup, Modal } from "react-bootstrap";
 import { RecordFill, StopFill } from "react-bootstrap-icons";
 import { useTabulature } from "../../../hooks/useTabulature";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const RecorderSettings = () => {
 
     const { tabulatureRecorder } = useTabulature();
 
+    const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+
+    const [deviceLabel, setDeviceLabel] = useState<string>("");
+
+    const [deviceId, setDeviceId] = useState<string>("");
+
     const [renderModal, setRenderModal] = useState(false);
 
     const handleCloseModal = () => setRenderModal(false);
 
+    const fetchDevices = useCallback(async () => {
+        try {
+            const devices = await tabulatureRecorder.microphoneSelector.getDevices();
+            setDevices(devices);
+            setDeviceLabel(devices[0].label || 'No device found')
+            setDeviceId(devices[0].deviceId)
+        } catch (error) {
+            console.error("Failed to fetch microphone devices:", error);
+        }
+    }, [tabulatureRecorder.microphoneSelector, setDeviceLabel]);
+
+    useEffect(() => {
+        fetchDevices();
+    }, [tabulatureRecorder, fetchDevices]);
+
     const start = async () => {
-        if (!await tabulatureRecorder.record()) {
+        if (!await tabulatureRecorder.record(deviceId)) {
             setRenderModal(true)
         }
         
     }
 
-    const stop = () => {
-        tabulatureRecorder.stop();
+    useEffect(() => {
+        return () => {
+            tabulatureRecorder.stop();
+        }
+    }, [tabulatureRecorder])
+
+    useEffect(() => {
+        const intervalId = setInterval(async () => {
+
+            try {
+                console.log(tabulatureRecorder.getF())
+            } catch {
+                console.log("Nic");
+            }
+
+        }, 1000);
+
+        return () => {
+            clearInterval(intervalId);
+        };
         
+    }, [tabulatureRecorder]);
+
+    const stop = () => {
+        
+        tabulatureRecorder.stop();
     }
 
     return (
@@ -58,6 +102,33 @@ export const RecorderSettings = () => {
                         className="border flex-grow-1"
                     >
                         <StopFill />
+                    </Button>
+                </InputGroup>
+                <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}>
+                    <Dropdown drop="down-centered">
+                        <Dropdown.Toggle variant="light" className="border flex-grow-1">
+                            {`${deviceLabel}`}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {devices.map((device) => (
+                                <Dropdown.Item
+                                    key={device.deviceId}
+                                    onClick={() => {
+                                        setDeviceLabel(device.label || `Microphone ${device.deviceId}`)
+                                        setDeviceId(deviceId)
+                                    }}
+                                >
+                                    {device.label || `Microphone ${device.deviceId}`}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                    <Button
+                        className="border flex-grow-1"
+                        variant="light"
+                        onClick={ ()=> fetchDevices()}
+                    >
+                        Refresh
                     </Button>
                 </InputGroup>
             </div>

@@ -8,12 +8,21 @@ export class TabulatureRecorder {
         this.microphone = new MicrophoneService();
     }
 
-    public async record(): Promise<boolean> {
-        if (!await this.microphone.init()) {
+    public async record(deviceId: string): Promise<boolean> {
+        if (!await this.microphone.init(deviceId)) {
             return false;
         }
         //...
         return true;
+    }
+
+
+    public getF() {
+        return this.microphone.getDetectedFrequencies();
+    }
+
+    public get microphoneSelector() {
+        return this.microphone.microphoneSelector;
     }
 
     public stop(): void {
