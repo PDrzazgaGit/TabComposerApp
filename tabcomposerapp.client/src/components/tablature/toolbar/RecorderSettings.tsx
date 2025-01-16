@@ -1,9 +1,10 @@
 import { Button, Dropdown, InputGroup, Modal } from "react-bootstrap";
 import { RecordFill, StopFill } from "react-bootstrap-icons";
 import { useTabulature } from "../../../hooks/useTabulature";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
 
-export const RecorderSettings = () => {
+export const RecorderSettings = observer(() => {
 
     const { tabulatureRecorder } = useTabulature();
 
@@ -17,26 +18,32 @@ export const RecorderSettings = () => {
 
     const handleCloseModal = () => setRenderModal(false);
 
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
     const fetchDevices = useCallback(async () => {
         try {
-            const devices = await tabulatureRecorder.microphoneSelector.getDevices();
+            const devices = await tabulatureRecorder.getAvailableMicrophones();
             setDevices(devices);
             setDeviceLabel(devices[0].label || 'No device found')
             setDeviceId(devices[0].deviceId)
         } catch (error) {
             console.error("Failed to fetch microphone devices:", error);
         }
-    }, [tabulatureRecorder.microphoneSelector, setDeviceLabel]);
+    }, [tabulatureRecorder, setDeviceLabel]);
 
     useEffect(() => {
         fetchDevices();
     }, [tabulatureRecorder, fetchDevices]);
 
+    useEffect(() => {
+        tabulatureRecorder.draw(canvasRef.current);
+    })
+
     const start = async () => {
         if (!await tabulatureRecorder.record(deviceId)) {
             setRenderModal(true)
         }
-        
+
     }
 
     useEffect(() => {
@@ -49,21 +56,27 @@ export const RecorderSettings = () => {
         const intervalId = setInterval(async () => {
 
             try {
-                console.log(tabulatureRecorder.getF())
+                const num = tabulatureRecorder.getF();
+                if (num) {
+                    console.log(num, "Hz")
+
+                    //
+                }
+
             } catch {
                 console.log("Nic");
             }
 
-        }, 1000);
+        }, 1);
 
         return () => {
             clearInterval(intervalId);
         };
-        
+
     }, [tabulatureRecorder]);
 
     const stop = () => {
-        
+
         tabulatureRecorder.stop();
     }
 
@@ -82,7 +95,7 @@ export const RecorderSettings = () => {
             </Modal>
 
             <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-
+                <canvas  ref={canvasRef} style={{ width: '100%', height: '150px', border: '1px solid #ccc' }} />
                 <InputGroup
                     className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}
                 >
@@ -90,6 +103,7 @@ export const RecorderSettings = () => {
                         onClick={() => start()}
                         variant="light"
                         className="border flex-grow-1"
+                        disabled={ tabulatureRecorder.monite || tabulatureRecorder.recording }
                     >
                         <RecordFill
                             color="red"
@@ -100,6 +114,7 @@ export const RecorderSettings = () => {
                         onClick={() => stop()}
                         variant="light"
                         className="border flex-grow-1"
+                        disabled={tabulatureRecorder.monite || !tabulatureRecorder.recording}
                     >
                         <StopFill />
                     </Button>
@@ -123,19 +138,42 @@ export const RecorderSettings = () => {
                             ))}
                         </Dropdown.Menu>
                     </Dropdown>
+
                     <Button
                         className="border flex-grow-1"
                         variant="light"
-                        onClick={ ()=> fetchDevices()}
+                        onClick={() => fetchDevices()}
                     >
                         Refresh
+                    </Button>
+                </InputGroup>
+                <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}>
+
+                    <Button
+                        className="border flex-grow-1"
+                        onClick={() => tabulatureRecorder.effectsToggle()}
+                        variant={tabulatureRecorder.effectsOn ? "secondary" : "light"}
+                    >
+                        {`Effects ${tabulatureRecorder.effectsOn ? "off" : "on"}`}
+                    </Button>
+
+                    <Button
+                        className="border flex-grow-1"
+
+                        onClick={() =>
+                            tabulatureRecorder.moniteToggle(deviceId)
+                        }
+                        disabled={tabulatureRecorder.recording}
+                        variant={ tabulatureRecorder.monite ? "danger" : "success" }
+                    >
+                        {`Monitor ${tabulatureRecorder.monite ? "off" : "on"}` }
                     </Button>
                 </InputGroup>
             </div>
         </>
     );
 }
-
+)
 /*
 
 <InputGroup
