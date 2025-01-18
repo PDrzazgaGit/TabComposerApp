@@ -1,4 +1,4 @@
-import { Button, Dropdown, InputGroup, Modal } from "react-bootstrap";
+import { Button, Dropdown, FormCheck, InputGroup, Modal } from "react-bootstrap";
 import { RecordFill, StopFill } from "react-bootstrap-icons";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,9 +16,12 @@ export const RecorderSettings = observer(() => {
 
     const [renderModal, setRenderModal] = useState(false);
 
+    const [showCharts, setShowCharts] = useState(true);
+
     const handleCloseModal = () => setRenderModal(false);
 
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const canvasFFTRef = useRef<HTMLCanvasElement | null>(null);
+    const canvasAMDFRef = useRef<HTMLCanvasElement | null>(null);
 
     const fetchDevices = useCallback(async () => {
         try {
@@ -32,14 +35,30 @@ export const RecorderSettings = observer(() => {
     }, [tabulatureRecorder, setDeviceLabel]);
 
     useEffect(() => {
+        console.log("heheh")
         fetchDevices();
     }, [tabulatureRecorder, fetchDevices]);
 
     useEffect(() => {
-        tabulatureRecorder.draw(canvasRef.current);
-    })
+        let stopFunctions: { stopAMDF: () => void; stopFFT: () => void } | null = null;
+
+        if (showCharts && (tabulatureRecorder.monite || tabulatureRecorder.recording)) {
+            if (canvasAMDFRef.current && canvasFFTRef.current) {
+                stopFunctions = tabulatureRecorder.draw(canvasAMDFRef.current, canvasFFTRef.current);
+            }
+        }
+
+        // Cleanup: zatrzymujemy animacje, gdy komponent jest unmountowany lub warunki siê zmieniaj¹
+        return () => {
+            if (stopFunctions) {
+                stopFunctions.stopAMDF();
+                stopFunctions.stopFFT();
+            }
+        };
+    }, [showCharts, tabulatureRecorder.monite, tabulatureRecorder.recording, canvasAMDFRef, canvasFFTRef, tabulatureRecorder]);
 
     const start = async () => {
+        console.log(deviceId)
         if (!await tabulatureRecorder.record(deviceId)) {
             setRenderModal(true)
         }
@@ -95,14 +114,24 @@ export const RecorderSettings = observer(() => {
             </Modal>
 
             <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-                <canvas  ref={canvasRef} style={{ width: '100%', height: '150px', border: '1px solid #ccc' }} />
+                {showCharts && (
+                    <InputGroup
+                        className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 100%' }}
+                    >
+                        <canvas ref={canvasFFTRef} style={{ width: '50%', height: '150px', border: '1px solid #ccc' }} />
+                        <canvas ref={canvasAMDFRef} style={{ width: '50%', height: '150px', border: '1px solid #ccc' }} />
+
+
+                    </InputGroup>
+                )}
+                
                 <InputGroup
                     className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}
                 >
                     <Button
                         onClick={() => start()}
                         variant="light"
-                        className="border flex-grow-1"
+                        className="border w-25 "
                         disabled={ tabulatureRecorder.monite || tabulatureRecorder.recording }
                     >
                         <RecordFill
@@ -113,15 +142,45 @@ export const RecorderSettings = observer(() => {
                     <Button
                         onClick={() => stop()}
                         variant="light"
-                        className="border flex-grow-1"
+                        className="border  w-25"
                         disabled={tabulatureRecorder.monite || !tabulatureRecorder.recording}
                     >
                         <StopFill />
                     </Button>
+
+                    <Button
+                        className="border  w-25"
+
+                        onClick={() =>
+                            tabulatureRecorder.moniteToggle(deviceId)
+                        }
+                        disabled={tabulatureRecorder.recording}
+                        variant={tabulatureRecorder.monite ? "danger" : "success"}
+                    >
+                        {`Monitor ${tabulatureRecorder.monite ? "off" : "on"}`}
+                    </Button>
+                    <InputGroup.Text
+                        className="border  w-25 d-flex justify-content-center"
+                    >
+                        <FormCheck
+                            checked={showCharts}
+                            type="checkbox"
+                            label="Show charts"
+                            id={ "setShowCharts" }
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setShowCharts(e.target.checked)}
+                        >
+
+                        </FormCheck>
+                    </InputGroup.Text>
+
                 </InputGroup>
                 <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}>
                     <Dropdown drop="down-centered">
-                        <Dropdown.Toggle variant="light" className="border flex-grow-1">
+                        <Dropdown.Toggle
+                            variant="light"
+                            className="border flex-grow-1"
+                            disabled={tabulatureRecorder.monite || tabulatureRecorder.recording}
+                        >
                             {`${deviceLabel}`}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
@@ -130,7 +189,7 @@ export const RecorderSettings = observer(() => {
                                     key={device.deviceId}
                                     onClick={() => {
                                         setDeviceLabel(device.label || `Microphone ${device.deviceId}`)
-                                        setDeviceId(deviceId)
+                                        setDeviceId(device.deviceId)
                                     }}
                                 >
                                     {device.label || `Microphone ${device.deviceId}`}
@@ -140,34 +199,20 @@ export const RecorderSettings = observer(() => {
                     </Dropdown>
 
                     <Button
-                        className="border flex-grow-1"
+                        className="border  w-25"
                         variant="light"
                         onClick={() => fetchDevices()}
                     >
                         Refresh
                     </Button>
-                </InputGroup>
-                <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}>
-
                     <Button
-                        className="border flex-grow-1"
+                        className="border  w-25"
                         onClick={() => tabulatureRecorder.effectsToggle()}
                         variant={tabulatureRecorder.effectsOn ? "secondary" : "light"}
                     >
                         {`Effects ${tabulatureRecorder.effectsOn ? "off" : "on"}`}
                     </Button>
-
-                    <Button
-                        className="border flex-grow-1"
-
-                        onClick={() =>
-                            tabulatureRecorder.moniteToggle(deviceId)
-                        }
-                        disabled={tabulatureRecorder.recording}
-                        variant={ tabulatureRecorder.monite ? "danger" : "success" }
-                    >
-                        {`Monitor ${tabulatureRecorder.monite ? "off" : "on"}` }
-                    </Button>
+                   
                 </InputGroup>
             </div>
         </>

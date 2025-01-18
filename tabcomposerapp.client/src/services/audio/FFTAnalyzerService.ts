@@ -1,18 +1,56 @@
 import * as Tone from 'tone';
-import { Chart, registerables } from 'chart.js';
-
-Chart.register(...registerables);
-
-export interface IFFTAnalyzerService extends Tone.ToneAudioNode {
-    getDominantFrequency(): number | null;
-    animateFrequencyPlot(canvas: HTMLCanvasElement): void;
-    connect(destination: Tone.InputNode, outputNum?: number, inputNum?: number): this;
-    disconnect(destination?: Tone.InputNode, outputNum?: number, inputNum?: number): this;
-}
-export class FFTAnalyzerService extends Tone.Analyser implements IFFTAnalyzerService {
+import { AnalyzerService } from './AnalyzerService';
+export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService {
     constructor(fftSize = 1024) {
         super('fft', fftSize);
+        this.lastFrequencies = [];
     }
+
+    private lastFrequencies: Array<number>;
+
+    getDominantFrequency2(): number | null {
+        const magnitudes = this.getValue() as Float32Array;
+        const sampleRate = Tone.getContext().sampleRate;
+        const lowFreq = 80;
+        const highFreq = 1400;
+
+        const binFrequency = sampleRate / (this.size * 2);
+        const minIndex = Math.ceil(lowFreq / binFrequency);
+        const maxIndexLimit = Math.floor(highFreq / binFrequency);  // Zmieniam nazwê na maxIndexLimit
+
+        let maxIndex = minIndex; // Pocz¹tkowa wartoœæ dla maxIndex
+        let maxValue = magnitudes[minIndex];
+
+        // Szukaj dominuj¹cej czêstotliwoœci w zakresie
+        for (let i = minIndex; i <= maxIndexLimit; i++) {
+            if (magnitudes[i] > maxValue) {
+                maxValue = magnitudes[i];
+                maxIndex = i;
+            }
+        }
+
+        const frequency = (maxIndex * sampleRate) / (this.size * 2);
+
+        // SprawdŸ harmoniczne
+        for (let i = 2; i <= 5; i++) {
+            const harmonicIndex = Math.round((maxIndex / i));
+            if (harmonicIndex >= minIndex && magnitudes[harmonicIndex] > maxValue * 0.5) {
+                return (harmonicIndex * sampleRate) / (this.size * 2);
+            }
+        }
+
+        // Wyg³adzenie
+        if (!this.lastFrequencies) this.lastFrequencies = [];
+        const smoothingFactor = 5;
+        this.lastFrequencies.push(frequency);
+        if (this.lastFrequencies.length > smoothingFactor) {
+            this.lastFrequencies.shift();
+        }
+        const smoothedFrequency = this.lastFrequencies.reduce((sum, freq) => sum + freq, 0) / this.lastFrequencies.length;
+
+        return maxValue > -Infinity ? smoothedFrequency : null;
+    }
+
 
     getDominantFrequency(): number | null {
         const magnitudes = this.getValue() as Float32Array;
@@ -32,13 +70,15 @@ export class FFTAnalyzerService extends Tone.Analyser implements IFFTAnalyzerSer
         return maxValue > -Infinity ? frequency : null; // Zwraca dominuj¹c¹ czêstotliwoœæ
     }
     
-    animateFrequencyPlot(canvas: HTMLCanvasElement) {
+    animateFrequencyPlot(canvas: HTMLCanvasElement): () => void {
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
             console.error('Failed to get canvas context.');
-            return;
+            return () => { };
         }
+
+        let animationFrameId: number | null = null;
 
         // Dopasowanie rozdzielczoœci kanwy do jej stylu CSS
         const setCanvasSize = () => {
@@ -60,8 +100,8 @@ export class FFTAnalyzerService extends Tone.Analyser implements IFFTAnalyzerSer
             // Czyszczenie kanwy
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Ustawienie szerokoœci s³upków jako liczba ca³kowita
-            const barWidth = Math.floor(canvas.width / magnitudes.length);
+            // Obliczanie szerokoœci s³upka bez zaokr¹glania
+            const barWidth = canvas.width / magnitudes.length;
             const adjustedHeight = canvas.height / window.devicePixelRatio;
 
             for (let i = 0; i < magnitudes.length; i++) {
@@ -74,10 +114,20 @@ export class FFTAnalyzerService extends Tone.Analyser implements IFFTAnalyzerSer
                 ctx.fillRect(x, y, barWidth, barHeight);
             }
 
-            requestAnimationFrame(draw);
+            animationFrameId = requestAnimationFrame(draw);
         };
 
         draw();
+
+        return () => {
+            setTimeout(() => {
+                if (animationFrameId !== null) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }, 1000)
+            
+        }
     }
 
 }

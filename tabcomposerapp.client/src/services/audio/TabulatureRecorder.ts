@@ -1,10 +1,12 @@
 import { ITabulature } from "../../models";
-import { FFTAnalyzerService, IFFTAnalyzerService } from "./FFTAnalyzerService";
 import { IMicrophoneService, MicrophoneService } from "./MicrophoneService";
 import { MicrophoneSelector } from "./MicrophoneSelector";
 import { AudioEffectService } from "./AudioEffectService";
 import { makeObservable, observable, runInAction } from "mobx";
 import * as Tone from 'tone';
+import { AnalyzerService } from "./AnalyzerService";
+import { AMDFAnalyzerService } from "./AMDFAnalyzerService";
+import { FFTAnalyzerService } from "./FFTAnalyzerService";
 export interface ITabulatureRecorder {
     readonly monite: boolean;
     readonly recording: boolean;
@@ -13,7 +15,8 @@ export interface ITabulatureRecorder {
     moniteToggle(deviceId: string): Promise<boolean>;
     effectsToggle(): boolean;
     stop(): void;
-    draw(canvas: HTMLCanvasElement): void;
+    draw(canvasAMDF: HTMLCanvasElement, canvasFFT: HTMLCanvasElement): { stopAMDF: () => void; stopFFT: () => void }
+;
     getF(): number;
     getAvailableMicrophones(): Promise<MediaDeviceInfo[]>;
 }
@@ -21,7 +24,8 @@ export class TabulatureRecorder {
 
     private microphoneSelector: MicrophoneSelector;
     private microphone: IMicrophoneService;
-    private analyzer: IFFTAnalyzerService;
+    private AMDFAnalyzer: AnalyzerService;
+    private FFTAnalizer: AnalyzerService;
     private effect: AudioEffectService;
     public recording: boolean;
     public effectsOn: boolean;
@@ -30,11 +34,14 @@ export class TabulatureRecorder {
     constructor(private tabulature: ITabulature) {
         this.microphoneSelector = new MicrophoneSelector();
         this.microphone = MicrophoneService.getInstance();
-        this.analyzer = new FFTAnalyzerService(1024);
+        this.AMDFAnalyzer = new AMDFAnalyzerService(1024);
+        this.FFTAnalizer = new FFTAnalyzerService(1024);
         this.effect = new AudioEffectService();
         this.microphone.connect(this.effect.getNode());
-        this.effect.connect(this.analyzer);
-        //this.microphone.connect(this.analyzer);
+        this.effect.connect(this.FFTAnalizer);
+        this.effect.connect(this.AMDFAnalyzer);
+        this.microphone.connect(this.FFTAnalizer);
+        this.microphone.connect(this.AMDFAnalyzer);
         this.effectsOn = true;
         this.recording = false;
         this.monite = false;
@@ -46,6 +53,7 @@ export class TabulatureRecorder {
     }
 
     public async record(deviceId: string): Promise<boolean> {
+        //console.log(this.tabulature.getMeasure(0)?.getNotes(6))
         if (!await this.microphone.init(deviceId)) {
             return false;
         }
@@ -60,19 +68,19 @@ export class TabulatureRecorder {
             if (this.recording)
                 return false;
             if (await this.microphone.init(deviceId)) {
-                this.analyzer.connect(Tone.getDestination());
+                this.AMDFAnalyzer.connect(Tone.getDestination());
                 runInAction(() => this.monite = true);
                 return true;
 
             } else {
-                this.analyzer.disconnect(Tone.getDestination());
+                this.AMDFAnalyzer.disconnect(Tone.getDestination());
                 runInAction(() => this.monite = false);
                 this.microphone.stop();
                 return false;
             }
 
         } catch {
-            this.analyzer.disconnect(Tone.getDestination())
+            this.AMDFAnalyzer.disconnect(Tone.getDestination())
             runInAction(() => this.monite = false);
             this.microphone.stop();
             return false;
@@ -83,30 +91,45 @@ export class TabulatureRecorder {
         try {
 
             if (!this.effectsOn) {
-                this.microphone.disconnect(this.analyzer);
+                this.microphone.disconnect(this.AMDFAnalyzer);
                 this.microphone.connect(this.effect.getNode());
-                this.effect.connect(this.analyzer);
+                
+                this.effect.connect(this.FFTAnalizer);
+                this.effect.connect(this.AMDFAnalyzer);
                 runInAction(() => this.effectsOn = true);
             } else {
                 this.effect.disconnect();
-                this.microphone.connect(this.analyzer);
+                this.microphone.connect(this.AMDFAnalyzer);
+                this.microphone.connect(this.FFTAnalizer);
                 runInAction(() => this.effectsOn = false);
             }
             return this.effectsOn;
         } catch {
-            console.log("upz")
             return false;
         }
         
     }
 
-    public draw(canvas: HTMLCanvasElement) {
-        this.analyzer.animateFrequencyPlot(canvas);
+    public draw(canvasAMDF: HTMLCanvasElement, canvasFFT: HTMLCanvasElement) {
+        const stopAMDF = this.AMDFAnalyzer.animateFrequencyPlot(canvasAMDF);
+        const stopFFT = this.FFTAnalizer.animateFrequencyPlot(canvasFFT);
+
+        // Zwracamy funkcje zatrzymuj¹ce
+        return {
+            stopAMDF,
+            stopFFT
+        };
     }
 
     public getF() {
-        if (this.microphone.active)
-            return this.analyzer.getDominantFrequency();
+        if (this.microphone.active) {
+            const num = this.AMDFAnalyzer.getDominantFrequency()
+            if (num) {
+                this.effect.updateAdaptiveFilter(num);
+            }
+            return num;
+        }
+            
         else
             return null;
     }
