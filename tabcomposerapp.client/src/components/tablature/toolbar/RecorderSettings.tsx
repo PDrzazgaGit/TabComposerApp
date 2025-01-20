@@ -6,7 +6,14 @@ import { observer } from "mobx-react-lite";
 
 export const RecorderSettings = observer(() => {
 
-    const { tabulatureRecorder } = useTabulature();
+    const {
+        tabulatureRecorder,
+        globalTempo,
+        globalNumerator,
+        globalDenominator,
+        globalNoteDuration,
+        globalNoteInterval
+    } = useTabulature();
 
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
 
@@ -35,12 +42,11 @@ export const RecorderSettings = observer(() => {
     }, [tabulatureRecorder, setDeviceLabel]);
 
     useEffect(() => {
-        console.log("heheh")
         fetchDevices();
     }, [tabulatureRecorder, fetchDevices]);
 
     useEffect(() => {
-        let stopFunctions: { stopAMDF: () => void; stopFFT: () => void } | null = null;
+        let stopFunctions: { stopAMDF: () => void; stopFFT: () => void; } | null = null;
 
         if (showCharts && (tabulatureRecorder.monite || tabulatureRecorder.recording)) {
             if (canvasAMDFRef.current && canvasFFTRef.current) {
@@ -58,8 +64,15 @@ export const RecorderSettings = observer(() => {
     }, [showCharts, tabulatureRecorder.monite, tabulatureRecorder.recording, canvasAMDFRef, canvasFFTRef, tabulatureRecorder]);
 
     const start = async () => {
-        console.log(deviceId)
-        if (!await tabulatureRecorder.record(deviceId)) {
+        if (!await tabulatureRecorder.record(
+            deviceId,
+            globalTempo,
+            globalNumerator,
+            globalDenominator,
+            globalNoteDuration,
+            globalNoteInterval
+
+        )) {
             setRenderModal(true)
         }
 
@@ -75,15 +88,9 @@ export const RecorderSettings = observer(() => {
         const intervalId = setInterval(async () => {
 
             try {
-                const num = tabulatureRecorder.getF();
-                if (num) {
-                    console.log(num, "Hz")
-
-                    //
-                }
-
+                tabulatureRecorder.printValues();
             } catch {
-                console.log("Nic");
+                //
             }
 
         }, 1);
@@ -115,14 +122,17 @@ export const RecorderSettings = observer(() => {
 
             <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
                 {showCharts && (
-                    <InputGroup
-                        className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 100%' }}
-                    >
-                        <canvas ref={canvasFFTRef} style={{ width: '50%', height: '150px', border: '1px solid #ccc' }} />
-                        <canvas ref={canvasAMDFRef} style={{ width: '50%', height: '150px', border: '1px solid #ccc' }} />
+                    <>
+                        <InputGroup
+                            className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 100%' }}
+                        >
+                            <canvas ref={canvasFFTRef} style={{ width: '50%', height: '150px', border: '1px solid #ccc' }} />
+                            <canvas ref={canvasAMDFRef} style={{ width: '50%', height: '150px', border: '1px solid #ccc' }} />
 
 
-                    </InputGroup>
+                        </InputGroup>
+                    </>
+                    
                 )}
                 
                 <InputGroup

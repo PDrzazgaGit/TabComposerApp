@@ -1,4 +1,4 @@
-import { makeObservable, observable, computed, action } from 'mobx';
+import { makeObservable, observable, action, runInAction } from 'mobx';
 import { Notation } from './NotationModel'
 
 export class Sound {
@@ -16,7 +16,7 @@ export class Sound {
             octave: observable,    // Obserwowalna w³aœciwoœæ
             //durationMs: observable, // Chroniona, ale nadal obserwowalna
 
-            getName: action,     // Getter jako computed
+           // getName: action,     // Getter jako computed
             getDurationMs: action, // Getter jako computed
 
             setDurationMs: action, // Akcja

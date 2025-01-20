@@ -7,6 +7,7 @@ export interface IMicrophoneService {
     connect(destination: Tone.InputNode, outputNum?: number, inputNum?: number): IMicrophoneService;
     disconnect(destination?: Tone.InputNode, outputNum?: number, inputNum?: number): IMicrophoneService;
     toDestination(): this;
+    disconnectFromDestination(): this;
 }
 export class MicrophoneService extends Tone.UserMedia implements IMicrophoneService {
 
@@ -43,6 +44,10 @@ export class MicrophoneService extends Tone.UserMedia implements IMicrophoneServ
             this.close();
             console.log('Microphone closed.');
         }
+    }
+
+    disconnectFromDestination() {
+        return this.disconnect(Tone.getDestination());
     }
 
     public get active() {

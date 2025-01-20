@@ -1,118 +1,78 @@
 import * as Tone from 'tone';
 
 export class AudioEffectService {
+    
+
+    private outputNode: Tone.ToneAudioNode;
+    private inputNode: Tone.ToneAudioNode;
+
     private highpassFilter: Tone.Filter;
-    private lowpassFilter: Tone.Filter;
-    private noiseReduction: Tone.EQ3;
-    private noiseGate: Tone.Gate;
-    private compressor: Tone.Compressor;
-    private adaptiveFilter: Tone.Filter;
-    private connectedNode: Tone.ToneAudioNode | null = null;
+    private bandpassFilter: Tone.Filter;
+    private noiseReduction: Tone.EQ3; // Korektor do redukcji szumów
+    private compressor: Tone.Compressor; // Kompresor dla wyrównania dynamiki
+    private normalizer: Tone.Gain; // Normalizator amplitudy
 
-    constructor() {
-        // Filtr górnoprzepustowy (agresywnie t³umi niskie czêstotliwoœci)
+    constructor(private minFrequency: number = 60, private maxFrequency: number = 1400) {
+        // Filtr górnoprzepustowy (t³umi czêstotliwoœci poni¿ej zakresu gitary)
         this.highpassFilter = new Tone.Filter({
+            frequency: this.minFrequency,
             type: "highpass",
-            frequency: 100,
-            rolloff: -24,
+            Q: 1,
         });
 
-        // Filtr dolnoprzepustowy (dynamiczne t³umienie wy¿szych szumów)
-        this.lowpassFilter = new Tone.Filter({
-            type: "lowpass",
-            frequency: 5000, // Górna granica czêstotliwoœci dla gitary
-            rolloff: -24,
+        // Filtr pasmowoprzepustowy (dynamiczne t³umienie szumów spoza pasma)
+        this.bandpassFilter = new Tone.Filter({
+            frequency: (this.minFrequency + this.maxFrequency) / 2, // Œrodek zakresu
+            type: "bandpass",
+            Q: 5,
         });
 
-        // Redukcja szumu w pasmach czêstotliwoœci
+        // Redukcja szumów (korektor graficzny do t³umienia niskich i wysokich szumów)
         this.noiseReduction = new Tone.EQ3({
-            low: -6, // Dodatkowe t³umienie niskich pasm
-            mid: 0,
-            high: -2, // Lekko t³umi wysokie szumy
+            low: -10, // Redukcja szumów w niskich czêstotliwoœciach
+            mid: 5, // Neutralne œrednie
+            high: -50, // Redukcja szumów w wysokich czêstotliwoœciach
         });
 
-        // Brama szumów
-        this.noiseGate = new Tone.Gate({
-            threshold: -45, // Progi ni¿sze dla cichszych dŸwiêków gitary
-            smoothing: 0.05,
-        });
-
-        // Kompresor
+        // Kompresor (wyrównuje dynamikê sygna³u)
         this.compressor = new Tone.Compressor({
-            threshold: -30,
-            ratio: 4,
-            attack: 0.01,
-            release: 0.2,
+            threshold: -24, // Punkt, w którym kompresor zaczyna dzia³aæ
+            ratio: 10, // Si³a kompresji
+            attack: 0.003, // Szybkoœæ reakcji
+            release: 0.25, // Czas powrotu do normalnego poziomu
         });
 
-        // Adaptive Filter (dynamiczne dostosowanie czêstotliwoœci odciêcia)
-        this.adaptiveFilter = new Tone.Filter({
-            type: "lowpass",
-            frequency: 3000, // Pocz¹tkowa wartoœæ odciêcia
-            rolloff: -12,
-        });
+        // Normalizacja amplitudy (gain ustawiony na 1)
+        this.normalizer = new Tone.Gain(1);
+
+        // Po³¹czenie efektów
+        this.inputNode = this.highpassFilter;
+
+        this.highpassFilter.connect(this.bandpassFilter);
+        this.bandpassFilter.connect(this.noiseReduction);
+        this.noiseReduction.connect(this.compressor);
+        this.compressor.connect(this.normalizer);
+
+        this.outputNode = this.normalizer; // Wyjœcie gotowe do analizy FFT
     }
 
-    // Funkcja do dynamicznego odszumiania
-    public updateAdaptiveFilter(dominantFrequency: number): void {
-        const targetFrequency = Math.min(3000, dominantFrequency * 1.5); // Dostosowanie filtra w górê o 50% dominuj¹cej czêstotliwoœci
-        this.adaptiveFilter.frequency.rampTo(targetFrequency, 0.1); // G³adkie przejœcie
-    }
-
-    public getNode(): Tone.InputNode {
-        return this.highpassFilter;
-    }
-
-    // Pod³¹czenie efektów do kolejnego wêz³a
     public connect(node: Tone.ToneAudioNode): void {
-        if (this.connectedNode) {
-            this.disconnect();
-        }
-        this.highpassFilter
-            .connect(this.lowpassFilter)
-            .connect(this.noiseReduction)
-            .connect(this.noiseGate)
-            .connect(this.adaptiveFilter)
-            .connect(this.compressor)
-            .connect(node);
-
-        this.connectedNode = node;
+        this.outputNode.connect(node);
     }
 
-    // Roz³¹czenie ca³ego ³añcucha
     public disconnect(): void {
-        if (this.connectedNode) {
-            this.highpassFilter.disconnect();
-            this.lowpassFilter.disconnect();
-            this.noiseReduction.disconnect();
-            this.noiseGate.disconnect();
-            this.adaptiveFilter.disconnect();
-            this.compressor.disconnect();
-            this.connectedNode = null;
-        }
+        this.outputNode.disconnect();
     }
 
-    // Dostosowanie progu bramy szumów
-    public adjustNoiseGateThreshold(threshold: number): void {
-        this.noiseGate.threshold = threshold;
+    public toDestination() {
+        this.outputNode.connect(Tone.getDestination());
     }
 
-    // Aktualizacja filtrów
-    public adjustHighpassFrequency(frequency: number): void {
-        this.highpassFilter.frequency.value = frequency;
+    public disconnectFromDestination() {
+        this.outputNode.disconnect(Tone.getDestination());
     }
 
-    public adjustLowpassFrequency(frequency: number): void {
-        this.lowpassFilter.frequency.value = frequency;
-    }
-
-    // Pod³¹czenie do wyjœcia
-    public toDestination(): void {
-        this.compressor.toDestination();
-    }
-
-    // Roz³¹czenie z wyjœciem
-    public disconnectFromDestination(): void {
-        this.compressor.disconnect(Tone.getDestination());
+    public getInputNode(): Tone.InputNode {
+        return this.inputNode;
     }
 }

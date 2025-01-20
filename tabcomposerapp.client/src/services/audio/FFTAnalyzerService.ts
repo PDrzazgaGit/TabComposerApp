@@ -1,22 +1,43 @@
 import * as Tone from 'tone';
 import { AnalyzerService } from './AnalyzerService';
 export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService {
-    constructor(fftSize = 1024) {
+    constructor(fftSize = 1024, private minFrequency: number = 60, private maxFrequency: number = 1400) {
         super('fft', fftSize);
-        this.lastFrequencies = [];
     }
 
-    private lastFrequencies: Array<number>;
-
-    getDominantFrequency2(): number | null {
+    findHarmonics(baseFrequency: number): number[] {
         const magnitudes = this.getValue() as Float32Array;
         const sampleRate = Tone.getContext().sampleRate;
-        const lowFreq = 80;
-        const highFreq = 1400;
 
         const binFrequency = sampleRate / (this.size * 2);
-        const minIndex = Math.ceil(lowFreq / binFrequency);
-        const maxIndexLimit = Math.floor(highFreq / binFrequency);  // Zmieniam nazwê na maxIndexLimit
+        const harmonicFrequencies: number[] = [];
+
+        // Przegl¹daj harmoniczne (np. do 10-tej harmonicznej)
+        for (let i = 1; i <= 10; i++) {
+            const targetFrequency = baseFrequency * i; // Teoretyczna harmoniczna
+            if (targetFrequency > this.maxFrequency) break; // Poza analizowanym zakresem
+
+            const targetIndex = Math.round(targetFrequency / binFrequency); // Bin docelowy
+            if (targetIndex < magnitudes.length) {
+                const amplitude = magnitudes[targetIndex];
+
+                // SprawdŸ, czy amplituda w tym binie jest znacz¹ca
+                if (amplitude > -Infinity) {
+                    harmonicFrequencies.push(targetFrequency);
+                }
+            }
+        }
+
+        return harmonicFrequencies;
+    }
+
+    getDominantFrequency(): number | null {
+        const magnitudes = this.getValue() as Float32Array;
+        const sampleRate = Tone.getContext().sampleRate;
+
+        const binFrequency = sampleRate / (this.size * 2);
+        const minIndex = Math.ceil(this.minFrequency / binFrequency);
+        const maxIndexLimit = Math.floor(this.maxFrequency / binFrequency);  // Zmieniam nazwê na maxIndexLimit
 
         let maxIndex = minIndex; // Pocz¹tkowa wartoœæ dla maxIndex
         let maxValue = magnitudes[minIndex];
@@ -31,46 +52,10 @@ export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService
 
         const frequency = (maxIndex * sampleRate) / (this.size * 2);
 
-        // SprawdŸ harmoniczne
-        for (let i = 2; i <= 5; i++) {
-            const harmonicIndex = Math.round((maxIndex / i));
-            if (harmonicIndex >= minIndex && magnitudes[harmonicIndex] > maxValue * 0.5) {
-                return (harmonicIndex * sampleRate) / (this.size * 2);
-            }
-        }
-
-        // Wyg³adzenie
-        if (!this.lastFrequencies) this.lastFrequencies = [];
-        const smoothingFactor = 5;
-        this.lastFrequencies.push(frequency);
-        if (this.lastFrequencies.length > smoothingFactor) {
-            this.lastFrequencies.shift();
-        }
-        const smoothedFrequency = this.lastFrequencies.reduce((sum, freq) => sum + freq, 0) / this.lastFrequencies.length;
-
-        return maxValue > -Infinity ? smoothedFrequency : null;
-    }
-
-
-    getDominantFrequency(): number | null {
-        const magnitudes = this.getValue() as Float32Array;
-
-        let maxIndex = 0;
-        let maxValue = magnitudes[0];
-        for (let i = 1; i < magnitudes.length; i++) {
-            if (magnitudes[i] > maxValue) {
-                maxValue = magnitudes[i];
-                maxIndex = i;
-            }
-        }
-        const sampleRate = Tone.getContext().sampleRate;
-        //console.log(sampleRate)
-        const frequency = (maxIndex * sampleRate) / (this.size * 2);
-
         return maxValue > -Infinity ? frequency : null; // Zwraca dominuj¹c¹ czêstotliwoœæ
     }
     
-    animateFrequencyPlot(canvas: HTMLCanvasElement): () => void {
+    animatePlot(canvas: HTMLCanvasElement): () => void {
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
