@@ -8,9 +8,10 @@ import { RecorderSettings } from "./RecorderSettings";
 interface EditorToolbarProps {
     children: ReactNode;
     playerMode?: boolean;
+    previewMode?: boolean;
 }
 
-export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMode = false }) => {
+export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMode = false, previewMode = false }) => {
 
     const [tabKey, setTabKey] = useState<string | null>(null);
 
@@ -30,7 +31,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMo
                         <Tab
                             eventKey="toolbar" title="Global Toolbar"
                         >
-                            <GlobalSettings/>
+                            <GlobalSettings previevMode={ previewMode } />
                         </Tab>
                     )} 
                     <Tab

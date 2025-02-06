@@ -7,7 +7,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { autorun } from "mobx";
 import { useEffect, useState } from "react";
 
-export const GlobalSettings: React.FC = () => {
+export const GlobalSettings: React.FC<{ previevMode?: boolean }> = ({previevMode=false}) => {
 
     const {
         measuresPerRow,
@@ -147,26 +147,37 @@ export const GlobalSettings: React.FC = () => {
             </InputGroup>
 
             <InputGroup className="w-100 d-flex align-items-center justify-content-center" style={{ flex: '1 1 20%' }}>
-                <Button
-                    variant={upToDate && "light" || "success"}
-                    onClick={() => handleClick()}
-                    className="w-100"
-                    disabled={ upToDate }
-                >
-                    {upToDate && "Up to date" || (
-                        <>
-                            <span className="me-1">Saving...</span>
-                            <Spinner
-                                animation="border"
-                                role="status"
-                                size="sm"
-                            >
-                                <span className="visually-hidden">Loading...</span>
+                {previevMode === true && (
+                    <Button
+                        variant="warning"
+                        disabled={true}
+                        className="w-100"
+                    >
+                        Trial Mode
+                    </Button>
+                ) || (
+                    <Button
+                        variant={upToDate && "light" || "success"}
+                        onClick={() => handleClick()}
+                        className="w-100"
+                        disabled={upToDate}
+                    >
+                        {upToDate && "Up to date" || (
+                            <>
+                                <span className="me-1">Saving...</span>
+                                <Spinner
+                                    animation="border"
+                                    role="status"
+                                    size="sm"
+                                >
+                                    <span className="visually-hidden">Loading...</span>
 
-                            </Spinner>
-                        </>
-                    )}
-                </Button>
+                                </Spinner>
+                            </>
+                        )}
+                    </Button>
+                )}
+                
             </InputGroup>
         </div>
     );

@@ -22,7 +22,7 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     const [measuresPerRow, setMeasuresPerRow] = useState(3);
 
     const tabulaturePlayer: TabulaturePlayer = new TabulaturePlayer(tabulature);
-    const tabulatureRecorder: TabulatureRecorder = new TabulatureRecorder(tabulature);
+    const tabulatureRecorder: TabulatureRecorder = new TabulatureRecorder(tabulature, 20, 1500);
 
     const addMeasure = (tempo: number, numerator: number, denominator: number) => {
         tabulature.addMeasure(tempo, numerator, denominator);     

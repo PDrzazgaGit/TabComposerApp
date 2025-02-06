@@ -27,7 +27,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
 
     const [overflow, setOverflow] = useState(true);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets, measure } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets } = useMeasure();
 
     const { shiftOnDelete, globalNoteInterval } = useTabulature();
 

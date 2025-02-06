@@ -14,7 +14,7 @@ import { runInAction } from 'mobx';
 import { useTabulatureApi } from "../../hooks/useTabulatureApi";
 
 
-export const TabulatureEditorView = observer(() => {
+export const TabulatureEditorView: React.FC<{ previevMode?: boolean }> = observer(({ previevMode = false}) => {
 
     const {
         tabulature,
@@ -30,6 +30,8 @@ export const TabulatureEditorView = observer(() => {
     const token = useMemo(() => getToken(), [getToken]);
 
     useEffect(() => {
+        if (previevMode)
+            return;
         const intervalId = setInterval(async () => {
 
             if (!tabulatureManagerApi.upToDate) {
@@ -44,6 +46,8 @@ export const TabulatureEditorView = observer(() => {
         }, updateTimeMs);
 
         return () => {
+            if (previevMode)
+                return;
             clearInterval(intervalId);
             updateTabulature(token ? token : '');
         };
@@ -72,7 +76,8 @@ export const TabulatureEditorView = observer(() => {
 
     const handleSaveEditModal = async () => {
         handleCloseEditModal();
-
+        if (previevMode)
+            return;
         const token = getToken();
         if (!token) {
             return;
@@ -83,12 +88,12 @@ export const TabulatureEditorView = observer(() => {
         }
     }
 
-    if (clientAuth.authorized === false) {
+    if (clientAuth.authorized === false && previevMode === false) {
         return <SessionExpired />
     }
 
     return (
-        <EditorToolbar>
+        <EditorToolbar previewMode={previevMode }>
             <div
                 className="d-flex justify-content-center align-items-center mb-3 column"
             >
@@ -152,7 +157,7 @@ export const TabulatureEditorView = observer(() => {
                 {tabulature.map((measure, index) => {
                     return (
                         <MeasureProvider key={index} measure={measure} initialMeasureId={index}>
-                            <MeasureLabelEditor />
+                            <MeasureLabelEditor previewMode={ previevMode} />
                             <MeasureView isEditor={true} measurePerRow={measuresPerRow} />
                         </MeasureProvider>
                     )
@@ -162,4 +167,3 @@ export const TabulatureEditorView = observer(() => {
         </EditorToolbar>
     );
 })
-

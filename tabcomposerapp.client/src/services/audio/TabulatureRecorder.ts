@@ -7,6 +7,7 @@ import { AnalyzerService } from "./AnalyzerService";
 import { AMDFAnalyzerService } from "./AMDFAnalyzerService";
 import { FFTAnalyzerService } from "./FFTAnalyzerService";
 import { MusicScale } from "../MusicScale";
+import { WindowService } from "./WindowService";
 export interface ITabulatureRecorder {
     readonly monite: boolean;
     readonly recording: boolean;
@@ -31,6 +32,7 @@ export class TabulatureRecorder {
     private AMDFAnalyzer: AnalyzerService;
     private FFTAnalizer: AnalyzerService;
     private effectService: AudioEffectService;
+    private windowService: WindowService;
     public recording: boolean;
     public effectsOn: boolean;
     public monite: boolean;
@@ -38,12 +40,15 @@ export class TabulatureRecorder {
     constructor(private tabulature: ITabulature, private minFrequency: number = 60, private maxFrequency: number = 1400) {
         this.microphoneSelector = new MicrophoneSelector();
         this.microphone = MicrophoneService.getInstance();
-        this.AMDFAnalyzer = new AMDFAnalyzerService(2048, minFrequency, maxFrequency);
-        this.FFTAnalizer = new FFTAnalyzerService(1024, minFrequency, maxFrequency);
+        this.AMDFAnalyzer = new AMDFAnalyzerService(1024, minFrequency, maxFrequency);
+        this.FFTAnalizer = new FFTAnalyzerService(2048, minFrequency, maxFrequency);
         this.effectService = new AudioEffectService(this.minFrequency, this.maxFrequency);
+        this.windowService = new WindowService("blackman", 2048);
         this.microphone.connect(this.effectService.getInputNode());
         this.effectService.connect(this.AMDFAnalyzer);
-        this.effectService.connect(this.FFTAnalizer);
+        this.effectService.connect(this.windowService.getInputNode());
+        this.windowService.connect(this.FFTAnalizer);
+      //  this.effectService.connect(this.FFTAnalizer);
         this.effectsOn = true;
         this.recording = false;
         this.monite = false;
@@ -106,7 +111,7 @@ export class TabulatureRecorder {
             this.microphone.disconnect()
             if (!this.effectsOn) {
                 this.microphone.connect(this.effectService.getInputNode());
-                this.effectService.connect(this.FFTAnalizer);
+                this.effectService.connect(this.windowService.getInputNode());
                 this.effectService.connect(this.AMDFAnalyzer);
                 if (this.monite) {
                     this.effectService.toDestination();
@@ -114,7 +119,7 @@ export class TabulatureRecorder {
                 runInAction(() => this.effectsOn = true);
             } else {
                 this.effectService.disconnect();
-                this.microphone.connect(this.FFTAnalizer)
+                this.microphone.connect(this.windowService.getInputNode())
                 this.microphone.connect(this.AMDFAnalyzer)
                 if (this.monite) {
                     this.microphone.toDestination();
@@ -124,7 +129,7 @@ export class TabulatureRecorder {
             return this.effectsOn;
         } catch {
             this.effectService.disconnect();
-            this.microphone.connect(this.FFTAnalizer)
+            this.microphone.connect(this.windowService.getInputNode())
             this.microphone.connect(this.AMDFAnalyzer)
             runInAction(() => this.effectsOn = false);
             return false;
@@ -148,6 +153,8 @@ export class TabulatureRecorder {
 
     public getPlayingSound(): string {
         const amdf = this.AMDFAnalyzer.getDominantFrequency();
+        const fft = this.FFTAnalizer.getDominantFrequency();
+        console.log(fft)
         if (!amdf)
             return 'unknown';
         const sound = MusicScale.getSoundFromFrequency(amdf);
@@ -155,10 +162,13 @@ export class TabulatureRecorder {
     }
 
     public printValues() {
+        
         if (this.microphone.active) {
             const amdf = this.AMDFAnalyzer.getDominantFrequency();
-          //  const fft = this.FFTAnalizer.getDominantFrequency();
-           
+            const fft = this.FFTAnalizer.getDominantFrequency();
+            if (fft) {
+                console.log(`FFT: ${fft}`)
+            }
             if (amdf) {
                 const sound = MusicScale.getSoundFromFrequency(amdf);
 

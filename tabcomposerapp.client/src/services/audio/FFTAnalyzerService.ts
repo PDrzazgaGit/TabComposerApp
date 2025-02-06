@@ -1,62 +1,41 @@
 import * as Tone from 'tone';
 import { AnalyzerService } from './AnalyzerService';
 export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService {
+
+    private binFrequency: number;
+    private startEdge: number;
+    private endEdge: number;
+    private sampleRate: number;
     constructor(fftSize = 1024, private minFrequency: number = 60, private maxFrequency: number = 1400) {
         super('fft', fftSize);
+        this.sampleRate = Tone.getContext().sampleRate;
+        this.binFrequency = this.sampleRate / (this.size * 2);
+        this.startEdge = Math.ceil(this.minFrequency / this.binFrequency);
+        this.endEdge = Math.floor(this.maxFrequency / this.binFrequency);
+        console.log(this.startEdge, this.endEdge)
     }
 
-    findHarmonics(baseFrequency: number): number[] {
-        const magnitudes = this.getValue() as Float32Array;
-        const sampleRate = Tone.getContext().sampleRate;
-
-        const binFrequency = sampleRate / (this.size * 2);
-        const harmonicFrequencies: number[] = [];
-
-        // Przegl¹daj harmoniczne (np. do 10-tej harmonicznej)
-        for (let i = 1; i <= 10; i++) {
-            const targetFrequency = baseFrequency * i; // Teoretyczna harmoniczna
-            if (targetFrequency > this.maxFrequency) break; // Poza analizowanym zakresem
-
-            const targetIndex = Math.round(targetFrequency / binFrequency); // Bin docelowy
-            if (targetIndex < magnitudes.length) {
-                const amplitude = magnitudes[targetIndex];
-
-                // SprawdŸ, czy amplituda w tym binie jest znacz¹ca
-                if (amplitude > -Infinity) {
-                    harmonicFrequencies.push(targetFrequency);
-                }
-            }
-        }
-
-        return harmonicFrequencies;
-    }
 
     getDominantFrequency(): number | null {
         const magnitudes = this.getValue() as Float32Array;
-        const sampleRate = Tone.getContext().sampleRate;
 
-        const binFrequency = sampleRate / (this.size * 2);
-        const minIndex = Math.ceil(this.minFrequency / binFrequency);
-        const maxIndexLimit = Math.floor(this.maxFrequency / binFrequency);  // Zmieniam nazwê na maxIndexLimit
+        let maxIndex = this.startEdge;
+        let maxValue = magnitudes[this.startEdge];
 
-        let maxIndex = minIndex; // Pocz¹tkowa wartoœæ dla maxIndex
-        let maxValue = magnitudes[minIndex];
-
-        // Szukaj dominuj¹cej czêstotliwoœci w zakresie
-        for (let i = minIndex; i <= maxIndexLimit; i++) {
+        for (let i = this.startEdge; i <= this.endEdge; i++) {
             if (magnitudes[i] > maxValue) {
                 maxValue = magnitudes[i];
                 maxIndex = i;
             }
         }
 
-        const frequency = (maxIndex * sampleRate) / (this.size * 2);
+        const frequency = (maxIndex * this.sampleRate) / (this.size * 2);
 
         return maxValue > -Infinity ? frequency : null; // Zwraca dominuj¹c¹ czêstotliwoœæ
     }
+
     
     animatePlot(canvas: HTMLCanvasElement): () => void {
-
         const ctx = canvas.getContext('2d');
         if (!ctx) {
             console.error('Failed to get canvas context.');
@@ -65,16 +44,18 @@ export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService
 
         let animationFrameId: number | null = null;
 
-        // Dopasowanie rozdzielczoœci kanwy do jej stylu CSS
+        // Funkcja ustawiaj¹ca rozmiar kanwy zgodnie z jej stylem CSS
         const setCanvasSize = () => {
             const { width, height } = canvas.getBoundingClientRect();
             canvas.width = Math.floor(width * window.devicePixelRatio);
             canvas.height = Math.floor(height * window.devicePixelRatio);
+            // Resetujemy transformacjê przed ponownym skalowaniem, ¿eby nie mno¿yæ skalowania
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         };
 
-        setCanvasSize();
         window.addEventListener("resize", setCanvasSize);
+        setCanvasSize(); // Ustaw pocz¹tkowy rozmiar
 
         const draw = () => {
             const magnitudes = this.getValue(); // Pobieranie danych
@@ -82,19 +63,22 @@ export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService
                 throw new Error("getValue() must return a Float32Array");
             }
 
+            // U¿ywamy widocznych rozmiarów kanwy
+            const rect = canvas.getBoundingClientRect();
+            const visibleWidth = rect.width;
+            const visibleHeight = rect.height;
+
             // Czyszczenie kanwy
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, visibleWidth, visibleHeight);
 
-            // Obliczanie szerokoœci s³upka bez zaokr¹glania
-            const barWidth = canvas.width / magnitudes.length;
-            const adjustedHeight = canvas.height / window.devicePixelRatio;
+            // Obliczanie szerokoœci s³upka na podstawie widocznej szerokoœci
+            const totalBars = this.endEdge;
+            const barWidth = visibleWidth / totalBars;
 
-            for (let i = 0; i < magnitudes.length; i++) {
-                const barHeight = Math.max(0, (magnitudes[i] + 120) * 1.5); // Skalowanie
-                const x = i * barWidth;
-                const y = adjustedHeight - barHeight;
-
-                // Rysowanie s³upka
+            for (let i = this.startEdge; i < this.endEdge; i++) {
+                const barHeight = Math.max(0, (magnitudes[i] + 120) * 1.5); // Skalowanie – mo¿esz dostosowaæ
+                const x = (i - this.startEdge) * barWidth;
+                const y = visibleHeight - barHeight;
                 ctx.fillStyle = "black";
                 ctx.fillRect(x, y, barWidth, barHeight);
             }
@@ -110,9 +94,9 @@ export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService
                     cancelAnimationFrame(animationFrameId);
                     animationFrameId = null;
                 }
-            }, 1000)
-            
-        }
+            }, 1000);
+        };
     }
+
 
 }

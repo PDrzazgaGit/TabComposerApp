@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AuthorizationForm } from "../AuthorizationForm";
 import { useNavigate } from "react-router-dom";
 import { MyOffcanvas } from "../MyOffcanvas";
+import { useAuth } from "../../hooks/useAuth";
 
 export const Login = () => {
 
@@ -9,9 +10,13 @@ export const Login = () => {
 
     const navigate = useNavigate();
 
+    const { user } = useAuth();
+
     const handleHide = () => {
         navigate("/");
     }
+
+    if(user) navigate ("/mytabs")
 
     return (
         <MyOffcanvas

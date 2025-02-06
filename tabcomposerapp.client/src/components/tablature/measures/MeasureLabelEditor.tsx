@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { useAuth } from "../../../hooks/useAuth";
 import { useMeasure } from "../../../hooks/useMeasure";
@@ -7,7 +7,7 @@ import { MeasureLabel } from "./MeasureLabel";
 import { SessionExpired } from "../../SessionExpired";
 import { AppErrors } from "../../../models/AppErrorsModel";
 
-export const MeasureLabelEditor = () => {
+export const MeasureLabelEditor: React.FC<{ previewMode?: boolean }> = ({ previewMode = false }) => {
 
     const { measure, changeSignature, changeTempo } = useMeasure();
 
@@ -62,10 +62,13 @@ export const MeasureLabelEditor = () => {
     };
 
     const handleDeleteMeasure = async () => {
-        const token = await getTokenWithAuth();
-        if (!token) {
-            <SessionExpired />
-            return;
+        
+        if (previewMode === false) {
+            const token = await getTokenWithAuth();
+            if (!token) {
+                <SessionExpired />
+            }
+           // return;
         }
         deleteMeasure(measure);
     }

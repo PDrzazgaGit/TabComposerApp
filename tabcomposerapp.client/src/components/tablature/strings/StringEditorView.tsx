@@ -483,7 +483,7 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                                         <NoteEditorView
                                             note={note}
                                             stringId={stringId}
-                                            onNoteDragChange={(moved: number) => {
+                                            onNoteDragChange={(moved: number) => { //ustawiæ odœwie¿anie dla przesuwania za pomoc¹ przycisku
                                                 if (moved != noteMoved) {
                                                     setNoteMoved(moved)
                                                 }
