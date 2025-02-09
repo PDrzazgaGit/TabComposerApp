@@ -14,7 +14,7 @@ export interface ITabulature {
     map<U>(callback: (measure: IMeasure, index: number, array: IMeasure[]) => U): U[];
     find(callback: (measure: IMeasure) => boolean): IMeasure | undefined;
     updateTablature(oldM: IMeasure | number, newM: IMeasure): void;
-    addMeasure(tempo: number, numerator: number, denominator: number): void;
+    addMeasure(tempo: number, numerator: number, denominator: number): void | IMeasure;
     deleteMeasure(measure: IMeasure): void;
     getMeasure(index: number): IMeasure | undefined;
     addMeasureObject(measure: IMeasure): boolean;

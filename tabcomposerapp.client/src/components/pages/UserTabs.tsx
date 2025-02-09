@@ -10,7 +10,7 @@ import { useTabulatureApi } from "../../hooks/useTabulatureApi";
 import { AppErrors } from "../../models/AppErrorsModel";
 
 export const UserTabs = () => {
-    const { getToken } = useAuth();
+    const { getToken, user } = useAuth();
 
     const [userTabsErrors, setUserTabsErrors] = useState<AppErrors>({});
 
@@ -97,19 +97,22 @@ export const UserTabs = () => {
     if (authorized === false) return (<SessionExpired></SessionExpired>);
 
     return (
-        <Container className="mt-3">
-            {tabInfo && Object.entries(tabInfo!).length === 0 && (
-                <div className="mb-3">
-                    <Row className="align-items-center">
-                        <Col className="text-center">
-                            Ohh there is nothing here. Let's Compose your first Tab!
-                        </Col>
-                    </Row>
-                </div>
+        <Container className="mt-5">
+            {user != null && user != undefined && (
+                <Row className="justify-content-center mb-5">
+                    <Col className="text-center">
+                        <h1 className="fw-bold">Welcome {user.username}</h1>
+                        
+                    </Col>
+                </Row>
+                
             )}
+           
+            
+            
             {tabInfo && Object.entries(tabInfo!).map(([key, tab]) => (
-                <Card key={key} className="mb-3">
-                    <Card.Header className="fw-bold mb-1">{tab.title}</Card.Header>
+                <Card key={key} className="mb-3 p-4 bg-light shadow-sm">
+                    <Card.Header className="fw-bold bg-light mb-1">{tab.title}</Card.Header>
                     <Card.Body>
                         <Row className="align-items-center w-100">
                             <Col className="w-50">
@@ -141,18 +144,18 @@ export const UserTabs = () => {
                                     vertical
                                 >
                                     <Button
-                                        variant="light"
-                                        className="w-100"
-                                        onClick={() => { handlePlay(Number(key)) }}
-                                    >
-                                        Play
-                                    </Button>
-                                    <Button
                                         variant="secondary"
                                         className="w-100"
                                         onClick={() => { handleEdit(Number(key)) }}
                                     >
                                         Edit
+                                    </Button>
+                                    <Button
+                                        variant="light"
+                                        className="w-100"
+                                        onClick={() => { handlePlay(Number(key)) }}
+                                    >
+                                        Play
                                     </Button>
                                     <Button
                                         variant="danger"
@@ -179,27 +182,49 @@ export const UserTabs = () => {
                             </Col>
                         </Row>
                     </Card.Body>
-                    <Card.Footer>
-                        <Card.Text className="text-muted">Created: {tab.created}</Card.Text>
+                    <Card.Footer className="bg-light">
+                        <Card.Text className="text-muted ">Created: {tab.created}</Card.Text>
                     </Card.Footer>
                 </Card>
             ))}
-            {tabInfo && (
-                <Row className="align-items-center mb-3">
-                    <Col className="text-center">
-                        <CreateTabulature />
-                    </Col>
-                </Row>
-            ) || (
-                <Row className="align-items-center">
-                    <Col className="text-center">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </Spinner>
-                    </Col>
-                </Row>
-            )}
-            
+            <Row className="justify-content-center mb-5">
+                <Col md={10} className="w-100">
+                    <Card className="p-4 bg-light shadow-sm">
+                        <Card.Body className="text-center">
+                            <h4 className="fw-semibold">
+                                {tabInfo && Object.entries(tabInfo!).length === 0 && (
+                                    "Ohh there is nothing here"
+                                ) || (
+                                        "So, you're looking for a new Tab?"
+                                )}
+                            </h4>
+                            <p className="fs-5 text-justify">
+                                {tabInfo && Object.entries(tabInfo!).length === 0 && (
+                                    "Let's Compose your first Tab!"
+                                ) || (
+                                        "Let's Compose new piece of music!"
+                                )}
+
+                            </p>
+                            {tabInfo && (
+                                <Row className="align-items-center mb-3">
+                                    <Col className="text-center">
+                                        <CreateTabulature />
+                                    </Col>
+                                </Row>
+                            ) || (
+                                    <Row className="align-items-center">
+                                        <Col className="text-center">
+                                            <Spinner animation="border" role="status">
+                                                <span className="visually-hidden">Loading...</span>
+                                            </Spinner>
+                                        </Col>
+                                    </Row>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row> 
         </Container>
 
     );

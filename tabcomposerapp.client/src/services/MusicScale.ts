@@ -13,7 +13,7 @@ export class MusicScale {
         return this.frequencies[notation][octave];
     }
 
-    private static frequencies: { [key in Notation]: { [octave: number]: number } } = {
+    private static readonly frequencies: { [key in Notation]: { [octave: number]: number } } = {
         [Notation.C]: {
             0: 16.35, 1: 32.70, 2: 65.41, 3: 130.81, 4: 261.63, 5: 523.25, 6: 1046.50, 7: 2093.00, 8: 4186.01
         },
@@ -52,6 +52,27 @@ export class MusicScale {
         }
     };
 
+    public static findClosestFrequency(frequency: number): number {
+        let closestFrequency = Infinity;
+        let minDifference = Infinity;
+
+        // Iterujemy przez wszystkie notacje i oktawy
+        for (const notation in this.frequencies) {
+            const octaves = this.frequencies[notation as unknown as Notation];
+            for (const octave in octaves) {
+                const freq = octaves[parseInt(octave)];
+                const diff = Math.abs(freq - frequency);
+
+                // Sprawdzamy, czy ta czêstotliwoœæ jest bli¿sza ni¿ poprzednia
+                if (diff < minDifference) {
+                    minDifference = diff;
+                    closestFrequency = freq;
+                }
+            }
+        }
+
+        return closestFrequency;
+    }
 
 
     public static getSoundFromFrequency(frequency: number): Sound | null {

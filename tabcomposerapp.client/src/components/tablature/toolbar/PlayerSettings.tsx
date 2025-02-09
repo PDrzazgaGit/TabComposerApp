@@ -8,7 +8,7 @@ import { PlayFill, PauseFill, StopFill } from 'react-bootstrap-icons';
 
 export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playing }) => {
 
-    const { tabulature, tabulaturePlayer } = useTabulature();
+    const { tabulature, tabulaturePlayer, setRecordTempo } = useTabulature();
 
     const [playerErrors, setPlayerErrors] = useState<AppErrors>({});
 
@@ -60,6 +60,7 @@ export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playin
         const value = parseFloat(event.target.value);
         tabulaturePlayer.changeTempo(value);
         setTempoFactor(value);
+        setRecordTempo(value);
     };
 
     const handleSelectMeasure = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -3,8 +3,9 @@ import { RecordFill, StopFill } from "react-bootstrap-icons";
 import { useTabulature } from "../../../hooks/useTabulature";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
+import * as Tone from "tone";
 
-export const RecorderSettings = observer(() => {
+export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ recording }) => {
 
     const {
         tabulatureRecorder,
@@ -12,7 +13,7 @@ export const RecorderSettings = observer(() => {
         globalNumerator,
         globalDenominator,
         globalNoteDuration,
-        globalNoteInterval
+        recordTempo
     } = useTabulature();
 
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -64,13 +65,14 @@ export const RecorderSettings = observer(() => {
     }, [showCharts, tabulatureRecorder.monite, tabulatureRecorder.recording, canvasAMDFRef, canvasFFTRef, tabulatureRecorder]);
 
     const start = async () => {
+        Tone.start();
         if (!await tabulatureRecorder.record(
             deviceId,
             globalTempo,
+            recordTempo,
             globalNumerator,
             globalDenominator,
-            globalNoteDuration,
-            globalNoteInterval
+            globalNoteDuration
 
         )) {
             setRenderModal(true)
@@ -84,6 +86,12 @@ export const RecorderSettings = observer(() => {
         }
     }, [tabulatureRecorder])
 
+    useEffect(() => {
+        if (!recording) {
+            tabulatureRecorder.stop();
+        }
+    }, [tabulatureRecorder, recording])
+    /*
     useEffect(() => {
         const intervalId = setInterval(async () => {
 
@@ -100,7 +108,7 @@ export const RecorderSettings = observer(() => {
         };
 
     }, [tabulatureRecorder]);
-
+    */
     const stop = () => {
 
         tabulatureRecorder.stop();

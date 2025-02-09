@@ -1,4 +1,4 @@
-import { ITabulature, NoteDuration } from "../../models";
+﻿import { IMeasure, ITabulature, NoteDuration } from "../../models";
 import { IMicrophoneService, MicrophoneService } from "./MicrophoneService";
 import { MicrophoneSelector } from "./MicrophoneSelector";
 import { AudioEffectService } from "./AudioEffectService";
@@ -8,11 +8,14 @@ import { AMDFAnalyzerService } from "./AMDFAnalyzerService";
 import { FFTAnalyzerService } from "./FFTAnalyzerService";
 import { MusicScale } from "../MusicScale";
 import { WindowService } from "./WindowService";
+import { BufferAnalyser, FrequencyBuffer } from "./BufferAnalyser";
+import { TablaturePosition, TablaturePositionFinder } from "../TablaturePositionFinder";
+
 export interface ITabulatureRecorder {
     readonly monite: boolean;
     readonly recording: boolean;
     readonly effectsOn: boolean;
-    record(deviceId: string, tempo: number, numerator: number, denominator: number, duration: NoteDuration, interval: NoteDuration): Promise<boolean>;
+    record(deviceId: string, tempo: number, tempoFactor: number, numerator: number, denominator: number, duration: NoteDuration): Promise<boolean>;
     moniteToggle(deviceId: string): Promise<boolean>;
     effectsToggle(): boolean;
     stop(): void;
@@ -36,6 +39,8 @@ export class TabulatureRecorder {
     public recording: boolean;
     public effectsOn: boolean;
     public monite: boolean;
+    private bufferAnalyser: BufferAnalyser;
+    private tablaturePositionFinder: TablaturePositionFinder;
 
     constructor(private tabulature: ITabulature, private minFrequency: number = 60, private maxFrequency: number = 1400) {
         this.microphoneSelector = new MicrophoneSelector();
@@ -48,10 +53,11 @@ export class TabulatureRecorder {
         this.effectService.connect(this.AMDFAnalyzer);
         this.effectService.connect(this.windowService.getInputNode());
         this.windowService.connect(this.FFTAnalizer);
-      //  this.effectService.connect(this.FFTAnalizer);
         this.effectsOn = true;
         this.recording = false;
         this.monite = false;
+        this.bufferAnalyser = new BufferAnalyser(this.AMDFAnalyzer, 0.025);
+        this.tablaturePositionFinder = new TablaturePositionFinder(tabulature.tuning, tabulature.frets);
         makeObservable(this, {
             recording: observable,
             effectsOn: observable,
@@ -59,14 +65,14 @@ export class TabulatureRecorder {
         })
     }
 
-    public async record(deviceId: string, tempo: number, numerator: number, denominator: number, duration: NoteDuration, interval: NoteDuration): Promise<boolean> {
-        //console.log(this.tabulature.getMeasure(0)?.getNotes(6))
+    public async record(deviceId: string, tempo: number, tempoFactor: number, numerator: number, denominator: number, duration: NoteDuration): Promise<boolean> {
         if (!await this.microphone.init(deviceId)) {
             return false;
         }
         runInAction(() => this.recording = true);
 
-        //...
+        this.bufferAnalyser.start(tempo, tempoFactor, numerator, denominator, duration);
+
         return true;
     }
 
@@ -141,9 +147,6 @@ export class TabulatureRecorder {
         const stopAMDF = this.AMDFAnalyzer.animatePlot(canvasAMDF);
         const stopFFT = this.FFTAnalizer.animatePlot(canvasFFT);
 
-
-
-        // Zwracamy funkcje zatrzymuj�ce
         return {
             stopAMDF,
             stopFFT
@@ -173,7 +176,6 @@ export class TabulatureRecorder {
                 const sound = MusicScale.getSoundFromFrequency(amdf);
 
                 console.log(`${sound?.getName()}${sound?.octave} | ${amdf}`)
-                //console.log(`AMDF: ${Math.round(amdf)}, HARMONICS:${this.FFTAnalizer.findHarmonics(amdf)}`)
             }
                 
         }
@@ -183,8 +185,53 @@ export class TabulatureRecorder {
         return this.microphoneSelector.getDevices();
     }
 
+    private putNotesOnTablature(data: Map<number, FrequencyBuffer[]>) {
+
+        console.log(data);
+
+        this.tablaturePositionFinder.init();
+
+        const tempo = this.bufferAnalyser.tempo;
+        const numerator = this.bufferAnalyser.numerator;
+        const denominator = this.bufferAnalyser.denominator;
+        const noteDuration = this.bufferAnalyser.noteDuration;
+
+        if (!tempo || !numerator || !denominator || !noteDuration)
+            return;
+
+        data.forEach((frequencyBuffer, measure) => {
+            frequencyBuffer.forEach(sample => {
+                this.tablaturePositionFinder.addSound(sample.frequency, sample.timestamp, measure);
+            })
+        })
+
+        const positions: TablaturePosition[] = this.tablaturePositionFinder.getBestPositions(); //to musi być wykonane na pełnym zestawie dźwięków.
+        const updateMap: Map<number, TablaturePosition[]> = new Map();
+        positions.forEach(position => {
+            const measureNumber = position.measureNumber;
+            if (!updateMap.get(measureNumber)) {
+                updateMap.set(measureNumber, [])
+            } 
+            updateMap.get(measureNumber)!.push(position);
+        })
+        updateMap.forEach((positions) => {
+            const measure = this.tabulature.addMeasure(tempo, numerator, denominator) as IMeasure;
+            console.log(measure.measureDurationMs)
+            positions.forEach((position) => {
+                console.log(measure.putNote(position.fret, position.stringNumber, Math.round(position.timeStamp * 1000 * 10)/10, noteDuration));
+            })
+        })
+        this.bufferAnalyser.clear();
+    }
+
     public stop(): void {
         this.microphone.stop();
         runInAction(() => this.recording = false);
+        const result: Map<number, FrequencyBuffer[]> | null = this.bufferAnalyser.stopAndGetResult();
+        if (result) {
+            this.putNotesOnTablature(result);
+        }
+        //console.log(result);
+        
     }
 }

@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useMemo } from 'react';
 import { TabulatureContext } from './TabulatureContext';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
 import { TabulaturePlayer } from '../services/audio/TabulaturePlayer';
@@ -21,8 +21,10 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
     const [shiftOnDelete, setShiftOnDelete] = useState(true);
     const [measuresPerRow, setMeasuresPerRow] = useState(3);
 
-    const tabulaturePlayer: TabulaturePlayer = new TabulaturePlayer(tabulature);
-    const tabulatureRecorder: TabulatureRecorder = new TabulatureRecorder(tabulature, 20, 1500);
+    const [recordTempo, setRecordTempo] = useState(1);
+
+    const tabulaturePlayer: TabulaturePlayer = useMemo(() => new TabulaturePlayer(tabulature),[tabulature])
+    const tabulatureRecorder: TabulatureRecorder = useMemo(() => new TabulatureRecorder(tabulature, 20, 1500), [tabulature])
 
     const addMeasure = (tempo: number, numerator: number, denominator: number) => {
         tabulature.addMeasure(tempo, numerator, denominator);     
@@ -57,6 +59,9 @@ export const TabulatureProvider: React.FC<TabulatureProviderProps> = ({ children
 
         measuresPerRow,
         setMeasuresPerRow,
+
+        recordTempo,
+        setRecordTempo,
 
         globalTempo,
         setGlobalTempo,

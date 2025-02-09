@@ -1,4 +1,4 @@
-﻿using TabComposerApp.Server.Models;
+﻿using TabComposerApp.Server.Models.DataTransferObjects;
 
 namespace TabComposerApp.Server.Services
 {

@@ -12,7 +12,6 @@ export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService
         this.binFrequency = this.sampleRate / (this.size * 2);
         this.startEdge = Math.ceil(this.minFrequency / this.binFrequency);
         this.endEdge = Math.floor(this.maxFrequency / this.binFrequency);
-        console.log(this.startEdge, this.endEdge)
     }
 
 

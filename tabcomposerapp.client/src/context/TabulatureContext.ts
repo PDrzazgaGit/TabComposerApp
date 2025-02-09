@@ -12,7 +12,14 @@ interface TabulatureContextType {
 
     tabulature: ITabulature;
 
+
+    recordTempo: number;
+
+    setRecordTempo: (recordTempo: number) => number;
+
     measuresPerRow: number;
+
+
     setMeasuresPerRow: (measures: number) => void;
 
     globalTempo: number;

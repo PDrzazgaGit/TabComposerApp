@@ -9,7 +9,7 @@ export class TabulaturePlayer {
 
     private tabulature: ITabulature;
 
-      private synth: Tone.PolySynth<Tone.FMSynth>;
+    private synth: Tone.PolySynth<Tone.FMSynth>;
 
     private transport: TransportClass;
     private readonly defaultSpeed: number;
@@ -31,47 +31,31 @@ export class TabulaturePlayer {
 
     private scheduleNotes(startMeasure?: IMeasure): void {
         let currentTime = 1;
-        let stopTime = currentTime;
+        //let stopTime = currentTime;
         let play: boolean = false;
         if (startMeasure === undefined) {
             play = true;
         }
         this.tabulature.forEach((measure: IMeasure) => {
+            
             if (!play && startMeasure === measure) {
                 play = true;
+                
             }
             if (play) {
                 measure.forEach((notes: (INote | IPause)[]) => {
                     notes.forEach((note) => {
+                        
                         const duration = note.getDurationMs() / 1000;
                         const timeStamp = note.getTimeStampMs() / 1000 + currentTime;
                         if (note.kind === NoteKind.Pause) {
                             return;
                         }
-                        
-                        stopTime += duration;
+                        console.log(timeStamp)
+                        //stopTime += duration;
                         this.transport.schedule((time) => {
                             runInAction(() => note.playing = true);
                             this.transport.bpm.value = this.currentSpeed;
-
-                            /*
-
-                            runInAction(() => {
-                                if (index === 0 && (note as INote).slide === true) {
-                                    // TO DO
-                                } else if (index === notes.length - 1) {
-                                    // TO DO
-                                } else {
-                                    if ((notes[index + 1] as INote).slide === true) {
-                                        this.synth.portamento = note.getDurationMs() / 1000;
-                                    } else {
-                                        this.synth.portamento = 0;
-                                    }
-                                }
-                            })
-
-                            */
-                            
                             this.synth.triggerAttackRelease(
                                 (note as INote).frequency,
                                 duration,
@@ -92,7 +76,7 @@ export class TabulaturePlayer {
         }); 
         this.transport.scheduleOnce(() => {
             this.stop();
-        }, stopTime)
+        }, currentTime)
     }
 
     public async play(startMeasure?: IMeasure): Promise<void> {

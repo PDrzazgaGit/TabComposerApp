@@ -43,7 +43,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMo
                         <Tab
                             eventKey="recorder" title="Tab Recorder"
                         >
-                            <RecorderSettings/>
+                            <RecorderSettings recording={tabKey === "recorder"} />
                         </Tab>
                     )} 
                 </Tabs>
