@@ -18,7 +18,6 @@ export interface ITabulature {
     deleteMeasure(measure: IMeasure): void;
     getMeasure(index: number): IMeasure | undefined;
     addMeasureObject(measure: IMeasure): boolean;
-    clone(): ITabulature;
 }
 
 export class Tabulature implements ITabulature {
@@ -30,12 +29,6 @@ export class Tabulature implements ITabulature {
 
     public getLength(): number {
         return this.measures.length;
-    }
-
-    public clone(): ITabulature {
-        const clone = new Tabulature(this.tuning, this.frets, this.title);
-        clone.measures = this.measures;
-        return clone;
     }
 
     public count(): number {

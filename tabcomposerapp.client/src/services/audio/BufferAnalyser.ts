@@ -1,7 +1,7 @@
 ﻿import * as Tone from "tone";
 import { TransportClass } from "tone/build/esm/core/clock/Transport";
 import { NoteDuration } from "../../models";
-import { AnalyzerService } from "./AnalyzerService";
+import { IAnalyzerService } from "./AnalyzerService";
 import { MusicScale } from "../MusicScale";
 
 export type FrequencyBuffer = { timestamp: number, frequency: number };
@@ -21,7 +21,7 @@ export class BufferAnalyser {
 
     private synth: Tone.MembraneSynth;
 
-    constructor(private analyser: AnalyzerService, private samplesOfFrequencies: number = 0.025) {
+    constructor(private analyser: IAnalyzerService, private samplesOfFrequencies: number = 0.025) {
         this.values = null;
         this.recordingNoteDuration = null;
         this.recordingTempo = null;

@@ -1,16 +1,15 @@
 import * as Tone from 'tone';
 import * as PitchFinder from 'pitchfinder'
-import { AnalyzerService } from './AnalyzerService';
+import { IAnalyzerService } from './AnalyzerService';
 import { MusicScale } from '../MusicScale';
-import { amdf } from './methods/amdf';
 //import { YIN } from './methods/YIN';
 
-export class AMDFAnalyzerService extends Tone.Analyser implements AnalyzerService {
+export class AMDFAnalyzerService extends Tone.Analyser implements IAnalyzerService {
 
     private detectPitch: (signal: Float32Array) => number | null;
    // private yin: YIN;
 
-    constructor(amdfSize = 1024, private minFrequency: number= 60, private maxFrequency: number = 1400) {
+    constructor(amdfSize = 1024, public minFrequency: number= 60, public maxFrequency: number = 1400) {
         super('waveform', amdfSize);
 
         //this.yin = new YIN(Tone.getContext().sampleRate, amdfSize, 0);

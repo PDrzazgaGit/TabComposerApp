@@ -3,13 +3,13 @@ import { IMicrophoneService, MicrophoneService } from "./MicrophoneService";
 import { MicrophoneSelector } from "./MicrophoneSelector";
 import { AudioEffectService } from "./AudioEffectService";
 import { makeObservable, observable, runInAction } from "mobx";
-import { AnalyzerService } from "./AnalyzerService";
+import { IAnalyzerService } from "./AnalyzerService";
 import { AMDFAnalyzerService } from "./AMDFAnalyzerService";
 import { FFTAnalyzerService } from "./FFTAnalyzerService";
 import { MusicScale } from "../MusicScale";
 import { WindowService } from "./WindowService";
 import { BufferAnalyser, FrequencyBuffer } from "./BufferAnalyser";
-import { TablaturePosition, TablaturePositionFinder } from "../TablaturePositionFinder";
+import { TablaturePosition, TablaturePositionFinder } from "./TablaturePositionFinder";
 
 export interface ITabulatureRecorder {
     readonly monite: boolean;
@@ -32,8 +32,8 @@ export class TabulatureRecorder {
 
     private microphoneSelector: MicrophoneSelector;
     private microphone: IMicrophoneService;
-    private AMDFAnalyzer: AnalyzerService;
-    private FFTAnalizer: AnalyzerService;
+    private AMDFAnalyzer: IAnalyzerService;
+    private FFTAnalizer: IAnalyzerService;
     private effectService: AudioEffectService;
     private windowService: WindowService;
     public recording: boolean;

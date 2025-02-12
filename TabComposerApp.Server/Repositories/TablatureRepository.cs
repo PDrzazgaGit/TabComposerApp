@@ -40,7 +40,8 @@ namespace TabComposerApp.Server.Repositories
         }
 
         public async Task UpdateAsync(Tablature tabulature)
-        {
+        {   
+            tabulature.LastUpdatedAt = DateTime.Now;
             _context.Tablatures.Update(tabulature);
             await _context.SaveChangesAsync();
         }

@@ -27,15 +27,28 @@ export class TablaturePositionFinder {
         return Math.round(12 * Math.log2(frequency / stringFrequency));
     }
 
-    public addSound(frequency: number,  timeStamp: number, measureNumber: number): boolean {
+    public addSound(
+        frequency: number,
+        timeStamp: number,
+        measureNumber: number
+    ): boolean {
         this.layers.set(this.currentLevel, []);
         const currentLayer = this.layers.get(this.currentLevel);
         this.tuning.forEach((string: number, openSound: Sound) => {
             const fret = this.findFret(frequency, openSound.frequency);
             if (fret >= 0 && fret <= this.maxFrets) {
-                currentLayer?.push(new TablaturePosition(fret, Number(string), timeStamp, measureNumber))
+                currentLayer?.push(
+                    new TablaturePosition(
+                        fret,
+                        Number(string),
+                        timeStamp,
+                        measureNumber
+                    )
+                )
             }
         })
+        if (currentLayer?.length === 0)
+            return false;
         this.currentLevel++;
         return true;
     }

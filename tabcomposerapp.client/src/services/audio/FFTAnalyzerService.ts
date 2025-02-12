@@ -1,12 +1,12 @@
 import * as Tone from 'tone';
-import { AnalyzerService } from './AnalyzerService';
-export class FFTAnalyzerService extends Tone.Analyser implements AnalyzerService {
+import { IAnalyzerService } from './AnalyzerService';
+export class FFTAnalyzerService extends Tone.Analyser implements IAnalyzerService {
 
     private binFrequency: number;
     private startEdge: number;
     private endEdge: number;
     private sampleRate: number;
-    constructor(fftSize = 1024, private minFrequency: number = 60, private maxFrequency: number = 1400) {
+    constructor(fftSize = 1024, public minFrequency: number = 60, public maxFrequency: number = 1400) {
         super('fft', fftSize);
         this.sampleRate = Tone.getContext().sampleRate;
         this.binFrequency = this.sampleRate / (this.size * 2);

@@ -150,7 +150,7 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
                         onClick={() => start()}
                         variant="light"
                         className="border w-25 "
-                        disabled={ tabulatureRecorder.monite || tabulatureRecorder.recording }
+                        disabled={ tabulatureRecorder.monite || tabulatureRecorder.recording || devices.length === 0}
                     >
                         <RecordFill
                             color="red"
