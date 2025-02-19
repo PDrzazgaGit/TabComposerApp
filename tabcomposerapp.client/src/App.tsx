@@ -1,32 +1,41 @@
 import { Route, Routes } from "react-router-dom";
-import { MyNavbar } from './components/MyNavbar';
-import { Home, Editor } from './components/pages';
-import { AuthProvider } from "./context/AuthProvider";
-import { ErrorProvider } from "./context/ErrorProvider";
-import { AuthRoute } from "./components/AuthRoute";
-import { UserTabs } from "./components/pages/UserTabs";
-import { Login } from "./components/pages/Login";
-import { TabulatureProvider } from "./context/TabulatureProvider";
-import { Player } from "./components/pages/Player";
+import { Editor, Home, Login, MyNavbar, Player, TryEditor, UserTabs } from './components';
+import { AuthProvider, TabulatureApiProvider } from "./context";
 
 function App() {
 
     return (
-        <ErrorProvider>
-            <AuthProvider>
+        <AuthProvider>
+            <TabulatureApiProvider>
                 <MyNavbar />
                 <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/player" element={<Player />} />
-                    <Route element={<AuthRoute />}>
-                        <Route path="/mytabs" element={<UserTabs />}></Route>
-                        <Route path="/editor" element={<Editor />} />
-                    </Route>
+                    <Route
+                        path="/"
+                        element={<Home />}
+                    />
+                    <Route
+                        path="/login"
+                        element={<Login />}
+                    />
+                    <Route
+                        path="/player"
+                        element={<Player />}
+                    />
+                    <Route
+                        path="/mytabs"
+                        element={<UserTabs />}
+                    />
+                    <Route
+                        path="/editor"
+                        element={<Editor />}
+                    />
+                    <Route
+                        path="/tryeditor"
+                        element={<TryEditor />}
+                    />
                 </Routes>
-            </AuthProvider>
-        </ErrorProvider>
-       
+            </TabulatureApiProvider>
+        </AuthProvider>
     );
 
 }

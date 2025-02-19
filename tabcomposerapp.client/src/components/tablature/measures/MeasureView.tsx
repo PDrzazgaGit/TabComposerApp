@@ -1,8 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { StringEditorView } from "../strings/StringEditorView";
-import { StringView } from "../strings/StringView";
+import { observer } from "mobx-react-lite";
+import { useMeasure } from "../../../hooks";
+import { StringEditorView, StringView } from "../strings";
 
 
 interface MeasureViewProps {
@@ -10,14 +8,11 @@ interface MeasureViewProps {
     measurePerRow: number
 }
 
-export const MeasureView: React.FC<MeasureViewProps> = ({ isEditor = false, measurePerRow }) => {
+export const MeasureView: React.FC<MeasureViewProps> = observer(({ isEditor = false, measurePerRow }) => {
 
     const { measure, measureId } = useMeasure();
-    const { tabulature } = useTabulature(); // Odkomentowana linia
 
-    const [stringComponents, setStringComponents] = useState<JSX.Element[]>([]);
-
-    const generateStringComponents = useCallback(() => {
+    const generateStringComponents = () => {
         const components: JSX.Element[] = [];
         if (measure) {
             measure.forEach((_, stringId: number) => {
@@ -31,12 +26,8 @@ export const MeasureView: React.FC<MeasureViewProps> = ({ isEditor = false, meas
             });
         }
         return components;
-    }, [measure, isEditor]);
+    }
 
-    useEffect(() => {
-        setStringComponents(generateStringComponents());
-    }, [measure, isEditor, tabulature, generateStringComponents]);
-    
     return (
         <>
             <div
@@ -48,9 +39,9 @@ export const MeasureView: React.FC<MeasureViewProps> = ({ isEditor = false, meas
                         borderRight: "2px solid black"
                     } 
                 }>                        
-                {stringComponents}  
+                {generateStringComponents()}
             </div>
         </>
        
     );
-}
+})

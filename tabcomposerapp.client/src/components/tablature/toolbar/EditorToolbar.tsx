@@ -1,19 +1,14 @@
 import { ReactNode, useState } from "react";
-import { StickyPanel } from "./StickyPanel";
-import { Card, Tabs, Tab, Button, Dropdown, FormCheck, FormControl, InputGroup } from "react-bootstrap";
-import { NoteDuration } from "../../../models";
-import { noteRepresentationMap } from "../../../utils/noteUtils";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { TabulaturePlayer } from "../../../services/audio/TabulaturePlayer";
-import { GlobalSettings } from "./GlobalSettings";
-import { PlayerSettings } from "./PlayerSettings";
+import { Card, Tab, Tabs } from "react-bootstrap";
+import { GlobalSettings, PlayerSettings, RecorderSettings, StickyPanel } from "./";
 
 interface EditorToolbarProps {
     children: ReactNode;
     playerMode?: boolean;
+    previewMode?: boolean;
 }
 
-export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMode = false }) => {
+export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMode = false, previewMode = false }) => {
 
     const [tabKey, setTabKey] = useState<string | null>(null);
 
@@ -33,18 +28,19 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ children, playerMo
                         <Tab
                             eventKey="toolbar" title="Global Toolbar"
                         >
-                            <GlobalSettings/>
+                            <GlobalSettings previevMode={ previewMode } />
                         </Tab>
                     )} 
                     <Tab
                         eventKey="player" title="Tab Player"
                     >
-                        <PlayerSettings/>
+                        <PlayerSettings playing={tabKey === "player"} />
                     </Tab>
                     {!playerMode && (
                         <Tab
                             eventKey="recorder" title="Tab Recorder"
                         >
+                            <RecorderSettings recording={tabKey === "recorder"} />
                         </Tab>
                     )} 
                 </Tabs>

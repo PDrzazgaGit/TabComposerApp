@@ -1,36 +1,52 @@
-import { forwardRef, useState, useEffect } from "react";
+import { observer } from "mobx-react-lite";
+import { forwardRef, useRef } from "react";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { INote, IPause, NoteKind } from "../../../models";
-import { pauseRepresentationMap } from "../../../utils/noteUtils";
-import { v4 as uuidv4 } from 'uuid';
-import "../../../styles/NoteView.css"
+import "../../../styles/NoteView.css";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/";
 
 interface NoteViewProps {
     note: INote | IPause;
-    onGenerateId?: (id: string) => void;
     onClick?: () => void; 
+    isDragging?: boolean | undefined;
+    showTip?: boolean;
 }
 
-export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGenerateId, onClick }, ref) => {
+export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ note, onClick, isDragging, showTip = false }, ref) => {
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
 
-    const [isHovered, setIsHovered] = useState(false);
+    const hoverDiv = useRef<HTMLButtonElement>(null);
 
-    const [noteId] = useState<string>(`note-${uuidv4()}`);
+    const renderTooltip = (props: React.HTMLAttributes<HTMLDivElement>) => {
+        if (!showTip) return (<></>);
+        return (
+            <Tooltip {...props}>
+                {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}
+            </Tooltip>
+        )
+    }
 
-    useEffect(() => {
-        if (onGenerateId) {
-            onGenerateId(noteId);
+    const handleOnMouseEnter = () => {
+        if (hoverDiv.current && !isDragging) {
+            hoverDiv.current.style.color = '#007bff';
         }
-    }, [noteId, onGenerateId]);
-    
+    }
+
+    const handleOnMouseLeave = () => {
+        if (hoverDiv.current && !isDragging) {
+            hoverDiv.current.style.color = "black";
+        }
+    }
+
     return (
         <div
+            draggable='false'
             ref={ref}
-            onClick={onClick} 
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onClick={onClick}
+            onMouseEnter={() => handleOnMouseEnter()}
+            onMouseLeave={() => handleOnMouseLeave()}
             style={{
                 display: 'flex',
                 height: '100%',
@@ -40,20 +56,34 @@ export const NoteView = forwardRef<HTMLDivElement, NoteViewProps>(({ note, onGen
                 alignItems: "center"
             }}
         >
-        
-            <div
-                className="note-square"
+
+            <OverlayTrigger
+                placement="bottom"
+                overlay={renderTooltip}
+                flip
             >
-                <button
-                    id={noteId}
-                    className="note-input-button"
-                    style={{
-                        color: isHovered ? '#007bff' : 'black',
-                    }}
+                <div
+                    className="note-square"
+                    ref={ref}
                 >
-                    {isNote(note) ? (note.fret.toString() === 'NaN' ? '' : note.fret.toString()) : pauseRepresentationMap[note.noteDuration]}
-                </button>
-            </div>
+                    <button
+                        draggable='false'
+                        className="note-input-button"
+                        ref={hoverDiv}
+                        style={{
+                            color: note.playing && !isDragging ? '#007bff' : (isDragging ? "green" : 'black'),
+                            cursor: isDragging === undefined ? "auto" : isDragging ? "grabbing" : "grab"
+                        }}
+                    >
+                        {isNote(note) ?
+                            (note.fret.toString() === 'NaN' ? ''
+                                : note.fret.toString())
+                            : pauseRepresentationMap[note.noteDuration]
+                        }
+                    </button>
+                </div>
+            </OverlayTrigger>    
+            
         </div>
     );
-});
+}))

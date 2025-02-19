@@ -1,4 +1,5 @@
-import { Notation } from './NotationModel'
+import { makeObservable, observable, action } from 'mobx';
+import { Notation } from './'
 
 export class Sound {
     public constructor(
@@ -6,7 +7,19 @@ export class Sound {
         public notation: Notation,
         public octave: number,
         protected durationMs: number = 500
-    ) { }
+       
+    ) {
+
+        makeObservable(this, {
+            frequency: observable, 
+            notation: observable, 
+            octave: observable,  
+         
+            getDurationMs: action, 
+
+            setDurationMs: action, 
+        });
+    }
 
     public getName(): string {
         return Notation[this.notation];

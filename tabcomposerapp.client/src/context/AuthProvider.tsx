@@ -1,16 +1,17 @@
-import { useState, ReactNode, useEffect } from 'react';
-//import { signUpApi, signInApi } from '../api/AuthService';
-//import { getUserProfileApi } from '../api/UserService';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { IClientAuth, UserManagerApi } from '../api';
+import { AppErrors, IUser } from '../models';
 import { AuthContext } from './AuthContext';
-import { IUser } from '../models/UserModel';
-import { UserManagerApi } from '../api/UserManagerApi';
-import { AppErrors } from '../models/AppErrorsModel';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const [errors, setErrors] = useState<AppErrors>({});
 
-    const [user, setUser] = useState<IUser | null>(null);
+    const [user, setUser] = useState<IUser | undefined | null>();
+
+    const userManagerApi = useMemo(() => new UserManagerApi(), []);
+
+    const clientAuth: IClientAuth = useMemo(() => userManagerApi.getAuth(), [userManagerApi]);
 
     const signIn = async (username: string, password: string, remember: boolean = false): Promise<boolean> => { 
         clearErrors();
@@ -26,12 +27,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return false;
         }
         
-        const success = await UserManagerApi.signIn(username, password, remember);
+        const success = await userManagerApi.signIn(username, password, remember);
         if (success) {
-            setUser(UserManagerApi.getUser());
+            setUser(userManagerApi.getUser());
             return true;
         } else {
-            setErrors(UserManagerApi.getErrors() ?? {});
+            setErrors(userManagerApi.getErrors() ?? {});
             return false;
         }
     };
@@ -52,24 +53,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setErrors(preErrors);
             return false;
         }
-        const success = await UserManagerApi.signUp(email, username, password);
+        const success = await userManagerApi.signUp(email, username, password);
         if (success) {
             return true;
         } else {
-            setErrors(UserManagerApi.getErrors() ?? {});
+            setErrors(userManagerApi.getErrors() ?? {});
             return false;
         }
         
     };
 
-    const signOut = () => {
-        UserManagerApi.signOut();
+    const signOut = useCallback(() => {
+        userManagerApi.signOut();
         setUser(null);
-        console.log("debug user is null reference changed")
-    };
+    }, [userManagerApi]);
 
-    const getToken = async (): Promise<string | null> => {
-        const token = await UserManagerApi.getUserToken();
+    const getToken = (): string | null => {
+        return userManagerApi.getUserToken();
+    }
+
+    const getTokenWithAuth = async (): Promise<string | null> => {
+        const token = await userManagerApi.getUserTokenWithAuth();
         if (!token) {
             signOut();
         }
@@ -77,7 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     const authorize = async (): Promise<boolean> => {
-        const success = await UserManagerApi.authorize();
+        const success = await userManagerApi.authorize();
         if (!success) {
             signOut();
         }
@@ -89,27 +93,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     useEffect(() => {
-       
-        const fetchUser = async () => {
-            const token = await getToken();
-            if (token) {
-                setUser(await UserManagerApi.downloadUser());
-            }
-        }
+        const user = userManagerApi.getUser();
         if (!user) {
-            fetchUser();
+            signOut();
+        } else {
+            setUser(user);
         }
-    })
+    }, [signOut, userManagerApi])
 
     const value = {
+        clientAuth,
         user,
         errors,
         clearErrors,
-        getToken,
+        getTokenWithAuth,
         signUp,
         signIn,
         signOut,
-        authorize
+        authorize,
+        getToken
     }
 
     return (

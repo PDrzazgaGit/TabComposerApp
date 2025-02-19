@@ -1,6 +1,6 @@
-import { TuningFactory } from "../services";
-import { MeasureService, SerializedMeasure, SerializedNote } from "../services/MeasureService";
-import { ITuning, IMeasure, SerializedTuning } from "./";
+import { makeAutoObservable } from "mobx";
+import { MeasureService, } from "../services";
+import { IMeasure, ITuning } from "./";
 
 export interface ITabulature {
     title: string;
@@ -13,26 +13,21 @@ export interface ITabulature {
     map<U>(callback: (measure: IMeasure, index: number, array: IMeasure[]) => U): U[];
     find(callback: (measure: IMeasure) => boolean): IMeasure | undefined;
     updateTablature(oldM: IMeasure | number, newM: IMeasure): void;
-    addMeasure(tempo: number, numerator: number, denominator: number): void;
+    addMeasure(tempo: number, numerator: number, denominator: number): void | IMeasure;
     deleteMeasure(measure: IMeasure): void;
     getMeasure(index: number): IMeasure | undefined;
     addMeasureObject(measure: IMeasure): boolean;
-    clone(): ITabulature;
 }
 
 export class Tabulature implements ITabulature {
 
     private measures: IMeasure[] = [];
-    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public description: string = "" ) { }
+    public constructor(public readonly tuning: ITuning, public frets: number = 24, public title: string = "Untilted track", public author: string = "unknown", public description: string = "") {
+        makeAutoObservable(this);
+    }
 
     public getLength(): number {
         return this.measures.length;
-    }
-
-    public clone(): ITabulature {
-        const clone = new Tabulature(this.tuning, this.frets, this.title);
-        clone.measures = this.measures;
-        return clone;
     }
 
     public count(): number {
@@ -69,7 +64,6 @@ export class Tabulature implements ITabulature {
             throw Error("Cannot delete inexisting measure");
         }
         this.measures.splice(measureIndex, 1);
-        console.log(this.measures);
     }
 
     public getMeasure(index: number): IMeasure | undefined {

@@ -1,42 +1,24 @@
-import { ITabulature, ITuning, Tabulature, IMeasure, Sound, Articulation, INote, IPause, NoteKind, Notation, NoteDuration } from "../models";
-import { MusicScale } from "./MusicScale";
-import { TuningFactory } from "./TuningFactory";
-
-export interface SerializedNote {
-    fret: number,
-    timeStamp: number;
-    noteDuration: NoteDuration,
-    articulation: Articulation
-}
-export interface SerializedMeasure {
-    tempo: number;
-    numerator: number;
-    denominator: number;
-    notes: Record<string, SerializedNote[]>;  // Mapowanie id struny na tablicê nut
-}
-
-export interface SerializedTabulature {
-    title: string;
-    author: string;
-    frets: number;         // Zak³adam, ¿e frets to liczba
-    tuning: SerializedTuning;  // Serializowane dane o strojeniu
-    measures: SerializedMeasure[];  // Tablica serializowanych miar
-    description: string;
-}
-
-export interface SerializedTuning {
-    tuning: Record<number, { notation: Notation, octave: number }>
-}
+import { Articulation, IMeasure, INote, IPause, ITabulature, ITuning, IUser, NoteKind, SerializedMeasure, SerializedNote, SerializedTabulature, SerializedTuning, Sound, Tabulature } from "../models";
+import { MusicScale, TuningFactory } from "./";
 
 export class SerializationService {
+
+    public static serializeUser(user: IUser): string {
+        return JSON.stringify(user);
+    }
+
+    public static deserializeUser(data: string): IUser {
+        const user: IUser = JSON.parse(data);
+        return user;
+    }
 
     public static serializeTabulature(tabulature: ITabulature): string {
         const serializedTabulature: SerializedTabulature = {
             title: tabulature.title,
             author: tabulature.author,
             frets: tabulature.frets,
-            tuning: this.serializeTuning(tabulature.tuning), // wywo³anie metody getData() na tuning
-            measures: tabulature.map(measure => this.serializeMeasure(measure)), // serializacja ka¿dej miary
+            tuning: this.serializeTuning(tabulature.tuning), 
+            measures: tabulature.map(measure => this.serializeMeasure(measure)), 
             description: tabulature.description ? tabulature.description : ""
         }
         return JSON.stringify(serializedTabulature);
@@ -53,7 +35,6 @@ export class SerializationService {
         const description = serializedTabulature.description;
 
         const tabulature = new Tabulature(tuning, frets, title, author, description);
-
         serializedTabulature.measures.forEach((serializedMeasure: SerializedMeasure) => {
             const tempo = serializedMeasure.tempo;
             const numerator = serializedMeasure.numerator;
@@ -62,16 +43,15 @@ export class SerializationService {
             tuning.forEach((stringId: number) => {
                 const notes: SerializedNote[] = serializedMeasure.notes[stringId];
                 notes.forEach(serializedNote => {
-                    if (serializedNote.fret != -1) {
-                        //measure.pushNote(serializedNote.fret, Number(stringId), serializedNote.noteDuration)?.setArticulation(serializedNote.articulation);
+                    if (serializedNote.fret != -1) {                      
                         measure.putNote(serializedNote.fret, Number(stringId), serializedNote.timeStamp , serializedNote.noteDuration)?.setArticulation(serializedNote.articulation);
                     } else {
-                        //measure.pushPause(Number(stringId), serializedNote.noteDuration);
                         measure.putPause(Number(stringId), serializedNote.timeStamp,serializedNote.noteDuration);
                     }
                 })
             })
         })
+
         return tabulature;
     }
 
@@ -98,11 +78,11 @@ export class SerializationService {
             tempo: measure.tempo,
             numerator: measure.numerator,
             denominator: measure.denominator,
-            notes: {} // Obiekt, który przechowa nutki dla ka¿dego stringa
+            notes: {} 
         };
 
         measure.forEach((notes, stringId) => {
-            serializedMeasure.notes[stringId] = notes.map(note => this.serializeNote(note)); // Serializacja ka¿dego elementu
+            serializedMeasure.notes[stringId] = notes.map(note => this.serializeNote(note)); 
         });
         return serializedMeasure;
     }
@@ -116,7 +96,7 @@ export class SerializationService {
         };
 
         Object.keys(dataToSerialize).forEach(key => {
-            const sound = dataToSerialize[parseInt(key)];  // Klucz jest typu string, wiêc musimy go sparsowaæ do number
+            const sound = dataToSerialize[parseInt(key)];  
             serializedData.tuning[parseInt(key)] = {
                 notation: sound.notation,
                 octave: sound.octave

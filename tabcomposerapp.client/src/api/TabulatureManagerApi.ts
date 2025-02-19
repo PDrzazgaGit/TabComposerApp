@@ -1,19 +1,37 @@
-import axios from "axios";
-import { ITabulature } from "../models";
-import { TabulatureDataModel } from "../models/TabulatureDataModel";
-import { SerializationService } from "../services/SerializationService";
+import { computed, makeObservable, observable, runInAction } from "mobx";
+import { ITabulature, TabulatureDataModel } from "../models"
+import { SerializationService } from "../services";
+import { ClientApi, IClientApi } from "./";
+import { config } from "./../config";
+export interface ITabulatureUpToDate {
+    get upToDate(): boolean
+}
+export class TabulatureManagerApi implements ITabulatureUpToDate {
 
-export class TabulatureManagerApi {
+    public tabulatureId: number | undefined;
 
-    static tabulatureId: number | undefined;
+    public tabulature: ITabulature | null;
 
-    static tabulature: ITabulature | null;
+    public previousUpdateTablature: string | null;
 
-    public static async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
+    private clientApi: IClientApi;
+
+    public constructor() {
+        this.clientApi = ClientApi.getInstance();
+        this.tabulature = null;
+        this.previousUpdateTablature = null;
+        makeObservable(this, {
+            tabulature: observable,
+            previousUpdateTablature: observable,
+            upToDate: computed
+        });
+    }
+
+    public async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
         try {
-            const response = await axios.get('https://localhost:44366/api/Tablature/GetUserTablaturesInfo', {
+            const response = await this.clientApi.use().get(config.tablature.userListEndpoint, {
                 headers: {
-                    Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
+                    Authorization: `Bearer ${token}` 
                 }
             });
             return response.data;
@@ -23,11 +41,12 @@ export class TabulatureManagerApi {
         
     }
 
-    public static async downloadTabulature(id: number): Promise<ITabulature | null> {
+    public async downloadTabulature(id: number): Promise<ITabulature | null> {
         try {
-            const response = await axios.get(`https://localhost:44366/api/Tablature/GetTablature/${id}`);
+            const response = await this.clientApi.use().get(`${config.tablature.getEndpoint}/${id}`);
             const tabulatureData: string = response.data.tablature as string; 
-            this.tabulature = SerializationService.deserializeTabulature(tabulatureData);
+            runInAction(() => this.tabulature = SerializationService.deserializeTabulature(tabulatureData))
+            runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!))
             this.tabulatureId = id;
             return this.tabulature;
         } catch {
@@ -35,11 +54,11 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static async addTabulature(token: string, tabulature: ITabulature): Promise<boolean> {
+    public async addTabulature(token: string, tabulature: ITabulature): Promise<boolean> {
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(tabulature);
-            const response = await axios.post(
-                'https://localhost:44366/api/Tablature/AddTablature',
+            const response = await this.clientApi.use().post(
+                config.tablature.addEndpoint,
                 tabulatureData,
                 {
                     
@@ -54,23 +73,25 @@ export class TabulatureManagerApi {
                 return false;
             }
             this.tabulatureId = id;
-            this.tabulature = tabulature
+            runInAction(() => this.tabulature = tabulature);
+            runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!));
             return true;
         } catch {
             return false
         }
     }
 
-    public static async deleteTabulature(token: string, id: number): Promise<boolean> {
+    public async deleteTabulature(token: string, id: number): Promise<boolean> {
         try {
-            await axios.post(`https://localhost:44366/api/Tablature/DeleteTablature/${id}`, null ,{
+            await this.clientApi.use().post(`${config.tablature.deleteEndpoint}/${id}`, null ,{
                 headers: {
                     Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
             });
             if (id === this.tabulatureId) {
                 this.tabulatureId = undefined;
-                this.tabulature = null;
+                runInAction(() => this.tabulature = null);
+                runInAction(() => this.previousUpdateTablature = null);
             }
             return true;
         } catch {
@@ -78,14 +99,14 @@ export class TabulatureManagerApi {
         }
     }
 
-    public static async updateTabulature(token: string): Promise<boolean> {
+    public async updateTabulature(token: string): Promise<boolean> {
         if (this.tabulatureId === undefined || this.tabulature === null) {
             return false;
         }
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(this.tabulature);
-            await axios.post(
-                `https://localhost:44366/api/Tablature/UpdateTablature/${this.tabulatureId}`,
+            await this.clientApi.use().post(
+                `${config.tablature.updateEndpoint}/${this.tabulatureId}`,
                 tabulatureData,  
                 {
                     headers: {
@@ -94,20 +115,23 @@ export class TabulatureManagerApi {
                     },
                 }
             );
+            runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!));
             return true;
         } catch {
             return false
         }
     }
 
-    public static cloneTabulature(): ITabulature | null {
-        const clone = this.tabulature?.clone() || null;
-        this.tabulature = clone;
-        return clone;
+    public getTabulature(): ITabulature | null {
+        return this.tabulature;
     }
 
-    public static getTabualture(): ITabulature | null {
-        return this.tabulature;
+    public get upToDate(): boolean {
+        if (!this.tabulature || !this.previousUpdateTablature) {
+            return false;
+        }
+        const currentTabulatureData = SerializationService.serializeTabulature(this.tabulature);
+        return this.previousUpdateTablature == currentTabulatureData;
     }
     
 }

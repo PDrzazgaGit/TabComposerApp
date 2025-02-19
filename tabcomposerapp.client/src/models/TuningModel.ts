@@ -1,4 +1,4 @@
-import { Notation, Sound } from "./";
+import { Sound } from "./";
 import { Dictionary } from "./../structures";
 
 export interface ITuning {

@@ -1,51 +1,40 @@
 import { useState } from "react";
-import { Popover, InputGroup, FormControl, Dropdown, FormCheck, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
-import { useError } from "../../../hooks/useError";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { INote, IPause, NoteKind, NoteDuration, Articulation } from "../../../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
-import { NoteView } from "./NoteView";
+import { Button, ButtonGroup, Dropdown, FormCheck, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { useMeasure, useTabulature } from "../../../hooks";
+import { AppErrors, Articulation, INote, IPause, NoteDuration, NoteKind } from "../../../models";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils";
+import { NoteView } from "./";
 
-//import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
+    stringWidthPx?: number;
+    onNoteDragChange?: (moved: number) => void;
+    onNoteChange?: (moved: number) => void;
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange, onNoteChange , stringWidthPx }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
-     
-    const [noteId, setNoteId] = useState<string | null>(null);
-
-    const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(note.noteDuration);
 
     const [slide, setSlide] = useState(false);
+
+    const [fret, setFret] = useState(isNote(note) ? note.fret : -1);
+
     const [overflow, setOverflow] = useState(true);
 
-    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, getMaxFrets, changeArticulation, setNodeSlide, setNodeOverflow } = useMeasure();
+    const { changeFret, changeNoteDuration, deleteNote, moveNoteRight, moveNoteLeft, changeArticulation, setNodeSlide, setNodeOverflow, frets } = useMeasure();
 
-    const { shiftOnDelete } = useTabulature();
+    const { shiftOnDelete, globalNoteInterval } = useTabulature();
 
-    const { noteEditorErrors, setNoteEditorErrors, clearNoteEditorErrors } = useError();
+    const [selectedInterval, setSelectedInterval] = useState<NoteDuration>(globalNoteInterval);
 
-    const maxFrets: number = getMaxFrets();
 
-    const handleGenerateId = (id: string) => {
-        setNoteId(id);
-    };
+    const [noteEditorErrors, setNoteEditorErrors] = useState<AppErrors>({});
 
-    const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!isNote(note))
-            return;
-        const newFret = event.target.valueAsNumber
-        if (newFret > maxFrets || newFret < 0)
-            return;
-        saveChanges(newFret)
-    };
+    const clearNoteEditorErrors = () => setNoteEditorErrors({});
 
     const handleDurationChange = (duration: NoteDuration) => {
         if (changeNoteDuration(note, duration, stringId)) {
@@ -55,13 +44,16 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         }
     };
 
-    const handleDeleteNote = () => {  
+    const handleDeleteNote = () => {
         deleteNote(note, stringId, shiftOnDelete);
         document.body.click();
     }
 
-    const handleMoveRight = () => {     
-        if (moveNoteRight(note, stringId, selectedInterval)) {
+    const handleMoveRight = () => {
+        if (moveNoteRight(note, stringId, true, selectedInterval)) {
+            if (onNoteChange) {
+                onNoteChange(note.getTimeStampMs())
+            }
             document.body.click();
             clearNoteEditorErrors();
         } else {
@@ -70,23 +62,26 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
     }
 
     const handleMoveLeft = () => {
-        if (moveNoteLeft(note, stringId, selectedInterval)) {
+        if (moveNoteLeft(note, stringId, true, selectedInterval)) {
+            if (onNoteChange) {
+                onNoteChange(note.getTimeStampMs())
+            }
             document.body.click();
             clearNoteEditorErrors();
         } else {
             setNoteEditorErrors({ ['moveNote']: ["Can't move left."] })
-        }     
+        }
     }
 
     const handleChangeArticulation = (articulation: Articulation) => {
         if (!isNote(note))
-            return; 
+            return;
         changeArticulation(note, stringId, articulation);
     }
 
     const handleSlide = (checkBox: React.ChangeEvent<HTMLInputElement>) => {
         if (!isNote(note))
-            return; 
+            return;
         const isChecked = checkBox.target.checked;
         setSlide(isChecked);
         setNodeSlide(note, stringId, isChecked);
@@ -100,40 +95,52 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         setNodeOverflow(note, stringId, isChecked);
     }
 
-    const saveChanges = (newFret: number) => {
+    const handleFretChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!isNote(note))
-            return;  
-        else {
-            if (note.fret === newFret)
-                return;
+            return;
+        const newFret = event.target.valueAsNumber
+        if (newFret > frets || newFret < 0)
+            return;
+        setFret(newFret);
+        if (!isNaN(newFret)) {
             changeFret(note, stringId, newFret);
+        } else {
+            changeFret(note, stringId, 0);
+        }
+    };
+
+    const handleFretChangeBlur = () => {
+        if (isNaN(fret)) {
+            setFret(0)
         }
     };
 
     const renderPopover = (props: React.HTMLAttributes<HTMLDivElement>) => (
         <Popover
-            id={"popover_" + noteId} 
+            id={"popover_note"}
             onClick={(e) => e.stopPropagation()}
             {...props}
         >
-            <Popover.Header as="h3">Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}</Popover.Header>
+            <Popover.Header as="h3">
+                Edit {isNote(note) && `Note ${noteRepresentationMap[note.noteDuration]} = ${note.getName()}${note.octave}` || `Pause ${pauseRepresentationMap[note.noteDuration]}`}
+            </Popover.Header>
             <Popover.Body className="">
                 {isNote(note) && (
                     <InputGroup className="mb-3">
                         <InputGroup.Text>Fret</InputGroup.Text>
                         <FormControl
                             type="number"
-                            value={note.fret}
+                            value={fret}
                             onChange={handleFretChange}
-                            onBlur={handleHide}
+                            onBlur={handleFretChangeBlur}
                             min={0}
-                            max={maxFrets}
+                            max={frets}
                         />
                     </InputGroup>
                 )}
 
                 <InputGroup className="mb-3 w-100 d-flex justify-content-center align-items-center" >
-                    <Dropdown 
+                    <Dropdown
                         drop="down-centered"
                     >
                         <Dropdown.Toggle
@@ -175,14 +182,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
                                 {Object.keys(Articulation)
-                                    .filter((key) => !isNaN(Number(key))) 
+                                    .filter((key) => !isNaN(Number(key)))
                                     .map((symbol) => (
-                                    <Dropdown.Item
-                                        key={symbol + "_articulation"}
+                                        <Dropdown.Item
+                                            key={symbol + "_articulation"}
                                             onClick={() => handleChangeArticulation(Number(symbol))}
-                                    >
+                                        >
                                             {Articulation[symbol as unknown as number]}
-                                    </Dropdown.Item>
+                                        </Dropdown.Item>
                                     ))}
                                 <Dropdown.Item
                                     onClick={(e) => e.stopPropagation()}
@@ -213,7 +220,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                                             onChange={handleOverflow}
                                         />
                                     </Dropdown.Item>
-                                )} 
+                                )}
                             </Dropdown.Menu>
                         </Dropdown>
                     </InputGroup>
@@ -233,9 +240,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             <div className="flex-grow-1">
                                 {isNote(note) ? noteRepresentationMap[selectedInterval] : pauseRepresentationMap[selectedInterval]}
                             </div>
-                            <i className="bi bi-arrow-left flex-grow-1"></i>                         
+                            <i className="bi bi-arrow-left flex-grow-1"></i>
                         </Button>
-                        
+
                         <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
                         <Dropdown.Menu>
                             {Object.entries(isNote(note) ? noteRepresentationMap : pauseRepresentationMap).map(([key, symbol]) => (
@@ -258,7 +265,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                             <div className="flex-grow-1">
                                 {isNote(note) ? noteRepresentationMap[selectedInterval] : pauseRepresentationMap[selectedInterval]}
                             </div>
-                           
+
                         </Button>
                     </Dropdown>
                 </InputGroup>
@@ -274,9 +281,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
                     <Button
                         className="w-100"
                         variant="danger"
-                        onClick={()=> handleDeleteNote()}
+                        onClick={() => handleDeleteNote()}
                     >
-                        Delete { isNote(note) && 'Note' || 'Pause' }
+                        Delete {isNote(note) && 'Note' || 'Pause'}
                     </Button>
                 </InputGroup>
             </Popover.Body>
@@ -288,12 +295,67 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
         clearNoteEditorErrors();
     }
 
-    const handleHide = () => {
-        if (!isNote(note))
-            return false;
-        if (!note.fret)
-            saveChanges(0);
-        return true;
+    const [startX, setStartX] = useState<number | null>(null);
+    const [step, setStep] = useState<number | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const calculateStep = (): number => {
+        if(stringWidthPx)
+            return (stringWidthPx * selectedInterval);
+        else
+            return (300 * selectedInterval);
+    }
+
+    const handleDragStart = (event: React.DragEvent) => {
+        if (!onNoteDragChange)
+            return;
+        setIsDragging(true);
+        setStep(calculateStep());
+        setStartX(event.clientX);
+        handleEnter();
+    }
+
+    const handleDragEnd = () => {
+        if (!onNoteDragChange)
+            return;
+        setIsDragging(false);
+        setStep(null);
+        setStartX(null);
+
+    }
+
+    const handleDrag = (event: React.DragEvent) => {
+        if (!onNoteDragChange)
+            return;
+        if (isDragging && startX != null && step != null) {
+            const newX = event.clientX;
+            if (newX === 0)
+                return
+
+            const value = Math.abs(newX - startX);
+
+            if (newX > startX) {
+
+                if (value >= step) {
+                    if (moveNoteRight(note, stringId, false, selectedInterval)){
+                        onNoteDragChange(newX);
+                        setStartX(newX);
+                    }
+                    
+                    
+                } 
+
+            } else if (newX < startX) {
+
+                if (value >= step) {
+                    if (moveNoteLeft(note, stringId, false ,selectedInterval)) {
+                        onNoteDragChange(newX);
+                        setStartX(newX);
+                    }
+                   
+                } 
+            }
+        }
     }
 
     return (
@@ -301,21 +363,28 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId }
             trigger="click"
             placement="bottom"
             overlay={renderPopover}
-            rootClose 
+            rootClose
             onEnter={handleEnter}
             flip
-            >
+        >
             <div
+                draggable="true"
+
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDrag={handleDrag}
+                onDragEnter={ (e: React.DragEvent) => e.preventDefault()}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     height: '100%',
                     margin: '0',
-                    padding: '0'
+                    padding: '0',
+                    cursor: isDragging ? "grabbing" : "grab"
                 }}
             >
-                <NoteView note={note} onGenerateId={ handleGenerateId }></NoteView>
+                <NoteView note={note} isDragging={isDragging}></NoteView>
             </div>
-            
+
         </OverlayTrigger>
     );
-};
+}

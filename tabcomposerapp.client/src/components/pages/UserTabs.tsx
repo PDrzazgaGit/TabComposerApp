@@ -1,19 +1,22 @@
-import { useState, useEffect, Key } from "react";
-import { Container, Row, Col, Card, ButtonGroup, Button, Modal } from "react-bootstrap";
+import { Key, useEffect, useMemo, useState } from "react";
+import { Button, ButtonGroup, Card, Col, Container, Modal, Row, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { TabulatureManagerApi } from "../../api/TabulatureManagerApi";
-import { useAuth } from "../../hooks/useAuth";
-//import { useTabulature } from "../../hooks/useTabulature";
-import { Notation } from "../../models";
-import { TabulatureDataModel } from "../../models/TabulatureDataModel";
-import { CreateTabulature } from "../tablature/CreateTabulature";
-import { SessionExpired } from "../SessionExpired";
-
-
+import { SessionExpired } from "../";
+import { useAuth, useTabulatureApi } from "../../hooks";
+import { AppErrors, Notation, TabulatureDataModel } from "../../models";
+import { CreateTabulature } from "../tablature";
 
 export const UserTabs = () => {
-    const { getToken } = useAuth();
-   // const { setTabulature, downloadTabulature, deleteTabulature } = useTabulature();
+    const { getToken, user } = useAuth();
+
+    const [userTabsErrors, setUserTabsErrors] = useState<AppErrors>({});
+
+    const clearUserTabsErrors = () => setUserTabsErrors({});
+
+    const {getUserTabulatureInfo, downloadTabulature, deleteTabulature} = useTabulatureApi();
+
+    const [authorized, setAuthorized] = useState<boolean | undefined>();
+
     const [tabInfo, setTabInfo] = useState<Record<number, TabulatureDataModel> | null>(null);
 
     const [showDelete, setShowDelete] = useState(false);
@@ -26,31 +29,33 @@ export const UserTabs = () => {
     };
     const handleShowDelete = () => setShowDelete(true);
 
-    const  navigate  = useNavigate();
+    const navigate = useNavigate();
 
+    const token = useMemo(() => getToken(), [getToken]);
+    
     useEffect(() => {
         const fetchTablatureData = async () => {
-            const token = await getToken();
-            if (token) {
-                const data = await TabulatureManagerApi.getUserTabulaturesInfo(token);
-                if (data) {
-                    setTabInfo(data);
-                } else {
-                    //b³¹d
-                }
-            } else {
-                <SessionExpired/>
-            }
+            if (!token) {
+                setAuthorized(false);
+                return;
+            } 
+            const data = await getUserTabulatureInfo(token);
+            if (!data) {
+                setAuthorized(false);
+                return;
+            } 
+            setAuthorized(true);
+            setTabInfo(data);        
         };
         fetchTablatureData();
-    }, [getToken, navigate]);
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    
     const handlePlay = async (id: number) => {
-
-        const result = await TabulatureManagerApi.downloadTabulature(id);
+        clearUserTabsErrors();
+        const result = await downloadTabulature(id);
         if (!result) {
-            //
+            setUserTabsErrors({ [`download_${id}`]:['Cannot load this tablature.']})
         } else {
             navigate("/player");
         }
@@ -58,49 +63,54 @@ export const UserTabs = () => {
     }
 
     const handleEdit = async (id: number) => {
-
-        const result = await TabulatureManagerApi.downloadTabulature(id);
-
+        clearUserTabsErrors();
+        const result = await downloadTabulature(id);
         if (!result) {
-            //
-        } else {
+            setUserTabsErrors({ [`download_${id}`]: ['Cannot load this tablature.'] })
+        } else { 
             navigate("/editor");
         }
     }
 
     const handleDelete = async (id: number) => {
-        const token = await getToken();
-        if (token) {
-            const success = await TabulatureManagerApi.deleteTabulature(token, id)//await deleteTabulature(token, id);
-            if (success) {
-                setTabInfo(prev => {
-                    if (!prev) return prev;
-                    const updatedTabs = { ...prev };
-                    delete updatedTabs[id];
-                    return updatedTabs;
-                });
-            }
-        } else {
-            <SessionExpired />
+        clearUserTabsErrors();
+        const token = getToken();
+        if (!token) {
+            setAuthorized(false);
+            return; 
         }
+        const success = await deleteTabulature(token, id);
+        if (!success) {
+            setAuthorized(false);
+            return; 
+        }
+        setTabInfo(prev => {
+            if (!prev) return prev;
+            const updatedTabs = { ...prev };
+            delete updatedTabs[id];
+            return updatedTabs;
+        });
     };
 
-    if (!tabInfo) return (<></>);
+    if (authorized === false) return (<SessionExpired></SessionExpired>);
 
     return (
-        <Container className="mt-3">
-            {Object.entries(tabInfo).length === 0 && (
-                <div className="mb-3">
-                    <Row className="align-items-center">
-                        <Col className="text-center">
-                            Ohh there is nothing here. Let's Compose your first Tab!
-                        </Col>
-                    </Row>
-                </div>
+        <Container className="mt-5">
+            {user != null && user != undefined && (
+                <Row className="justify-content-center mb-5">
+                    <Col className="text-center">
+                        <h1 className="fw-bold">Welcome {user.username}</h1>
+                        
+                    </Col>
+                </Row>
+                
             )}
-            {Object.entries(tabInfo).map(([key, tab]) => (
-                <Card key={key} className="mb-4 shadow-sm">
-                    <Card.Header className="fw-bold mb-1">{tab.title}</Card.Header>
+           
+            
+            
+            {tabInfo && Object.entries(tabInfo!).map(([key, tab]) => (
+                <Card key={key} className="mb-3 p-4 bg-light shadow-sm">
+                    <Card.Header className="fw-bold bg-light mb-1">{tab.title}</Card.Header>
                     <Card.Body>
                         <Row className="align-items-center w-100">
                             <Col className="w-50">
@@ -119,6 +129,10 @@ export const UserTabs = () => {
 
                                 <Card.Text className="text-muted">Description:</Card.Text>
                                 {tab.description}
+
+                                {userTabsErrors[`download_${key}`] && (
+                                    <Card.Text className="text-danger">{userTabsErrors[`download_${key}`]}</Card.Text>
+                                )}
                                 
                             </Col>
                             
@@ -128,18 +142,18 @@ export const UserTabs = () => {
                                     vertical
                                 >
                                     <Button
-                                        variant="light"
-                                        className="w-100"
-                                        onClick={() => { handlePlay(Number(key)) }}
-                                    >
-                                        Play
-                                    </Button>
-                                    <Button
                                         variant="secondary"
                                         className="w-100"
                                         onClick={() => { handleEdit(Number(key)) }}
                                     >
                                         Edit
+                                    </Button>
+                                    <Button
+                                        variant="light"
+                                        className="w-100"
+                                        onClick={() => { handlePlay(Number(key)) }}
+                                    >
+                                        Play
                                     </Button>
                                     <Button
                                         variant="danger"
@@ -166,16 +180,49 @@ export const UserTabs = () => {
                             </Col>
                         </Row>
                     </Card.Body>
-                    <Card.Footer>
-                        <Card.Text className="text-muted">Created: {tab.created}</Card.Text>
+                    <Card.Footer className="bg-light">
+                        <Card.Text className="text-muted ">Created: {tab.created}</Card.Text>
                     </Card.Footer>
                 </Card>
             ))}
-            <Row className="align-items-center mb-3">
-                <Col className="text-center">
-                    <CreateTabulature/>
+            <Row className="justify-content-center mb-5">
+                <Col md={10} className="w-100">
+                    <Card className="p-4 bg-light shadow-sm">
+                        <Card.Body className="text-center">
+                            <h4 className="fw-semibold">
+                                {tabInfo && Object.entries(tabInfo!).length === 0 && (
+                                    "Ohh there is nothing here"
+                                ) || (
+                                        "So, you're looking for a new Tab?"
+                                )}
+                            </h4>
+                            <p className="fs-5 text-justify">
+                                {tabInfo && Object.entries(tabInfo!).length === 0 && (
+                                    "Let's Compose your first Tab!"
+                                ) || (
+                                        "Let's Compose new piece of music!"
+                                )}
+
+                            </p>
+                            {tabInfo && (
+                                <Row className="align-items-center mb-3">
+                                    <Col className="text-center">
+                                        <CreateTabulature />
+                                    </Col>
+                                </Row>
+                            ) || (
+                                    <Row className="align-items-center">
+                                        <Col className="text-center">
+                                            <Spinner animation="border" role="status">
+                                                <span className="visually-hidden">Loading...</span>
+                                            </Spinner>
+                                        </Col>
+                                    </Row>
+                            )}
+                        </Card.Body>
+                    </Card>
                 </Col>
-            </Row>
+            </Row> 
         </Container>
 
     );

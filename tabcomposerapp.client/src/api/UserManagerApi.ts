@@ -1,18 +1,23 @@
-import axios from "axios";
-import { IUser, User } from "../models/UserModel";
-import { SessionService } from "../services/SessionService";
-import { AppErrors } from "../models/AppErrorsModel";
-
+import { isAxiosError } from "axios";
+import { AppErrors, IUser, User } from "../models";
+import { SessionService } from "../services";
+import { ClientApi, IClientApi, IClientAuth } from "./";
+import { config } from "./../config";
 export class UserManagerApi {
 
-    private static user: User | null;
+    private errors: AppErrors | null;
 
-    private static errors: AppErrors | null;
+    private clientApi: IClientApi;
+    
+    constructor() {
+        this.clientApi = ClientApi.getInstance();
+        this.errors = null;
+    }
 
-    public static async signIn(username: string, password: string, remember: boolean): Promise<boolean> {
+    public async signIn(username: string, password: string, remember: boolean): Promise<boolean> {
         this.clearErrors();
         try {
-            const response = await axios.post('https://localhost:44366/api/auth/signin', {
+            const response = await this.clientApi.use().post(config.auth.signInEndpoint, {
                 username,
                 password
             });
@@ -23,18 +28,21 @@ export class UserManagerApi {
             }
             SessionService.setJWT(token, remember);
             const profile = await this.getUserProfile();
-            this.user = new User(profile.userName, profile.email)
+            const user: IUser = new User(profile.userName, profile.email);
+            SessionService.setUser(user, remember);
+            this.clientApi.setAuthorize(true);
             return true;
         } catch (error) {
             this.errors = this.apiErrorFormatter(error, { message: "message" })
+            this.signOut();
             return false;
         }
     }
 
-    public static async signUp(email: string, username: string, password: string): Promise<boolean> {
+    public async signUp(email: string, username: string, password: string): Promise<boolean> {
         this.clearErrors();
         try {
-            await axios.post('https://localhost:44366/api/auth/signup', {
+            await await this.clientApi.use().post(config.auth.signUpEndpoint, {
                 email,
                 username,
                 password
@@ -50,15 +58,16 @@ export class UserManagerApi {
         }
     }
 
-    public static signOut(): void {
+    public signOut(): void {
         SessionService.removeJWT();
-        this.user = null;
+        SessionService.removeUser();
+        this.clientApi.setAuthorize(false);
     }
 
-    public static async authorize(): Promise<boolean> {
+    public async authorize(): Promise<boolean> {
         try {
             const token = SessionService.getJWT();
-            await axios.get('https://localhost:44366/api/auth/authorize', {
+            await this.clientApi.use().get(config.auth.authorizeEndpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -69,7 +78,15 @@ export class UserManagerApi {
         }
     }
 
-    public static async getUserToken(): Promise<string | null> {
+    public getAuth(): IClientAuth {
+        return this.clientApi;
+    }
+
+    public getUserToken(): string | null {
+        return SessionService.getJWT();
+    }
+
+    public async getUserTokenWithAuth(): Promise<string | null> {
         const auth = await this.authorize(); 
         if (auth) {
             return SessionService.getJWT();
@@ -78,42 +95,43 @@ export class UserManagerApi {
         }
     }
 
-    public static getUser(): IUser | null {
-        return this.user;
+    public getUser(): IUser | null {
+        return SessionService.getUser();
     }
 
-    public static async downloadUser(): Promise<IUser | null> {
+    public async downloadUser(): Promise<IUser | null> {
         try {
-            this.getUserProfile();
             const profile = await this.getUserProfile();
-            this.user = new User(profile.userName, profile.email);
-            return this.user;
+            const user: IUser = new User(profile.userName, profile.email);
+            if (!SessionService.updateUser(user))
+                return null
+            return user;
         } catch {
             return null;
         }
     }
 
-    public static getErrors(): AppErrors | null {
+    public getErrors(): AppErrors | null {
         return this.errors;
     }
-    private static clearErrors(): void {
+    private clearErrors(): void {
         this.errors = null;
     }
 
-    private static async getUserProfile() {
+    private async getUserProfile() {
         const token = SessionService.getJWT();
-        const response = await axios.get('https://localhost:44366/api/Account', {
+        const response = await this.clientApi.use().get(config.user.accountEndpoint, {
             headers: {
-                Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
+                Authorization: `Bearer ${token}` 
             }
         });
         return response.data;
     }
 
-    private static apiErrorFormatter(error: unknown, keywords: { [key: string]: string }): AppErrors {
+    private apiErrorFormatter(error: unknown, keywords: { [key: string]: string }): AppErrors {
         const formattedErrors: AppErrors = {};
 
-        if (axios.isAxiosError(error) && error.response) {
+        if (isAxiosError(error) && error.response) {
             const serverErrors = error.response.data;
             if (Array.isArray(serverErrors)) {
                 serverErrors.forEach((err: { code: string; description: string }) => {

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using TabComposerApp.Server.Data;
 using TabComposerApp.Server.Models;
+using TabComposerApp.Server.Models.DataTransferObjects;
 using TabComposerApp.Server.Repositories;
 using TabComposerApp.Server.Services;
 
