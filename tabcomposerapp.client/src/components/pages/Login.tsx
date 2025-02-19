@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { AuthorizationForm } from "../AuthorizationForm";
 import { useNavigate } from "react-router-dom";
-import { MyOffcanvas } from "../MyOffcanvas";
-import { useAuth } from "../../hooks/useAuth";
-import { Home } from "./Home";
+import { AuthorizationForm, MyOffcanvas } from "../";
+import { useAuth } from "../../hooks";
+import { Home } from "./";
 
 export const Login = () => {
 

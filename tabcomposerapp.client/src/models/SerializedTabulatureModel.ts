@@ -1,5 +1,5 @@
-import { Notation } from "./NotationModel";
-import { NoteDuration, Articulation } from "./NoteModel";
+import { Notation } from "./";
+import { Articulation, NoteDuration } from "./";
 
 export interface SerializedNote {
     fret: number,
@@ -11,15 +11,15 @@ export interface SerializedMeasure {
     tempo: number;
     numerator: number;
     denominator: number;
-    notes: Record<string, SerializedNote[]>;  // Mapowanie id struny na tablicê nut
+    notes: Record<string, SerializedNote[]>;  
 }
 
 export interface SerializedTabulature {
     title: string;
     author: string;
-    frets: number;         // Zak³adam, ¿e frets to liczba
-    tuning: SerializedTuning;  // Serializowane dane o strojeniu
-    measures: SerializedMeasure[];  // Tablica serializowanych miar
+    frets: number;        
+    tuning: SerializedTuning;  
+    measures: SerializedMeasure[];  
     description: string;
 }
 

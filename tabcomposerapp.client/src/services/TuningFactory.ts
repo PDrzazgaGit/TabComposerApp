@@ -1,6 +1,6 @@
 import { Dictionary } from '../structures';
-import { Tuning, ITuning, Notation, Sound } from './../models';
-import { MusicScale } from './MusicScale';
+import { MusicScale } from './';
+import { ITuning, Notation, Sound, Tuning } from './../models';
 
 
 export class TuningFactory {
@@ -117,19 +117,6 @@ export class TuningFactory {
             return new Tuning(new Dictionary<number, Sound>(this.TuningList[tuningString]));
         else
             throw Error(`'${tuningString}' does not exists.`)
-    }
-
-    public static deserialize(data: SerializedTuning): ITuning {
- 
-        const tuningData: Record<number, Sound> = {};
-
-        Object.keys(data).forEach(key => {
-            const numberKey = parseInt(key); 
-            const soundData = data.tuning[numberKey];
-            tuningData[numberKey] = MusicScale.getSound(soundData.notation, soundData.octave)
-        });
-
-        return this.getCustomTuning(tuningData);
     }
 
     public static getCustomTuning(sounds: Record<number, Sound>): ITuning {

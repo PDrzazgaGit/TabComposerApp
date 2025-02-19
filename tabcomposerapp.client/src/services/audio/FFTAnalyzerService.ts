@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import { IAnalyzerService } from './AnalyzerService';
+import { IAnalyzerService } from './';
 export class FFTAnalyzerService extends Tone.Analyser implements IAnalyzerService {
 
     private binFrequency: number;
@@ -30,7 +30,7 @@ export class FFTAnalyzerService extends Tone.Analyser implements IAnalyzerServic
 
         const frequency = (maxIndex * this.sampleRate) / (this.size * 2);
 
-        return maxValue > -Infinity ? frequency : null; // Zwraca dominuj¹c¹ czêstotliwoœæ
+        return maxValue > -Infinity ? frequency : null; 
     }
 
     
@@ -43,39 +43,39 @@ export class FFTAnalyzerService extends Tone.Analyser implements IAnalyzerServic
 
         let animationFrameId: number | null = null;
 
-        // Funkcja ustawiaj¹ca rozmiar kanwy zgodnie z jej stylem CSS
+
         const setCanvasSize = () => {
             const { width, height } = canvas.getBoundingClientRect();
             canvas.width = Math.floor(width * window.devicePixelRatio);
             canvas.height = Math.floor(height * window.devicePixelRatio);
-            // Resetujemy transformacjê przed ponownym skalowaniem, ¿eby nie mno¿yæ skalowania
+           
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         };
 
         window.addEventListener("resize", setCanvasSize);
-        setCanvasSize(); // Ustaw pocz¹tkowy rozmiar
+        setCanvasSize();
 
         const draw = () => {
-            const magnitudes = this.getValue(); // Pobieranie danych
+            const magnitudes = this.getValue(); 
             if (!(magnitudes instanceof Float32Array)) {
                 throw new Error("getValue() must return a Float32Array");
             }
 
-            // U¿ywamy widocznych rozmiarów kanwy
+      
             const rect = canvas.getBoundingClientRect();
             const visibleWidth = rect.width;
             const visibleHeight = rect.height;
 
-            // Czyszczenie kanwy
+ 
             ctx.clearRect(0, 0, visibleWidth, visibleHeight);
 
-            // Obliczanie szerokoœci s³upka na podstawie widocznej szerokoœci
+  
             const totalBars = this.endEdge;
             const barWidth = visibleWidth / totalBars;
 
             for (let i = this.startEdge; i < this.endEdge; i++) {
-                const barHeight = Math.max(0, (magnitudes[i] + 120) * 1.5); // Skalowanie – mo¿esz dostosowaæ
+                const barHeight = Math.max(0, (magnitudes[i] + 120) * 1.5); 
                 const x = (i - this.startEdge) * barWidth;
                 const y = visibleHeight - barHeight;
                 ctx.fillStyle = "black";

@@ -7,14 +7,14 @@ export class AudioEffectService {
 
     private highpassFilter: Tone.Filter;
     private lowpassFilter: Tone.Filter;
-   // private bandpassFilter: Tone.Filter;
+    private bandpassFilter: Tone.Filter;
     private noiseReduction: Tone.EQ3;
     private compressor: Tone.Compressor;
     private normalizer: Tone.Gain;
 
     constructor(private minFrequency: number = 60, private maxFrequency: number = 1400) {
-        // Filtr górnoprzepustowy
 
+        // Filtr górnoprzepustowy
         const fc = Math.sqrt(minFrequency * maxFrequency);
         const df = maxFrequency - minFrequency;
         const Q = fc / df;
@@ -33,14 +33,14 @@ export class AudioEffectService {
             Q: Q,
             rolloff: -12
         });
-        /*
+        
         // Filtr pasmowoprzepustowy
         this.bandpassFilter = new Tone.Filter({
             frequency: (this.minFrequency + this.maxFrequency) / 2,
             type: "bandpass",
             Q: 5,
         });
-        */
+        
         // Redukcja szumów
         this.noiseReduction = new Tone.EQ3({
             low: -12,
@@ -62,13 +62,12 @@ export class AudioEffectService {
         // Po³¹czenie efektów w ³añcuch
         this.inputNode = this.highpassFilter;
         this.highpassFilter.connect(this.lowpassFilter);
-        this.lowpassFilter.connect(this.noiseReduction);//this.lowpassFilter.connect(this.bandpassFilter);
+        this.lowpassFilter.connect(this.bandpassFilter);
+        this.bandpassFilter.connect(this.noiseReduction);
+        this.noiseReduction.connect(this.compressor);
+        this.compressor.connect(this.normalizer);
+        this.outputNode = this.normalizer;
 
-        //this.bandpassFilter.connect(this.noiseReduction);
-        //this.noiseReduction.connect(this.compressor);
-       // this.compressor.connect(this.normalizer);
-        // this.outputNode = this.normalizer;
-        this.outputNode = this.lowpassFilter;
     }
 
     public connect(node: Tone.InputNode): void {

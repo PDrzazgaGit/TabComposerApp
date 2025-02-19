@@ -1,8 +1,7 @@
-import { useState, ReactNode, useMemo } from 'react';
-import { TabulatureContext } from './TabulatureContext';
+import { ReactNode, useMemo, useState } from 'react';
 import { IMeasure, ITabulature, NoteDuration } from '../models';
-import { TabulaturePlayer } from '../services/audio/TabulaturePlayer';
-import { TabulatureRecorder } from '../services/audio/TabulatureRecorder';
+import { TabulaturePlayer, TabulatureRecorder } from '../services/audio';
+import { TabulatureContext } from './TabulatureContext';
 
 interface TabulatureProviderProps {
     children: ReactNode;

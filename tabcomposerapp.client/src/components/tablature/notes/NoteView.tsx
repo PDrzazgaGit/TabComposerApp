@@ -1,9 +1,9 @@
-import { forwardRef, useRef } from "react";
-import { INote, IPause, NoteKind } from "../../../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
-import "../../../styles/NoteView.css"
 import { observer } from "mobx-react-lite";
+import { forwardRef, useRef } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { INote, IPause, NoteKind } from "../../../models";
+import "../../../styles/NoteView.css";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/";
 
 interface NoteViewProps {
     note: INote | IPause;
@@ -16,8 +16,6 @@ export const NoteView = observer(forwardRef<HTMLDivElement, NoteViewProps>(({ no
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
     };
-
-    //const [isHovered, setIsHovered] = useState(false);
 
     const hoverDiv = useRef<HTMLButtonElement>(null);
 

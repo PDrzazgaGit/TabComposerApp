@@ -1,6 +1,6 @@
-import { ITuning, Note, NoteDuration, Sound, IMeasure, Pause, NoteKind, Articulation } from '../models';
-import { GuitarScale } from '.';
 import { makeAutoObservable } from 'mobx';
+import { GuitarScale } from '.';
+import { Articulation, IMeasure, ITuning, Note, NoteDuration, NoteKind, Pause, Sound } from '../models';
 
 const MINUTE_IN_MS: number = 60000;
 
@@ -92,7 +92,7 @@ export class MeasureService implements IMeasure {
     }
 
     private hasString(stringId: number): boolean {
-        return this.strings.has(stringId); // tutaj zawsze false
+        return this.strings.has(stringId); 
     }
 
     private calculateNoteDurationMs(noteDuration: NoteDuration): number {
@@ -335,8 +335,6 @@ export class MeasureService implements IMeasure {
         return true;
     }
 
-    // przerobiæ measure service aby iteracja po nutkach by³a zawsze po ich timestampach.
-
     public changeSignature(numerator: number, denominator: number): boolean {
         if (numerator <= 0) {
             throw new Error("Numerator must be a positive integer.");
@@ -403,13 +401,13 @@ export class MeasureService implements IMeasure {
                         noteToMove.setArticulation(note.articulation);
                         noteToMove.setTimeStampMs(note.timeStamp * timeScale)
                     }
-                    //this.putNote(note.fret, stringId, note.timeStamp, note.noteDuration)?.setArticulation(note.articulation);
+
                 } else {
                     const pauseToMove = this.pushPause(stringId, note.noteDuration);
                     if (pauseToMove) {
                         pauseToMove.setTimeStampMs(note.timeStamp * timeScale)
                     }
-                    //this.putPause(stringId, note.timeStamp, note.noteDuration);
+
                 }
                     
             })

@@ -1,9 +1,7 @@
-import { useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { IClientAuth, UserManagerApi } from '../api';
+import { AppErrors, IUser } from '../models';
 import { AuthContext } from './AuthContext';
-import { IUser } from '../models/UserModel';
-import { UserManagerApi } from '../api/UserManagerApi';
-import { AppErrors } from '../models/AppErrorsModel';
-import { IClientAuth } from '../api/ClientApi';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
@@ -102,21 +100,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(user);
         }
     }, [signOut, userManagerApi])
-
-    /*
-    useEffect(() => {
-        console.log("wywo³anie autoryzacji w auth provider")
-        const fetchUser = async () => {
-            const userData = await userManagerApi.downloadUser();
-            if (!userData) {
-                signOut();
-            } else {
-                setUser(userData);
-            }
-        }
-        //fetchUser();
-    }, [signOut, userManagerApi])
-    */
 
     const value = {
         clientAuth,

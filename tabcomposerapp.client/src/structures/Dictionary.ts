@@ -1,4 +1,3 @@
-
 export class Dictionary<Key extends string | number | symbol, Value> {
     private items: { [key in Key]: Value } = {} as { [key in Key]: Value };
 

@@ -26,6 +26,14 @@ export class WindowService {
         this.windowShaper.disconnect();
     }
 
+    public toDestination() {
+        this.windowShaper.connect(Tone.getDestination());
+    }
+
+    public disconnectFromDestination() {
+        this.windowShaper.disconnect(Tone.getDestination());
+    }
+
     public getInputNode(): Tone.InputNode {
         return this.windowShaper;
     }

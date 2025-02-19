@@ -1,11 +1,9 @@
 import React, { useRef, useState } from "react";
 import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
-import { useAuth } from "../../../hooks/useAuth";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { MeasureLabel } from "./MeasureLabel";
-import { SessionExpired } from "../../SessionExpired";
-import { AppErrors } from "../../../models/AppErrorsModel";
+import { SessionExpired } from "../../";
+import { useAuth, useMeasure, useTabulature } from "../../../hooks";
+import { AppErrors } from "../../../models";
+import { MeasureLabel } from "./";
 
 export const MeasureLabelEditor: React.FC<{ previewMode?: boolean }> = ({ previewMode = false }) => {
 

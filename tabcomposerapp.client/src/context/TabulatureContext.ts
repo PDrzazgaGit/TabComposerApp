@@ -1,7 +1,6 @@
 import { createContext } from 'react';
-import { IMeasure, ITabulature, NoteDuration } from '../models'
-import { TabulaturePlayer } from '../services/audio/TabulaturePlayer';
-import { ITabulatureRecorder } from '../services/audio/TabulatureRecorder';
+import { IMeasure, ITabulature, NoteDuration } from '../models';
+import { ITabulatureRecorder, TabulaturePlayer } from '../services/audio';
 interface TabulatureContextType {
 
     tabulaturePlayer: TabulaturePlayer;
@@ -15,7 +14,7 @@ interface TabulatureContextType {
 
     recordTempo: number;
 
-    setRecordTempo: (recordTempo: number) => number;
+    setRecordTempo: (recordTempo: number) => void;
 
     measuresPerRow: number;
 

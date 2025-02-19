@@ -1,5 +1,5 @@
 import { makeObservable } from "mobx";
-import {Note, NoteKind, NoteDuration } from "./"
+import { Note, NoteDuration, NoteKind } from "./";
 export interface IPause {
     playing: boolean;
     readonly kind: NoteKind;

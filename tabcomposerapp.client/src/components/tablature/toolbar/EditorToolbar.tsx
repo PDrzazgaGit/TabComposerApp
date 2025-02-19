@@ -1,9 +1,6 @@
 import { ReactNode, useState } from "react";
-import { StickyPanel } from "./StickyPanel";
-import { Card, Tabs, Tab} from "react-bootstrap";
-import { GlobalSettings } from "./GlobalSettings";
-import { PlayerSettings } from "./PlayerSettings";
-import { RecorderSettings } from "./RecorderSettings";
+import { Card, Tab, Tabs } from "react-bootstrap";
+import { GlobalSettings, PlayerSettings, RecorderSettings, StickyPanel } from "./";
 
 interface EditorToolbarProps {
     children: ReactNode;

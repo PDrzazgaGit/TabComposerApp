@@ -1,8 +1,7 @@
-import * as Tone from "tone";
-
-import { IMeasure, INote, IPause, ITabulature, NoteKind } from "../../models";
-import { TransportClass } from "tone/build/esm/core/clock/Transport";
 import { makeObservable, observable, runInAction } from 'mobx';
+import * as Tone from "tone";
+import { TransportClass } from "tone/build/esm/core/clock/Transport";
+import { IMeasure, INote, IPause, ITabulature, NoteKind } from "../../models";
 
 
 export class TabulaturePlayer {
@@ -51,7 +50,6 @@ export class TabulaturePlayer {
                         if (note.kind === NoteKind.Pause) {
                             return;
                         }
-                        console.log(timeStamp)
                         //stopTime += duration;
                         this.transport.schedule((time) => {
                             runInAction(() => note.playing = true);
@@ -88,7 +86,6 @@ export class TabulaturePlayer {
             this.transport.start();
             return;
         }
-        await Tone.start(); 
         this.scheduleNotes(startMeasure);
         this.transport.start();
     }

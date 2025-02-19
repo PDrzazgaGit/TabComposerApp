@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Modal, Button, Dropdown, FormControl, InputGroup, Nav } from "react-bootstrap";
+import { Button, Dropdown, FormControl, InputGroup, Modal, Nav, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { Tabulature } from "../../models";
+import { SessionExpired } from "../";
+import { useAuth, useTabulatureApi } from "../../hooks";
+import { AppErrors, Tabulature } from "../../models";
 import { TuningFactory } from "../../services";
-import { SessionExpired } from "../SessionExpired";
-import { useTabulatureApi } from "../../hooks/useTabulatureApi";
-import { AppErrors } from "../../models/AppErrorsModel";
 
 
 export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = false }) => {
@@ -33,6 +31,8 @@ export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = fa
         setShowCreate(false);
     }
 
+    const minFret: number = 12;
+    const maxFret: number = 30;
 
     const [createTabulatureErrors, setCreateTabulatureErrors] = useState<AppErrors>({});
 
@@ -43,7 +43,14 @@ export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = fa
     }
 
     const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setMaxFrets(event.target.valueAsNumber);
+       
+        let value = event.target.valueAsNumber;
+
+        if (isNaN(value)) {
+            value = minFret;
+        }
+        setMaxFrets(value);
+
     }
 
     const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,13 +118,33 @@ export const CreateTabulature: React.FC<{ navlink?: boolean }> = ({ navlink = fa
                     <InputGroup
                         className="d-flex justify-content-center align-items-center column mb-3"
                     >
-                        <InputGroup.Text>Frets</InputGroup.Text>
+                        
+                        <OverlayTrigger
+                            placement="bottom"
+                            overlay={(props: React.HTMLAttributes<HTMLDivElement>) => {
+                                return (
+                                    <Tooltip {...props}>
+                                        From range {`${minFret}-${maxFret}`}
+                                    </Tooltip>
+                                )
+                            }}
+                            flip
+                        >
+                            <InputGroup.Text>Frets</InputGroup.Text>
+                        </OverlayTrigger>
                         <FormControl
                             type="number"
-                            min={12}
-                            max={30}
+                            min={minFret}
+                            max={maxFret}
                             value={maxFrets}
                             onChange={handleChangeMaxFrets}
+                            onBlur={() => {
+                                if (maxFrets < minFret) {
+                                    setMaxFrets(minFret);
+                                } else if (maxFrets > maxFret) {
+                                    setMaxFrets(maxFret);
+                                }
+                            }}
                         />
                     </InputGroup>
                     <InputGroup

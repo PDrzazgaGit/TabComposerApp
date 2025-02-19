@@ -1,11 +1,10 @@
 import { createContext } from 'react';
-import { IUser } from '../models/UserModel';
-import { AppErrors } from '../models/AppErrorsModel';
-import { IClientAuth } from '../api/ClientApi';
+import { IClientAuth } from '../api';
+import { AppErrors, IUser } from '../models';
 
 interface AuthContextType {
     clientAuth: IClientAuth;
-    user: IUser | null;
+    user: IUser | null | undefined;
     errors: AppErrors;
     clearErrors: () => void;
     getToken: () => string | null;

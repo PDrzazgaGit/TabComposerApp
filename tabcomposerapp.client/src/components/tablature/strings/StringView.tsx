@@ -1,9 +1,8 @@
-import { FC } from "react"
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
+import { FC } from "react";
+import { useMeasure, useTabulature } from "../../../hooks";
 import { Articulation, IMeasure, INote, Sound } from "../../../models";
-import { NoteView } from "../notes/NoteView";
-import "../../../styles/StringView.css"
+import "../../../styles/StringView.css";
+import { NoteView } from "../notes";
 
 interface StringViewProps {
     stringId: number;

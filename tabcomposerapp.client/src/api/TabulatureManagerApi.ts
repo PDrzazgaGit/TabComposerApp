@@ -1,9 +1,8 @@
 import { computed, makeObservable, observable, runInAction } from "mobx";
-import { ITabulature } from "../models";
-import { TabulatureDataModel } from "../models/TabulatureDataModel";
-import { SerializationService } from "../services/SerializationService";
-import { ClientApi, IClientApi } from "./ClientApi";
-
+import { ITabulature, TabulatureDataModel } from "../models"
+import { SerializationService } from "../services";
+import { ClientApi, IClientApi } from "./";
+import { config } from "./../config";
 export interface ITabulatureUpToDate {
     get upToDate(): boolean
 }
@@ -30,9 +29,9 @@ export class TabulatureManagerApi implements ITabulatureUpToDate {
 
     public async getUserTabulaturesInfo(token: string): Promise<Record<number, TabulatureDataModel> | null> {
         try {
-            const response = await this.clientApi.use().get('/Tablature/GetUserTablaturesInfo', {
+            const response = await this.clientApi.use().get(config.tablature.userListEndpoint, {
                 headers: {
-                    Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
+                    Authorization: `Bearer ${token}` 
                 }
             });
             return response.data;
@@ -44,7 +43,7 @@ export class TabulatureManagerApi implements ITabulatureUpToDate {
 
     public async downloadTabulature(id: number): Promise<ITabulature | null> {
         try {
-            const response = await this.clientApi.use().get(`/Tablature/GetTablature/${id}`);
+            const response = await this.clientApi.use().get(`${config.tablature.getEndpoint}/${id}`);
             const tabulatureData: string = response.data.tablature as string; 
             runInAction(() => this.tabulature = SerializationService.deserializeTabulature(tabulatureData))
             runInAction(() => this.previousUpdateTablature = SerializationService.serializeTabulature(this.tabulature!))
@@ -59,7 +58,7 @@ export class TabulatureManagerApi implements ITabulatureUpToDate {
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(tabulature);
             const response = await this.clientApi.use().post(
-                '/Tablature/AddTablature',
+                config.tablature.addEndpoint,
                 tabulatureData,
                 {
                     
@@ -84,7 +83,7 @@ export class TabulatureManagerApi implements ITabulatureUpToDate {
 
     public async deleteTabulature(token: string, id: number): Promise<boolean> {
         try {
-            await this.clientApi.use().post(`/Tablature/DeleteTablature/${id}`, null ,{
+            await this.clientApi.use().post(`${config.tablature.deleteEndpoint}/${id}`, null ,{
                 headers: {
                     Authorization: `Bearer ${token}` // Dodajemy token JWT do nag³ówka
                 }
@@ -107,7 +106,7 @@ export class TabulatureManagerApi implements ITabulatureUpToDate {
         try {
             const tabulatureData: string = SerializationService.serializeTabulature(this.tabulature);
             await this.clientApi.use().post(
-                `/Tablature/UpdateTablature/${this.tabulatureId}`,
+                `${config.tablature.updateEndpoint}/${this.tabulatureId}`,
                 tabulatureData,  
                 {
                     headers: {

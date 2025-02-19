@@ -1,7 +1,7 @@
+import { Container, Nav, Navbar } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { Navbar, Nav, Container } from "react-bootstrap";
-import { useAuth } from "./../hooks/useAuth"
-import { CreateTabulature } from "./tablature/CreateTabulature";
+import { useAuth } from "./../hooks";
+import { CreateTabulature } from "./tablature";
 
 
 

@@ -1,30 +1,9 @@
-﻿import { Container, Row, Col, Button, Image, Card } from "react-bootstrap";
-import { TabCostFunction, TablaturePositionFinder } from "../../services/TablaturePositionFinder";
-import { TuningFactory } from "../../services";
-import { Metronome } from "../../services/audio/NotePutterService";
+﻿import { Button, Card, Col, Container, Image, Row } from "react-bootstrap";
 
 export const Home = () => {
-    /*
-    const finder = new TablaturePositionFinder(TuningFactory.EStandardTuning());
-    finder.addSound(329.63);
-    finder.addSound(349.23);
-    finder.addSound(369.99);
-    //finder.addSound(392.00);
-    //finder.addSound(293.66);
-    //finder.addSound(261.63);
-    //finder.addSound(466.16);
-    console.log(finder)
-
-    const costFunction  = (fretA: number, stringA: number, fretB: number, stringB: number): number =>  {
-        return 1 * Math.abs(fretB - fretA) + 3 * Math.abs(stringB - stringA) + 1;
-    }
-
-    console.log(finder.getBestPositions(costFunction))
-    */
 
     return (
         <Container className="mt-5">
-            {/* Nagłówek */}
             <Row className="justify-content-center">
                 <Col md={10} className="text-center">
                     <h1 className="fw-bold">Welcome to TabComposer</h1>
@@ -34,7 +13,6 @@ export const Home = () => {
                 </Col>
             </Row>
 
-            {/* Opis projektu */}
             <Row className="justify-content-center mt-4">
                 <Col md={10} className="w-100">
                     <Card className="p-4 bg-light shadow-sm">
@@ -52,7 +30,6 @@ export const Home = () => {
                 </Col>
             </Row>
 
-            {/* Jak działa aplikacja */}
             <Row className="mt-5">
                 <Col md={6}>
                     <Card className="p-4 bg-light shadow-sm h-100">
@@ -69,10 +46,9 @@ export const Home = () => {
                     </Card>
                 </Col>
 
-                {/* Ilustracja działania */}
                 <Col md={6} className="text-center">
                     <Image
-                        src="public/homepagescreen.png"
+                        src="src/assets/homepagescreen.png"
                         alt="TabComposer screenshot"
                         fluid
                         className="shadow-lg rounded"
@@ -80,7 +56,6 @@ export const Home = () => {
                 </Col>
             </Row>
 
-            {/* Zachęta do założenia konta */}
             <Row className="justify-content-center mt-5 mb-5">
                 <Col md={10} className="w-100">
                     <Card className="p-4 bg-light shadow-sm">

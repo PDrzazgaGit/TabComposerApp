@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import Form from "react-bootstrap/Form";
+import { useEffect, useState } from 'react';
 import Button from "react-bootstrap/Button";
-import { useAuth } from '../hooks/useAuth'
+import Form from "react-bootstrap/Form";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks';
 
 interface AuthorizationFormProps {
     updateTitle: (newTutle: string) => void;

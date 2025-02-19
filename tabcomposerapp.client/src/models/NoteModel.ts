@@ -1,5 +1,5 @@
-import { action, computed, makeAutoObservable, makeObservable, observable } from "mobx";
-import { Sound, Notation, IPause } from "./";
+import { action, makeObservable, observable } from "mobx";
+import { IPause, Notation, Sound } from "./";
 
 export enum Articulation {
     None,

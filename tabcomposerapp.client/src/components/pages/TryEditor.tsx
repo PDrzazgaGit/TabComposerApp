@@ -1,9 +1,9 @@
-import { Container, Row, Col, Spinner } from "react-bootstrap";
-import { TabulatureEditorView } from "../tablature/TabulatureEditorView";
-import { TabulatureProvider } from "../../context/TabulatureProvider";
 import { useMemo } from "react";
-import { Articulation, IMeasure, INote, NoteDuration, Tabulature } from "../../models";
-import { MeasureService, TuningFactory } from "../../services";
+import { Col, Container, Row, Spinner } from "react-bootstrap";
+import { TabulatureProvider } from "../../context";
+import { Articulation, INote, NoteDuration, Tabulature } from "../../models";
+import { TuningFactory } from "../../services";
+import { TabulatureEditorView } from "../tablature";
 
 export const TryEditor = () => {
 

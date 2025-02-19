@@ -1,9 +1,9 @@
+import { observer } from "mobx-react-lite";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Dropdown, FormCheck, InputGroup, Modal } from "react-bootstrap";
 import { RecordFill, StopFill } from "react-bootstrap-icons";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { observer } from "mobx-react-lite";
 import * as Tone from "tone";
+import { useTabulature } from "../../../hooks";
 
 export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ recording }) => {
 
@@ -12,8 +12,7 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
         globalTempo,
         globalNumerator,
         globalDenominator,
-        globalNoteDuration,
-        recordTempo
+        globalNoteDuration
     } = useTabulature();
 
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -55,7 +54,6 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
             }
         }
 
-        // Cleanup: zatrzymujemy animacje, gdy komponent jest unmountowany lub warunki siê zmieniaj¹
         return () => {
             if (stopFunctions) {
                 stopFunctions.stopAMDF();
@@ -65,11 +63,10 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
     }, [showCharts, tabulatureRecorder.monite, tabulatureRecorder.recording, canvasAMDFRef, canvasFFTRef, tabulatureRecorder]);
 
     const start = async () => {
-        Tone.start();
+        await Tone.start();
         if (!await tabulatureRecorder.record(
             deviceId,
             globalTempo,
-            recordTempo,
             globalNumerator,
             globalDenominator,
             globalNoteDuration
@@ -78,6 +75,13 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
             setRenderModal(true)
         }
 
+    }
+
+    const moniteToggle = async () => {
+        await Tone.start();
+        if (!await tabulatureRecorder.moniteToggle(deviceId)) {
+            setRenderModal(true);
+        }
     }
 
     useEffect(() => {
@@ -91,24 +95,7 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
             tabulatureRecorder.stop();
         }
     }, [tabulatureRecorder, recording])
-    /*
-    useEffect(() => {
-        const intervalId = setInterval(async () => {
 
-            try {
-                tabulatureRecorder.printValues();
-            } catch {
-                //
-            }
-
-        }, 1);
-
-        return () => {
-            clearInterval(intervalId);
-        };
-
-    }, [tabulatureRecorder]);
-    */
     const stop = () => {
 
         tabulatureRecorder.stop();
@@ -169,9 +156,7 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
                     <Button
                         className="border  w-25"
 
-                        onClick={() =>
-                            tabulatureRecorder.moniteToggle(deviceId)
-                        }
+                        onClick={() => moniteToggle()}
                         disabled={tabulatureRecorder.recording}
                         variant={tabulatureRecorder.monite ? "danger" : "success"}
                     >
@@ -237,12 +222,3 @@ export const RecorderSettings: React.FC<{ recording: boolean }> = observer(({ re
     );
 }
 )
-/*
-
-<InputGroup
-    className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}
->
-                
-</InputGroup>
-
-*/

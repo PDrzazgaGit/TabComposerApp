@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { IMeasure, INote, IPause, NoteDuration, Articulation } from '../models/'
+import { Articulation, IMeasure, INote, IPause, NoteDuration } from '../models';
 interface MeasureContextType {
     frets: number;
     measure: IMeasure;

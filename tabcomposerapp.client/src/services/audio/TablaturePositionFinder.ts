@@ -1,4 +1,4 @@
-import { ITuning, Sound } from "../models";
+import { ITuning, Sound } from "./../../models";
 
 export class TablaturePosition {
     constructor(public readonly fret: number, public readonly stringNumber: number, public readonly timeStamp: number, public readonly measureNumber: number) { }
@@ -86,11 +86,9 @@ export class TablaturePositionFinder {
             });
         }
 
-        // Znalezienie pozycji koñcowej o minimalnym koszcie
         const lastLayer = this.layers.get(this.currentLevel - 1) || [];
         let bestEnd: TablaturePosition | null = lastLayer.reduce((best, pos) => (distances.get(pos)! < distances.get(best)! ? pos : best), lastLayer[0]);
 
-        // Odtworzenie najlepszej œcie¿ki
         const bestPath: TablaturePosition[] = [];
         while (bestEnd) {
             bestPath.unshift(bestEnd);

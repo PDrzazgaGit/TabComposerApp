@@ -1,11 +1,9 @@
 import { isAxiosError } from "axios";
-import { IUser, User } from "../models/UserModel";
-import { SessionService } from "../services/SessionService";
-import { AppErrors } from "../models/AppErrorsModel";
-import { ClientApi, IClientApi, IClientAuth } from "./ClientApi";
+import { AppErrors, IUser, User } from "../models";
+import { SessionService } from "../services";
+import { ClientApi, IClientApi, IClientAuth } from "./";
+import { config } from "./../config";
 export class UserManagerApi {
-
-    //private user: User | null;
 
     private errors: AppErrors | null;
 
@@ -14,13 +12,12 @@ export class UserManagerApi {
     constructor() {
         this.clientApi = ClientApi.getInstance();
         this.errors = null;
-        //this.user = null;
     }
 
     public async signIn(username: string, password: string, remember: boolean): Promise<boolean> {
         this.clearErrors();
         try {
-            const response = await this.clientApi.use().post('/auth/signin', {
+            const response = await this.clientApi.use().post(config.auth.signInEndpoint, {
                 username,
                 password
             });
@@ -45,7 +42,7 @@ export class UserManagerApi {
     public async signUp(email: string, username: string, password: string): Promise<boolean> {
         this.clearErrors();
         try {
-            await await this.clientApi.use().post('/auth/signup', {
+            await await this.clientApi.use().post(config.auth.signUpEndpoint, {
                 email,
                 username,
                 password
@@ -70,7 +67,7 @@ export class UserManagerApi {
     public async authorize(): Promise<boolean> {
         try {
             const token = SessionService.getJWT();
-            await this.clientApi.use().get('/auth/authorize', {
+            await this.clientApi.use().get(config.auth.authorizeEndpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -123,7 +120,7 @@ export class UserManagerApi {
 
     private async getUserProfile() {
         const token = SessionService.getJWT();
-        const response = await this.clientApi.use().get('/account', {
+        const response = await this.clientApi.use().get(config.user.accountEndpoint, {
             headers: {
                 Authorization: `Bearer ${token}` 
             }

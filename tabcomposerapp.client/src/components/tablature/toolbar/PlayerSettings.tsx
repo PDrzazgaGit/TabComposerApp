@@ -1,10 +1,10 @@
-import { Button, FormControl, InputGroup } from "react-bootstrap";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { AppErrors } from "../../../models/AppErrorsModel";
-import { PlayFill, PauseFill, StopFill } from 'react-bootstrap-icons';
-
+import { useEffect, useState } from "react";
+import { Button, FormControl, InputGroup } from "react-bootstrap";
+import { PauseFill, PlayFill, StopFill } from 'react-bootstrap-icons';
+import { useTabulature } from "../../../hooks";
+import { AppErrors } from "../../../models";
+import * as Tone from "tone";
 
 export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playing }) => {
 
@@ -33,12 +33,15 @@ export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playin
     const play = async () => {
         clearPlayerErrors();
         if (selectedMeasure == 0) {
-          //  setPlaying(true);
+            Tone.start();
             await tabulaturePlayer.play();
         } else {
+            if (selectedMeasure > tabulature.getLength() - 1) {
+                setSelectedMeasure(tabulature.getLength() - 1);
+            }
             const start = tabulature.getMeasure(selectedMeasure);
             if (start) {
-               // setPlaying(true);
+                await Tone.start();
                 await tabulaturePlayer.play(start);
             } else {
                 setPlayerErrors({ ['playError']: [`There is no measure with id: ${selectedMeasure}.`] })
@@ -54,8 +57,6 @@ export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playin
         tabulaturePlayer.stop();
     }
 
-
-
     const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(event.target.value);
         tabulaturePlayer.changeTempo(value);
@@ -68,8 +69,10 @@ export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playin
     }
 
     const handleBlurSelectMeasure = () => {
-        if (isNaN(selectedMeasure)) {
+        if (isNaN(selectedMeasure) || selectedMeasure < 0) {
             setSelectedMeasure(0);
+        } else if (selectedMeasure > tabulature.getLength() - 1) {
+            setSelectedMeasure(tabulature.getLength() - 1)
         }
     }
 
@@ -129,7 +132,7 @@ export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playin
                         <FormControl
                             type='number'
                             min={0}
-                            value={selectedMeasure}
+                            value={isNaN(selectedMeasure) ? '' : selectedMeasure}
                             max={tabulature.getLength() - 1}
                             onChange={handleSelectMeasure}
                             onBlur={handleBlurSelectMeasure}

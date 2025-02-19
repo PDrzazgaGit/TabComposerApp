@@ -1,7 +1,6 @@
 import { makeAutoObservable } from "mobx";
-import { TuningFactory } from "../services";
-import { MeasureService, SerializedMeasure, SerializedNote } from "../services/MeasureService";
-import { ITuning, IMeasure, SerializedTuning } from "./";
+import { MeasureService, } from "../services";
+import { IMeasure, ITuning } from "./";
 
 export interface ITabulature {
     title: string;

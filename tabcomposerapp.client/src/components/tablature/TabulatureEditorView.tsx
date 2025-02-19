@@ -1,17 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import { MeasureProvider } from "../../context/MeasureProvider";
-import { useTabulature } from "../../hooks/useTabulature";
-import { AddMeasureView } from "./measures/AddMeasureView";
-import { MeasureLabelEditor } from "./measures/MeasureLabelEditor";
-import { MeasureView } from "./measures/MeasureView";
-import { TabulatureContainer } from "./TabulatureContainer";
-import { EditorToolbar } from "./toolbar/EditorToolbar";
-import { Modal, Button, FormControl, InputGroup } from "react-bootstrap";
-import { useAuth } from "../../hooks/useAuth";
-import { SessionExpired } from "../SessionExpired";
-import { observer } from "mobx-react-lite";
 import { runInAction } from 'mobx';
-import { useTabulatureApi } from "../../hooks/useTabulatureApi";
+import { observer } from "mobx-react-lite";
+import { useEffect, useMemo, useState } from "react";
+import { Button, FormControl, InputGroup, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { SessionExpired } from "../";
+import { MeasureProvider } from "../../context";
+import { useAuth, useTabulature, useTabulatureApi } from "../../hooks";
+import { TabulatureContainer } from "./";
+import { AddMeasureView, MeasureLabelEditor, MeasureView } from "./measures";
+import { EditorToolbar } from "./toolbar";
 
 
 export const TabulatureEditorView: React.FC<{ previevMode?: boolean }> = observer(({ previevMode = false}) => {
@@ -28,6 +24,10 @@ export const TabulatureEditorView: React.FC<{ previevMode?: boolean }> = observe
     const updateTimeMs: number = 5000;
 
     const token = useMemo(() => getToken(), [getToken]);
+
+    const minFret = 12
+
+    const maxFret = 30
 
     useEffect(() => {
         if (previevMode)
@@ -61,7 +61,13 @@ export const TabulatureEditorView: React.FC<{ previevMode?: boolean }> = observe
     }
 
     const handleChangeMaxFrets = (event: React.ChangeEvent<HTMLInputElement>) => {
-        runInAction(() => tabulature.frets = event.target.valueAsNumber);
+        let value = event.target.valueAsNumber;
+        
+        if (isNaN(value) ) {
+            value = minFret;
+        }
+        
+        runInAction(() => tabulature.frets = value);
     }
 
     const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,13 +129,32 @@ export const TabulatureEditorView: React.FC<{ previevMode?: boolean }> = observe
                         <InputGroup
                             className="d-flex justify-content-center align-items-center column mb-3"
                         >
-                            <InputGroup.Text>Frets</InputGroup.Text>
+                            <OverlayTrigger
+                                placement="bottom"
+                                overlay={(props: React.HTMLAttributes<HTMLDivElement>) => {
+                                    return (
+                                        <Tooltip {...props}>
+                                            From range {`${minFret}-${maxFret}`}
+                                        </Tooltip>
+                                    )
+                                }}
+                                flip
+                            >
+                                <InputGroup.Text>Frets</InputGroup.Text>
+                            </OverlayTrigger>
                             <FormControl
                                 type="number"
-                                min={12}
-                                max={30}
+                                min={minFret}
+                                max={maxFret}
                                 value={tabulature.frets}
                                 onChange={handleChangeMaxFrets}
+                                onBlur={() => {
+                                    if (tabulature.frets < minFret) {
+                                        tabulature.frets = minFret
+                                    } else if (tabulature.frets > maxFret) {
+                                        tabulature.frets = maxFret;
+                                    }
+                                }}
                             />
                         </InputGroup>
                         <InputGroup

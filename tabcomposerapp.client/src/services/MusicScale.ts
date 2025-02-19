@@ -1,5 +1,4 @@
-import { Sound } from "./../models/SoundModel";
-import { Notation } from "./../models/NotationModel";
+import { Notation, Sound } from "./../models";
 
 export class MusicScale {
 
@@ -56,14 +55,12 @@ export class MusicScale {
         let closestFrequency = Infinity;
         let minDifference = Infinity;
 
-        // Iterujemy przez wszystkie notacje i oktawy
         for (const notation in this.frequencies) {
             const octaves = this.frequencies[notation as unknown as Notation];
             for (const octave in octaves) {
                 const freq = octaves[parseInt(octave)];
                 const diff = Math.abs(freq - frequency);
 
-                // Sprawdzamy, czy ta czêstotliwoœæ jest bli¿sza ni¿ poprzednia
                 if (diff < minDifference) {
                     minDifference = diff;
                     closestFrequency = freq;

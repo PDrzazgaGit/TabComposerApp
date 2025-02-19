@@ -1,9 +1,9 @@
-import { Container, Row, Col, Spinner } from "react-bootstrap";
-import { TabulatureEditorView } from "../tablature/TabulatureEditorView";
-import { TabulatureProvider } from "../../context/TabulatureProvider";
-import {  useEffect } from "react";
+import { useEffect } from "react";
+import { Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useTabulatureApi } from "../../hooks/useTabulatureApi";
+import { TabulatureProvider } from "../../context";
+import { useTabulatureApi } from "../../hooks";
+import { TabulatureEditorView } from "../tablature";
 
 export const Editor = () => {
 

@@ -1,8 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { StringEditorView } from "../strings/StringEditorView";
-import { StringView } from "../strings/StringView";
 import { observer } from "mobx-react-lite";
+import { useMeasure } from "../../../hooks";
+import { StringEditorView, StringView } from "../strings";
 
 
 interface MeasureViewProps {

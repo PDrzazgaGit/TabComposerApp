@@ -1,5 +1,5 @@
-import { makeObservable, observable, action, runInAction } from 'mobx';
-import { Notation } from './NotationModel'
+import { makeObservable, observable, action } from 'mobx';
+import { Notation } from './'
 
 export class Sound {
     public constructor(
@@ -9,17 +9,15 @@ export class Sound {
         protected durationMs: number = 500
        
     ) {
-        //makeAutoObservable(this);
+
         makeObservable(this, {
-            frequency: observable, // Obserwowalna w³aœciwoœæ
-            notation: observable,  // Obserwowalna w³aœciwoœæ
-            octave: observable,    // Obserwowalna w³aœciwoœæ
-            //durationMs: observable, // Chroniona, ale nadal obserwowalna
+            frequency: observable, 
+            notation: observable, 
+            octave: observable,  
+         
+            getDurationMs: action, 
 
-           // getName: action,     // Getter jako computed
-            getDurationMs: action, // Getter jako computed
-
-            setDurationMs: action, // Akcja
+            setDurationMs: action, 
         });
     }
 

@@ -1,10 +1,9 @@
 import { observer } from "mobx-react-lite";
-import { MeasureProvider } from "../../context/MeasureProvider";
-import { useTabulature } from "../../hooks/useTabulature";
-import { MeasureLabel } from "./measures/MeasureLabel";
-import { MeasureView } from "./measures/MeasureView";
-import { TabulatureContainer } from "./TabulatureContainer";
-import { EditorToolbar } from "./toolbar/EditorToolbar";
+import { MeasureProvider } from "../../context";
+import { useTabulature } from "../../hooks";
+import { TabulatureContainer } from "./";
+import { MeasureLabel, MeasureView } from "./measures";
+import { EditorToolbar } from "./toolbar";
 
 export const TabulatureView = observer(() => {
 

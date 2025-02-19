@@ -1,8 +1,8 @@
 ﻿import * as Tone from "tone";
 import { TransportClass } from "tone/build/esm/core/clock/Transport";
 import { NoteDuration } from "../../models";
-import { IAnalyzerService } from "./AnalyzerService";
 import { MusicScale } from "../MusicScale";
+import { IAnalyzerService } from "./";
 
 export type FrequencyBuffer = { timestamp: number, frequency: number };
 
@@ -33,7 +33,7 @@ export class BufferAnalyser {
         this.synth = new Tone.MembraneSynth().toDestination();
     }
 
-    public async start(tempo: number, tempoFactor: number, numerator: number, denominator: number, duration: NoteDuration) {
+    public async start(tempo: number, numerator: number, denominator: number, duration: NoteDuration) {
         if (this.transport.state === "started") {
             return;
         }
@@ -110,9 +110,9 @@ export class BufferAnalyser {
                 measureParts.forEach((part, partKey) => {
                     part.sort((a, b) => {
                         if (a.frequency !== b.frequency) {
-                            return a.frequency - b.frequency; // Sortowanie po frequency rosnąco
+                            return a.frequency - b.frequency; 
                         }
-                        return a.timestamp - b.timestamp; // Sortowanie po timestamp rosnąco (druga kolejność)
+                        return a.timestamp - b.timestamp; 
                     });
 
                     const frequency = this.analyzePart(part, this.samplesOfFrequencies);
@@ -177,8 +177,6 @@ export class BufferAnalyser {
 
         frequencyGroups.forEach((notes, frequency) => {
 
-            //notes.sort((a, b) => a.timestamp - b.timestamp); //do ewentualnego wywalenia
-
             let index = 0;
             while (index < notes.length) {
                 let currentCount = 1;
@@ -194,14 +192,14 @@ export class BufferAnalyser {
                         break;
                     }
                 }
-                // Jeśli znaleziony ciąg jest dłuższy niż poprzednio zapamiętany, aktualizujemy wynik
+
                 if (currentCount > bestSequence.count) {
                     bestSequence = {
                         frequency,
                         count: currentCount          
                     };
                 }
-                // Przechodzimy do kolejnej próbki, pomijając już przetworzone elementy
+
                 index = j;
             }
         });

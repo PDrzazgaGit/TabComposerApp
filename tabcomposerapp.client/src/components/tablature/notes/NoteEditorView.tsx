@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { Popover, InputGroup, FormControl, Dropdown, FormCheck, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { INote, IPause, NoteKind, NoteDuration, Articulation } from "../../../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
-import { NoteView } from "./NoteView";
-import { AppErrors } from "../../../models/AppErrorsModel";
+import { Button, ButtonGroup, Dropdown, FormCheck, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { useMeasure, useTabulature } from "../../../hooks";
+import { AppErrors, Articulation, INote, IPause, NoteDuration, NoteKind } from "../../../models";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils";
+import { NoteView } from "./";
 
-//import { NotePlayer } from '../services/NotePlayer';
 interface NoteEditorViewProps {
     note: INote | IPause;
     stringId: number;
     stringWidthPx?: number;
     onNoteDragChange?: (moved: number) => void;
+    onNoteChange?: (moved: number) => void;
 }
 
-export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange, stringWidthPx }) => {
+export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, onNoteDragChange, onNoteChange , stringWidthPx }) => {
 
     const isNote = (note: INote | IPause): note is INote => {
         return note.kind === NoteKind.Note;
@@ -52,7 +50,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
     }
 
     const handleMoveRight = () => {
-        if (moveNoteRight(note, stringId, true ,selectedInterval)) {
+        if (moveNoteRight(note, stringId, true, selectedInterval)) {
+            if (onNoteChange) {
+                onNoteChange(note.getTimeStampMs())
+            }
             document.body.click();
             clearNoteEditorErrors();
         } else {
@@ -62,6 +63,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
 
     const handleMoveLeft = () => {
         if (moveNoteLeft(note, stringId, true, selectedInterval)) {
+            if (onNoteChange) {
+                onNoteChange(note.getTimeStampMs())
+            }
             document.body.click();
             clearNoteEditorErrors();
         } else {
@@ -370,8 +374,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({ note, stringId, 
                 onDragEnd={handleDragEnd}
                 onDrag={handleDrag}
                 onDragEnter={ (e: React.DragEvent) => e.preventDefault()}
-                // onDragExit={() => document.body.click()}
-                //onDragLeave={() => document.body.click()}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     height: '100%',

@@ -1,11 +1,9 @@
-import { InputGroup, FormControl, Dropdown, FormCheck, Button, Spinner } from "react-bootstrap";
-import { NoteDuration } from "../../../models";
-import { noteRepresentationMap } from "../../../utils/noteUtils";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { useTabulatureApi } from "../../../hooks/useTabulatureApi";
-import { useAuth } from "../../../hooks/useAuth";
 import { autorun } from "mobx";
 import { useEffect, useState } from "react";
+import { Button, Dropdown, FormCheck, FormControl, InputGroup, OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
+import { useAuth, useTabulature, useTabulatureApi } from "../../../hooks";
+import { NoteDuration } from "../../../models";
+import { noteRepresentationMap } from "../../../utils";
 
 export const GlobalSettings: React.FC<{ previevMode?: boolean }> = ({previevMode=false}) => {
 
@@ -29,12 +27,6 @@ export const GlobalSettings: React.FC<{ previevMode?: boolean }> = ({previevMode
     const { updateTabulature, tabulatureManagerApi } = useTabulatureApi();
     const { getToken } = useAuth();
 
-    
-
-    const handleMeasuresPerRow = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setMeasuresPerRow(event.target.valueAsNumber);
-    }
-
     const [upToDate, setUpToDate] = useState(true);
 
     useEffect(() => {
@@ -43,7 +35,7 @@ export const GlobalSettings: React.FC<{ previevMode?: boolean }> = ({previevMode
             setUpToDate(tabulatureManagerApi.upToDate);
         });
 
-        return () => disposer();  // Czyszczenie efektu
+        return () => disposer();  
     }, [tabulatureManagerApi]);
     
     const handleClick = async () => {
@@ -60,49 +52,150 @@ export const GlobalSettings: React.FC<{ previevMode?: boolean }> = ({previevMode
         }
     }
 
+    const minValue: number = 1;
+    const maxTempo: number = 999;
+    const maxDisplay: number = 5;
+    const maxMetrum: number = 12;
+
     return (
         <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
             <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
-                <InputGroup.Text>Display</InputGroup.Text>
+                <OverlayTrigger
+                    placement="bottom"
+                    overlay={(props: React.HTMLAttributes<HTMLDivElement>) => {
+                        return (
+                            <Tooltip {...props}>
+                                Number of measures in row
+                            </Tooltip>
+                        )
+                    }}
+                    flip
+                >
+                    <InputGroup.Text>Display</InputGroup.Text>
+                </OverlayTrigger>
+                
                 <FormControl
                     type="number"
-                    min={1}
-                    max={5}
-                    value={measuresPerRow}
-                    onChange={handleMeasuresPerRow}
+                    min={minValue}
+                    max={maxDisplay}
+                    value={isNaN(measuresPerRow) ? '' : measuresPerRow}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setMeasuresPerRow(e.target.valueAsNumber);
+                    }}
+                    onBlur={(() => {
+                        if (measuresPerRow > maxDisplay) {
+                            setMeasuresPerRow(maxDisplay)
+                        } else if (isNaN(measuresPerRow)) {
+                            setMeasuresPerRow(3)
+                        } else if (measuresPerRow < minValue) {
+                            setMeasuresPerRow(minValue)
+                        }
+                    })}
                 />
             </InputGroup>
 
             <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
-                <InputGroup.Text>Tempo</InputGroup.Text>
+                <OverlayTrigger
+                    placement="bottom"
+                    overlay={(props: React.HTMLAttributes<HTMLDivElement>) => {
+                        return (
+                            <Tooltip {...props}>
+                                From range {`${minValue}-${maxTempo}`}
+                            </Tooltip>
+                        )
+                    }}
+                    flip
+                >
+                    <InputGroup.Text>Tempo</InputGroup.Text>
+                </OverlayTrigger>
+                
                 <FormControl
                     type="number"
-                    min={1}
-                    max={999}
-                    value={globalTempo}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalTempo(e.target.valueAsNumber)}
+                    min={minValue}
+                    max={maxTempo}
+                    value={isNaN(globalTempo) ? '' : globalTempo}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setGlobalTempo(e.target.valueAsNumber)
+                    }}
+                    onBlur={(() => {
+                        if (globalTempo > maxTempo) {
+                            setGlobalTempo(maxTempo)
+                        } else if (isNaN(globalTempo)) {
+                            setGlobalTempo(120)
+                        } else if (globalTempo < minValue) {
+                            setGlobalTempo(minValue)
+                        }
+                    })}
                 />
             </InputGroup>
 
             <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
-                <InputGroup.Text>Numerator</InputGroup.Text>
+                <OverlayTrigger
+                    placement="bottom"
+                    overlay={(props: React.HTMLAttributes<HTMLDivElement>) => {
+                        return (
+                            <Tooltip {...props}>
+                                From range {`${minValue}-${maxMetrum}`}
+                            </Tooltip>
+                        )
+                    }}
+                    flip
+                >
+                    <InputGroup.Text>Numerator</InputGroup.Text>
+                </OverlayTrigger>
+               
                 <FormControl
                     type="number"
-                    min={1}
-                    max={999}
-                    value={globalNumerator}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalNumerator(e.target.valueAsNumber)}
+                    min={minValue}
+                    max={maxMetrum}
+                    value={isNaN(globalNumerator) ? '' : globalNumerator}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setGlobalNumerator(e.target.valueAsNumber)
+                    }}
+                    onBlur={(() => {
+                        if (globalNumerator > maxMetrum) {
+                            setGlobalNumerator(maxMetrum)
+                        } else if (isNaN(globalNumerator)) {
+                            setGlobalNumerator(4)
+                        } else if (globalNumerator < minValue) {
+                            setGlobalNumerator(minValue)
+                        }
+                    })}
                 />
             </InputGroup>
 
             <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 20%' }}>
-                <InputGroup.Text>Denominator</InputGroup.Text>
+                <OverlayTrigger
+                    placement="bottom"
+                    overlay={(props: React.HTMLAttributes<HTMLDivElement>) => {
+                        return (
+                            <Tooltip {...props}>
+                                From range {`${minValue}-${maxMetrum}`}
+                            </Tooltip>
+                        )
+                    }}
+                    flip
+                >
+                    <InputGroup.Text>Denominator</InputGroup.Text>
+                </OverlayTrigger>
+                
                 <FormControl
                     type="number"
-                    min={1}
-                    max={999}
-                    value={globalDenominator}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalDenominator(e.target.valueAsNumber)}
+                    min={minValue}
+                    max={maxMetrum}
+                    value={isNaN(globalDenominator) ? '' : globalDenominator}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setGlobalDenominator(e.target.valueAsNumber)
+                    }}
+                    onBlur={(() => {
+                        if (globalDenominator > maxMetrum) {
+                            setGlobalDenominator(maxMetrum)
+                        } else if (isNaN(globalDenominator)) {
+                            setGlobalDenominator(4)
+                        } else if (globalDenominator < minValue) {
+                            setGlobalDenominator(minValue)
+                        }
+                    })}
                 />
             </InputGroup>
 

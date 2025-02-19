@@ -1,9 +1,6 @@
-import { useMemo, useState } from "react";
-import { Container, Col, InputGroup, Button, FormControl } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../hooks/useAuth";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { SessionExpired } from "../../SessionExpired";
+import { useState } from "react";
+import { Button, Col, Container, FormControl, InputGroup } from "react-bootstrap";
+import { useTabulature } from "../../../hooks";
 
 
 
@@ -11,11 +8,7 @@ export const AddMeasureView = () => {
 
     const { addMeasure, globalNumerator, globalDenominator, globalTempo, getMeasuresCount, copyMeasure } = useTabulature();
 
-    //const { getToken } = useAuth();
-
     const [measureToCopy, setMeasureToCopy] = useState(getMeasuresCount()-1);
-
-    //const token = useMemo(() => getToken(), [getToken])
 
     const handleAddMeasure = async () => {
         addMeasure(globalTempo, globalNumerator, globalDenominator);
@@ -28,8 +21,8 @@ export const AddMeasureView = () => {
     return (
        
         <Container
-            className="d-flex justify-content-center align-items-center"  // Wyrównanie na œrodku
-            style={{ height: "100%" }}  // + 1.5 ==> measure label
+            className="d-flex justify-content-center align-items-center"  
+            style={{ height: "100%" }}  
         >
             <Col className="d-flex flex-column align-items-center">
                 <InputGroup className="mb-3 w-50">
@@ -56,6 +49,13 @@ export const AddMeasureView = () => {
                             max={getMeasuresCount() - 1}
                             value={measureToCopy}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setMeasureToCopy(e.target.valueAsNumber) }}
+                            onBlur={() => {
+                                if (isNaN(measureToCopy) || measureToCopy < 0) {
+                                    setMeasureToCopy(0)
+                                } else if (measureToCopy > getMeasuresCount() - 1) {
+                                    setMeasureToCopy(getMeasuresCount() - 1)
+                                }
+                            }}
                         />
                     </InputGroup>
                 )}

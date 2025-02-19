@@ -1,27 +1,20 @@
+import * as PitchFinder from 'pitchfinder';
 import * as Tone from 'tone';
-import * as PitchFinder from 'pitchfinder'
-import { IAnalyzerService } from './AnalyzerService';
 import { MusicScale } from '../MusicScale';
-//import { YIN } from './methods/YIN';
+import { IAnalyzerService } from './';
 
 export class AMDFAnalyzerService extends Tone.Analyser implements IAnalyzerService {
 
     private detectPitch: (signal: Float32Array) => number | null;
-   // private yin: YIN;
 
     constructor(amdfSize = 1024, public minFrequency: number= 60, public maxFrequency: number = 1400) {
         super('waveform', amdfSize);
-
-        //this.yin = new YIN(Tone.getContext().sampleRate, amdfSize, 0);
 
         this.detectPitch = PitchFinder.AMDF(
             {
                 sampleRate: Tone.getContext().sampleRate,
                 minFrequency: this.minFrequency,
                 maxFrequency: this.maxFrequency,
-
-                //ratio : 0.8,
-                //sensitivity: 0.7
 
             }
         );
@@ -41,24 +34,22 @@ export class AMDFAnalyzerService extends Tone.Analyser implements IAnalyzerServi
         }
 
         let animationFrameId: number | null = null;
-        let dominantFrequency: number | null = null; // Przechowuje dominuj¹c¹ czêstotliwoœæ
-        let soundName: string | null = null; // Przechowuje nazwê dŸwiêku
+        let dominantFrequency: number | null = null; 
+        let soundName: string | null = null; 
 
-        // Funkcja ustawiaj¹ca rozmiar kanwy zgodnie z widocznymi wymiarami CSS
         const setCanvasSize = () => {
             const { width, height } = canvas.getBoundingClientRect();
             canvas.width = Math.floor(width * window.devicePixelRatio);
             canvas.height = Math.floor(height * window.devicePixelRatio);
-            // Resetujemy transformacjê i skalujemy kontekst
+
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         };
 
-        // Ustawiamy pocz¹tkowy rozmiar
         setCanvasSize();
         window.addEventListener("resize", setCanvasSize);
 
-        // Aktualizacja dominuj¹cej czêstotliwoœci w interwa³ach (np. co 250 ms)
+
         const updateFrequencyInfo = () => {
             const value = this.getDominantFrequency();
             dominantFrequency = value;
@@ -73,29 +64,26 @@ export class AMDFAnalyzerService extends Tone.Analyser implements IAnalyzerServi
         setInterval(updateFrequencyInfo, 250);
 
         const draw = () => {
-            const waveform = this.getValue(); // Pobieranie danych z waveform
+            const waveform = this.getValue();
             if (!(waveform instanceof Float32Array)) {
                 throw new Error("getValue() must return a Float32Array");
             }
 
-            // Pobieramy widoczne wymiary kanwy (w CSS pikselach)
             const { width: visibleWidth, height: visibleHeight } = canvas.getBoundingClientRect();
 
-            // Czyszczenie kanwy - u¿ywamy widocznych wymiarów
+
             ctx.clearRect(0, 0, visibleWidth, visibleHeight);
 
-            // Obliczanie skali dla amplitudy i szerokoœci
-            // U¿ywamy d³ugoœci widocznej kanwy (CSS) do rysowania
-            const barWidth = visibleWidth / (waveform.length - 1); // Dzielimy przez (length - 1), aby ostatni punkt by³ na koñcu kanwy
-            const middle = visibleHeight / 2; // Pozycja œrodka (0 amplitudy)
+            const barWidth = visibleWidth / (waveform.length - 1); 
+            const middle = visibleHeight / 2;
 
             ctx.beginPath();
-            ctx.moveTo(0, middle); // Zaczynamy od œrodka wysokoœci
+            ctx.moveTo(0, middle); 
 
             for (let i = 0; i < waveform.length; i++) {
                 const amplitude = waveform[i];
-                const x = i * barWidth; // Skalowanie wspó³rzêdnej X
-                // Amplituda rysowana wzglêdem œrodka – dodatnie wartoœci id¹ w dó³, ujemne w górê
+                const x = i * barWidth; 
+             
                 const y = middle + (amplitude * middle);
                 ctx.lineTo(x, y);
             }
@@ -104,7 +92,7 @@ export class AMDFAnalyzerService extends Tone.Analyser implements IAnalyzerServi
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Wyœwietlanie dominuj¹cej czêstotliwoœci w prawym górnym rogu
+          
             if (dominantFrequency !== null) {
                 ctx.font = '16px Arial';
                 ctx.fillStyle = 'black';
@@ -124,10 +112,4 @@ export class AMDFAnalyzerService extends Tone.Analyser implements IAnalyzerServi
             }
         };
     }
-
-
-
-
-
-
 }

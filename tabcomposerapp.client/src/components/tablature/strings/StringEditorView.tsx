@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { Popover, InputGroup, Dropdown, ButtonGroup, Button, OverlayTrigger } from "react-bootstrap";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { NoteDuration, Sound, NoteKind, IMeasure, INote, Articulation } from "../../../models";
-import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils/noteUtils";
-import { NoteEditorView } from "../notes/NoteEditorView";
-import { v4 as uuidv4 } from 'uuid';
-import "../../../styles/StringView.css"
 import { observer } from "mobx-react-lite";
-import { AppErrors } from "../../../models/AppErrorsModel";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Button, ButtonGroup, Dropdown, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { v4 as uuidv4 } from 'uuid';
+import { useMeasure, useTabulature } from "../../../hooks";
+import { AppErrors, Articulation, IMeasure, INote, NoteDuration, NoteKind, Sound } from "../../../models";
+import "../../../styles/StringView.css";
+import { noteRepresentationMap, pauseRepresentationMap } from "../../../utils";
+import { NoteEditorView } from "../notes";
 
 interface StringEditorViewProps {
     stringId: number;
@@ -177,7 +175,6 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                     position: 'absolute',
                     left: prevNoteTimeStamp !== 0 ? `calc(${startX}% + 0.6em)` : `${startX}%`,
                     width: prevNoteTimeStamp !== 0 ? `calc(${dx}% - 0.6em)` : `${dx}%`,
-                    // top: '-0.25em',
                     height: '1.5em',
                     overflow: 'visible',
                 }}
@@ -487,6 +484,10 @@ export const StringEditorView: React.FC<StringEditorViewProps> = observer(({ str
                                                 if (moved != noteMoved) {
                                                     setNoteMoved(moved)
                                                 }
+                                            }}
+                                            onNoteChange={(moved: number) => { //ustawiæ odœwie¿anie dla przesuwania za pomoc¹ przycisku                                            
+                                                setNoteMoved(moved)
+
                                             }}
                                             stringWidthPx={hoverDiv.current ? hoverDiv.current.getBoundingClientRect().width : undefined}
                                             

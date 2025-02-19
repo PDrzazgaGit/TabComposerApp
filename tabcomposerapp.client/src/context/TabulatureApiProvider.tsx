@@ -1,9 +1,7 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useMemo } from 'react';
+import { TabulatureManagerApi } from '../api';
+import { ITabulature, TabulatureDataModel } from '../models';
 import { TabulatureApiContext } from './TabulatureApiContext';
-import {  TabulatureManagerApi } from '../api/TabulatureManagerApi';
-import { TabulatureDataModel } from '../models/TabulatureDataModel';
-import { ITabulature } from '../models';
-import { autorun } from 'mobx';
 
 interface TabulatureApiProviderProps {
     children: ReactNode;

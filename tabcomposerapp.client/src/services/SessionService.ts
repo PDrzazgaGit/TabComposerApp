@@ -1,5 +1,5 @@
-import { IUser } from "../models/UserModel";
-import { SerializationService } from "./SerializationService";
+import { IUser } from "../models";
+import { SerializationService } from "./";
 
 export class SessionService {
 
@@ -7,7 +7,7 @@ export class SessionService {
     private static readonly userKey = "userData";
 
     public static setJWT(token: string, sessionOnly: boolean) {
-        if (sessionOnly) {
+        if (!sessionOnly) {
             sessionStorage.setItem(this.tokenKey, token);
         } else {
             localStorage.setItem(this.tokenKey, token);
@@ -25,7 +25,7 @@ export class SessionService {
 
     public static setUser(user: IUser, sessionOnly: boolean) {
         const userData = SerializationService.serializeUser(user);
-        if (sessionOnly) {
+        if (!sessionOnly) {
             sessionStorage.setItem(this.userKey, userData);
         } else {
             localStorage.setItem(this.userKey, userData);

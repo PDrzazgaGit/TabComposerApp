@@ -1,5 +1,5 @@
 import { MusicScale } from "./";
-import { Note, NoteDuration, Sound, Notation, ITuning } from "./../models";
+import { Notation, Note, NoteDuration, Sound } from "./../models";
 
 export class GuitarScale extends MusicScale {
 
@@ -13,14 +13,11 @@ export class GuitarScale extends MusicScale {
         let frequency: number = base.frequency;
 
         if (fret > 0) {
-            // Dodaj przesuniêcie progów do notacji
             const totalSteps = notation + fret;
 
-            // Oblicz now¹ notacjê i oktawê
-            notation = totalSteps % 12; // Ustal nutê w ramach oktawy
-            octave += Math.floor(totalSteps / 12); // Zwiêksz oktawê, jeœli przekroczyliœmy granicê
+            notation = totalSteps % 12; 
+            octave += Math.floor(totalSteps / 12); 
 
-            // Oblicz czêstotliwoœæ dla nowej nuty i oktawy
             frequency = this.calculateFrequency(notation, octave);
         }
 

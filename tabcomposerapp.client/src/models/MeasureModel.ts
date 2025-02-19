@@ -1,4 +1,4 @@
-import { NoteDuration, INote, IPause, Articulation } from "./"
+import { Articulation, INote, IPause, NoteDuration } from "./";
 
 export interface IMeasure {
     readonly frets: number;

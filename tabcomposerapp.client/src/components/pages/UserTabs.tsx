@@ -1,13 +1,10 @@
-import { useState, useEffect, Key, useMemo } from "react";
-import { Container, Row, Col, Card, ButtonGroup, Button, Modal, Spinner } from "react-bootstrap";
+import { Key, useEffect, useMemo, useState } from "react";
+import { Button, ButtonGroup, Card, Col, Container, Modal, Row, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { Notation } from "../../models";
-import { TabulatureDataModel } from "../../models/TabulatureDataModel";
-import { CreateTabulature } from "../tablature/CreateTabulature";
-import { SessionExpired } from "../SessionExpired";
-import { useTabulatureApi } from "../../hooks/useTabulatureApi";
-import { AppErrors } from "../../models/AppErrorsModel";
+import { SessionExpired } from "../";
+import { useAuth, useTabulatureApi } from "../../hooks";
+import { AppErrors, Notation, TabulatureDataModel } from "../../models";
+import { CreateTabulature } from "../tablature";
 
 export const UserTabs = () => {
     const { getToken, user } = useAuth();
@@ -51,6 +48,7 @@ export const UserTabs = () => {
             setTabInfo(data);        
         };
         fetchTablatureData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
     const handlePlay = async (id: number) => {

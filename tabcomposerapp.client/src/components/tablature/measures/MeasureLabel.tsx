@@ -1,5 +1,4 @@
-//import { forwardRef } from 'react';
-import { useMeasure } from '../../../hooks/useMeasure';
+import { useMeasure } from '../../../hooks';
 
 interface MeasureLabelProps {
     divToHover?: React.RefObject<HTMLDivElement>;

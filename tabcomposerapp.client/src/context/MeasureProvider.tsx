@@ -1,6 +1,6 @@
-import { useState, ReactNode } from 'react';
-import { MeasureContext } from './MeasureContext';
+import { ReactNode, useState } from 'react';
 import { Articulation, IMeasure, INote, IPause, NoteDuration } from '../models';
+import { MeasureContext } from './MeasureContext';
 
 interface MeasureProviderProps {
     children: ReactNode;
