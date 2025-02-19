@@ -1,23 +1,25 @@
-import { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button, FormControl, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
-import { useAuth } from "../../../hooks/useAuth";
-import { useError } from "../../../hooks/useError";
-import { useMeasure } from "../../../hooks/useMeasure";
-import { useTabulature } from "../../../hooks/useTabulature";
-import { MeasureLabel } from "./MeasureLabel";
-import { SessionExpired } from "../../SessionExpired";
+import { SessionExpired } from "../../";
+import { useAuth, useMeasure, useTabulature } from "../../../hooks";
+import { AppErrors } from "../../../models";
+import { MeasureLabel } from "./";
 
-export const MeasureLabelEditor = () => {
+export const MeasureLabelEditor: React.FC<{ previewMode?: boolean }> = ({ previewMode = false }) => {
 
     const { measure, changeSignature, changeTempo } = useMeasure();
 
     const { deleteMeasure } = useTabulature();
 
-    const { measureEditorErrors, setMeasureEditorErrors, clearMeasureEditorErrors } = useError();
+    const [measureEditorErrors, setMeasureEditorErrors] = useState<AppErrors>({});
 
-    const { getToken } = useAuth();
+    const clearMeasureEditorErrors = () => setMeasureEditorErrors({});
 
-    const [isHovered, setIsHovered] = useState(false);
+    const { getTokenWithAuth } = useAuth();
+
+    //const [isHovered, setIsHovered] = useState(false);
+
+    const divToHover = useRef<HTMLDivElement>(null);
 
     const [numerator, setNumerator] = useState(measure.numerator);
     const [denominator, setDenominator] = useState(measure.denominator);
@@ -58,12 +60,15 @@ export const MeasureLabelEditor = () => {
     };
 
     const handleDeleteMeasure = async () => {
-        const token = await getToken();
-        if (!token) {
-            <SessionExpired />
-            return;
+        
+        if (previewMode === false) {
+            const token = await getTokenWithAuth();
+            if (!token) {
+                <SessionExpired />
+            }
+           // return;
         }
-        deleteMeasure(measure, token);
+        deleteMeasure(measure);
     }
 
     const handleEnter = () => {
@@ -162,10 +167,11 @@ export const MeasureLabelEditor = () => {
             flip
         >
             <div
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
+                onMouseEnter={() => { if (divToHover.current) divToHover.current.style.color = '#007bff' }}
+                onMouseLeave={() => { if (divToHover.current) divToHover.current.style.color = 'black' }}
             >
-                <MeasureLabel isHovered={isHovered} />
+                <MeasureLabel divToHover={divToHover} //isHovered={isHovered}
+                />
             </div>
         </OverlayTrigger>
         

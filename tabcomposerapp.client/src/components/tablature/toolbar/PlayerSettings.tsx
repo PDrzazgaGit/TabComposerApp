@@ -1,91 +1,181 @@
-import { Button } from "react-bootstrap";
-import { useTabulature } from "../../../hooks/useTabulature";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import { TabulaturePlayer } from "../../../services/audio/TabulaturePlayer";
+import { Button, FormControl, InputGroup } from "react-bootstrap";
+import { PauseFill, PlayFill, StopFill } from 'react-bootstrap-icons';
+import { useTabulature } from "../../../hooks";
+import { AppErrors } from "../../../models";
+import * as Tone from "tone";
 
-export const PlayerSettings = () => {
+export const PlayerSettings: React.FC<{ playing: boolean }> = observer(({ playing }) => {
 
-    const { tabulature } = useTabulature();
+    const { tabulature, tabulaturePlayer, setRecordTempo } = useTabulature();
 
-    const [player, setPlayer] = useState<TabulaturePlayer | undefined>(undefined);
+    const [playerErrors, setPlayerErrors] = useState<AppErrors>({});
+
+    const clearPlayerErrors = () => setPlayerErrors({});
+
+    const [selectedMeasure, setSelectedMeasure] = useState(0);
+
+    const [tempoFactor, setTempoFactor] = useState(1); 
 
     useEffect(() => {
-        if (tabulature) {
-            setPlayer(new TabulaturePlayer(tabulature));
+        return () => {
+            tabulaturePlayer.stop();
         }
-    }, [tabulature])
+    }, [tabulaturePlayer])
+
+    useEffect(() => {
+        if (!playing) {
+            tabulaturePlayer.stop();
+        }
+    }, [tabulaturePlayer, playing])
 
     const play = async () => {
-
-        if (player) {
-
-            await player.play();
-
-            //const tab = new TabulaturePlayer();
-            //tab.playTabulature(tabulature);
+        clearPlayerErrors();
+        if (selectedMeasure == 0) {
+            Tone.start();
+            await tabulaturePlayer.play();
+        } else {
+            if (selectedMeasure > tabulature.getLength() - 1) {
+                setSelectedMeasure(tabulature.getLength() - 1);
+            }
+            const start = tabulature.getMeasure(selectedMeasure);
+            if (start) {
+                await Tone.start();
+                await tabulaturePlayer.play(start);
+            } else {
+                setPlayerErrors({ ['playError']: [`There is no measure with id: ${selectedMeasure}.`] })
+            }
         }
     }
 
     const pause = async () => {
-
-        if (player) {
-
-            player.pause();
-            //player.changeTempo(1.75);
-            //const tab = new TabulaturePlayer();
-            //tab.playTabulature(tabulature);
-        }
+        tabulaturePlayer.pause();
     }
 
     const stop = async () => {
+        tabulaturePlayer.stop();
+    }
 
-        if (player) {
+    const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(event.target.value);
+        tabulaturePlayer.changeTempo(value);
+        setTempoFactor(value);
+        setRecordTempo(value);
+    };
 
-            player.stop();
+    const handleSelectMeasure = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedMeasure(event.target.valueAsNumber);
+    }
 
-            //const tab = new TabulaturePlayer();
-            //tab.playTabulature(tabulature);
+    const handleBlurSelectMeasure = () => {
+        if (isNaN(selectedMeasure) || selectedMeasure < 0) {
+            setSelectedMeasure(0);
+        } else if (selectedMeasure > tabulature.getLength() - 1) {
+            setSelectedMeasure(tabulature.getLength() - 1)
         }
     }
 
-    const [tempoFactor, setTempoFactor] = useState(1); // Domyœlnie 1
-
-    // Handler zmieniaj¹cy tempo transportu
-    const handleTempoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseFloat(event.target.value);
-        if (player) {
-            player.changeTempo(value);
-        }
-        setTempoFactor(value);
-    };
-
     return (
-        <div>
-            <Button
-                onClick={() => { play() }}
+        <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+
+            <InputGroup
+                className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}
             >
-                Play
-            </Button>
-            <Button
-                onClick={() => { pause() }}
+                <Button
+                    onClick={() => { pause() }}
+                    variant={tabulaturePlayer.isPlaying === false ? "secondary" : "light"}
+                    className="border flex-grow-1"
+                >
+                    <PauseFill />
+                </Button>
+                <Button
+                    onClick={() => { play() }}
+                    variant={tabulaturePlayer.isPlaying === true ? "secondary" : "light"}
+                    className="border flex-grow-1"
+                >
+                    <PlayFill />
+                </Button>
+
+                <Button
+                    onClick={() => { stop() }}
+                    variant="light"
+                    className="border flex-grow-1"
+                >
+                    <StopFill />
+                </Button>
+            </InputGroup>
+
+            
+              
+            {playerErrors['playError'] && (
+                <InputGroup className="w-100 d-flex align-items-center" style={{ flex: '1 1 100%' }}>
+                    <div className="text-danger">
+                        {playerErrors["playError"]}
+                    </div>
+
+                </InputGroup>
+            )}
+
+
+
+            <InputGroup
+                className="w-100 d-flex align-items-center" style={{ flex: '1 1 33%' }}
             >
-                Pause
-            </Button>
-            <Button
-                onClick={() => { stop() }}
+                {tabulature.getLength() > 1 && (
+                    <>
+                        <InputGroup.Text
+                            className="w-50"
+                        >
+                            Start at measure:
+                        </InputGroup.Text>
+                        <FormControl
+                            type='number'
+                            min={0}
+                            value={isNaN(selectedMeasure) ? '' : selectedMeasure}
+                            max={tabulature.getLength() - 1}
+                            onChange={handleSelectMeasure}
+                            onBlur={handleBlurSelectMeasure}
+                            className="w-50"
+                            disabled={tabulaturePlayer.isPlaying === true || tabulaturePlayer.isPlaying === false}
+                        />
+                    </>
+                )}
+            </InputGroup>
+
+            <InputGroup
+                className="w-100 d-flex align-items-center" style={{ flex: '1 1 30%' }}
             >
-                Stop
-            </Button>
-            <h3>Speed {Math.round(tempoFactor * 100)} %</h3>
-            <input
-                type="range"
-                min={0.25}
-                max={2}
-                step={0.05}
-                value={tempoFactor}
-                onChange={handleTempoChange}
-                className="form-range"
-            />
+                <InputGroup.Text
+                    className="d-flex justify-content-center align-items-center w-100"
+                >
+                    &#8203;
+                    <input
+                        className="flex-grow-1"
+                        type="range"
+                        min={0.25}
+                        max={2}
+                        step={0.05}
+                        value={tempoFactor}
+                        onChange={handleTempoChange}
+                    />
+                </InputGroup.Text>
+
+            </InputGroup>
+
+            <InputGroup
+                className="w-100 d-flex align-items-center" style={{ flex: '1 1 33%' }}
+            >
+                <InputGroup.Text
+                    className="flex-grow-1 fw-bold w-100 "
+                    style={{textAlign: 'center'} } 
+                >
+                    Speed: {Math.round(tempoFactor * 100)}%
+                </InputGroup.Text>
+            </InputGroup>
+            
+
+            
         </div>
     );
-}
+})

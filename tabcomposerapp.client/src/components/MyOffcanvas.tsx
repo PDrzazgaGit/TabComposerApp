@@ -1,6 +1,6 @@
+import { useWindowSize } from '@react-hook/window-size';
 import { FC, ReactNode, useState } from 'react';
 import Offcanvas, { OffcanvasProps } from 'react-bootstrap/Offcanvas';
-import { useWindowSize } from '@react-hook/window-size';  // Hook do wykrywania rozmiaru okna
 
 interface MyOffcanvasProps extends OffcanvasProps {
     trigger?: ReactNode;

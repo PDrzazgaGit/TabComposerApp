@@ -1,4 +1,5 @@
-import { Sound, Notation, IPause } from "./";
+import { action, makeObservable, observable } from "mobx";
+import { IPause, Notation, Sound } from "./";
 
 export enum Articulation {
     None,
@@ -42,6 +43,7 @@ export class Note extends Sound implements INote {
     public noteDuration: NoteDuration;
     public articulation: Articulation;
     private timeStamp: number;
+    public playing: boolean;
     constructor(
         sound: Sound,
         fret: number,   
@@ -80,6 +82,27 @@ export class Note extends Sound implements INote {
         this.kind = NoteKind.Note;
         this.slide = false;
         this.overflow = true;
+        this.playing = false;
+        makeObservable(this, {
+            kind: observable,
+            slide: observable,
+            overflow: observable,
+            fret: observable,
+            noteDuration: observable,
+            articulation: observable,
+            playing: observable,
+            //timeStamp: observable,
+
+            // Akcje
+            setTimeStampMs: action,
+            setArticulation: action,
+
+            getTimeStampMs: action,
+            getEndTimeStampMs: action,
+
+            // Metody
+            clone: action,
+        });
     }
 
     public setTimeStampMs(timeStampMs: number): void {
@@ -90,8 +113,6 @@ export class Note extends Sound implements INote {
     }
 
     public clone(): Note {
-        console.log(this.noteDuration)
-
         const note: Note = new Note(this.frequency, this.notation, this.octave, this.fret , this.getDurationMs(), this.noteDuration);//GuitarScale.getNote(this.fret, this, this.getDurationMs(), this.noteDuration);
         note.setTimeStampMs(this.getTimeStampMs());
         note.articulation = this.articulation;

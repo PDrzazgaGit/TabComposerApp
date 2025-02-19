@@ -1,46 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using TabComposerApp.Server.Models;
+using TabComposerApp.Server.Models.DataTransferObjects;
 
-namespace TabComposerApp.Server.Services
-{
-    public class SerializedNote
-    {
-        public int Fret { get; set; }
-        public float TimeStamp { get; set; }
-        public float NoteDuration { get; set; }
-        public int Articulation { get; set; }
-    }
-
-    public class SerializedMeasure
-    {
-        public int Tempo { get; set; }
-        public int Numerator { get; set; }
-        public int Denominator { get; set; }
-        public Dictionary<int, List<SerializedNote>>? Notes { get; set; }
-    }
-
-    public class SerializedSound
-    {
-        public int Notation { get; set; }
-        public int Octave { get; set; }
-    }
-
-    public class SerializedTuning
-    {
-        public  Dictionary<int, SerializedSound>? Tuning { get; set; }
-    }
-
-    public class SerializedTabulature
-    {
-        public string? Title { get; set; }
-        public string? Author { get; set; }
-        public int Frets { get; set; }
-        public SerializedTuning? Tuning { get; set; }
-        public List<SerializedMeasure>? Measures { get; set; }
-        public string? Description { get; set; }
-    }
+namespace TabComposerApp.Server.Services { 
+    
     public class TablatureService : ITablatureService
     {
         public TablatureService() { }

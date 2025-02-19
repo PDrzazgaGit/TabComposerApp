@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks";
 
 
 export const SessionExpired = () => {
@@ -9,15 +10,18 @@ export const SessionExpired = () => {
 
     const [show, setShow] = useState(true);
 
+    const { signOut } = useAuth();
+
     const handleClose = () => {
         setShow(false);
+        signOut();
         navigate("/login");   
     }
 
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>New tablature</Modal.Title>
+                <Modal.Title>Session expired</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 Your session expired. Please login again.

@@ -23,7 +23,7 @@ namespace TabComposerApp.Server.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("Authorize")]
+        [HttpGet("authorize")]
         public IActionResult Authorize()
         {
             return Ok(new { Message = "User is authorized." });

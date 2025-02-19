@@ -5,3 +5,7 @@ export * from "./NoteModel";
 export * from "./PauseModel";
 export * from "./MeasureModel";
 export * from "./TabulatureModel";
+export * from "./AppErrorsModel";
+export * from "./SerializedTabulatureModel";
+export * from "./TabulatureDataModel";
+export * from "./UserModel";

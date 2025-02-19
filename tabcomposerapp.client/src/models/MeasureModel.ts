@@ -1,4 +1,4 @@
-import { NoteDuration, INote, IPause, Articulation } from "./"
+import { Articulation, INote, IPause, NoteDuration } from "./";
 
 export interface IMeasure {
     readonly frets: number;
@@ -6,6 +6,7 @@ export interface IMeasure {
     readonly numerator: number;
     readonly denominator: number;
     readonly measureDurationMs: number;
+    map(callback: (notes: (INote | IPause)[], stringId: number) => void): void;
     deepClone(): IMeasure;
     putNote(fret: number, stringId: number, timeStamp: number, noteDuration?: NoteDuration): INote | undefined;
     pushNote(fret: number, stringId: number, noteDuration?: NoteDuration): INote | undefined;
@@ -21,8 +22,8 @@ export interface IMeasure {
     putPause(stringId: number, timeStamp: number, noteDuration: NoteDuration): IPause | undefined;
     deleteNote(note: INote | IPause, stringId: number, shift:boolean): void;
     clone(): IMeasure;
-    moveNoteRight(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
-    moveNoteLeft(note: INote | IPause, stringId: number, interval?: NoteDuration): boolean;
+    moveNoteRight(note: INote | IPause, stringId: number, jump: boolean, interval?: NoteDuration): boolean;
+    moveNoteLeft(note: INote | IPause, stringId: number, jump: boolean, interval?: NoteDuration): boolean;
     canPushNote(stringId: number, noteDuration: NoteDuration): boolean;
     changeArticulation(note: INote, stringId: number, articulation: Articulation): void;
     setSlide(note: INote, stringId: number, slide: boolean): void;

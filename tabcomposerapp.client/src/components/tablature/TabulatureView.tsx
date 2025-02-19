@@ -1,16 +1,16 @@
-import { MeasureProvider } from "../../context/MeasureProvider";
-import { useTabulature } from "../../hooks/useTabulature";
-import { MeasureLabel } from "./measures/MeasureLabel";
-import { MeasureView } from "./measures/MeasureView";
-import { TabulatureContainer } from "./TabulatureContainer";
-import { EditorToolbar } from "./toolbar/EditorToolbar";
+import { observer } from "mobx-react-lite";
+import { MeasureProvider } from "../../context";
+import { useTabulature } from "../../hooks";
+import { TabulatureContainer } from "./";
+import { MeasureLabel, MeasureView } from "./measures";
+import { EditorToolbar } from "./toolbar";
 
-export const TabulatureView = () => {
+export const TabulatureView = observer(() => {
 
     const { tabulature, measuresPerRow } = useTabulature();
 
     return (
-        <EditorToolbar playerMode={ true }>
+        <EditorToolbar playerMode={true}>
             <div
                 className="d-flex justify-content-center align-items-center mb-3 column"
             >
@@ -21,7 +21,7 @@ export const TabulatureView = () => {
             <TabulatureContainer maxItemsPerRow={measuresPerRow} >
                 {tabulature!.map((measure, index) => {
                     return (
-                        <MeasureProvider key={index} initialMeasure={measure} initialMeasureId={index}>
+                        <MeasureProvider key={index} measure={measure} initialMeasureId={index}>
                             <MeasureLabel />
                             <MeasureView isEditor={false} measurePerRow={measuresPerRow} />
 
@@ -31,4 +31,4 @@ export const TabulatureView = () => {
             </TabulatureContainer>
         </EditorToolbar>
     );
-}
+})

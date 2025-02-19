@@ -1,12 +1,14 @@
 import { createContext } from 'react';
-import { IUser } from '../models/UserModel';
-import { AppErrors } from '../models/AppErrorsModel';
+import { IClientAuth } from '../api';
+import { AppErrors, IUser } from '../models';
 
 interface AuthContextType {
-    user: IUser | null;
+    clientAuth: IClientAuth;
+    user: IUser | null | undefined;
     errors: AppErrors;
     clearErrors: () => void;
-    getToken: () => Promise<string | null>;
+    getToken: () => string | null;
+    getTokenWithAuth: () => Promise<string | null>;
     authorize: () => Promise<boolean>;
     signUp: (email: string, username: string, password: string) => Promise<boolean>;
     signIn: (username: string, password: string, remember: boolean) => Promise<boolean>;
