@@ -29,7 +29,7 @@ namespace TabComposerApp.Server.Controllers
             return Ok(new { Message = "User is authorized." });
         }
 
-        // Sign Up Endpoint
+ 
         [AllowAnonymous]
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] UserRegistration model)
@@ -52,7 +52,7 @@ namespace TabComposerApp.Server.Controllers
             }
         }
 
-        // Sign In Endpoint
+    
         [AllowAnonymous]
         [HttpPost("signin")]
         public async Task<IActionResult> SignIn([FromBody] UserLogin model)
@@ -70,7 +70,7 @@ namespace TabComposerApp.Server.Controllers
             }
         }
 
-        // Helper method to generate JWT
+
         private string GenerateJwtToken(AppUser user)
         {
             var claims = new[]

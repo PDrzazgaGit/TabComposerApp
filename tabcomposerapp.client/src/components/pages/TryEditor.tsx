@@ -8,7 +8,7 @@ import { TabulatureEditorView } from "../tablature";
 export const TryEditor = () => {
 
     const tabulature = useMemo(() => {
-        const tab = new Tabulature(TuningFactory.EStandardTuning(), 24, "Try TabComposer!", "Guest", "There's your tab-ground! Remember that any progress will be saved. Consider creating account!");
+        const tab = new Tabulature(TuningFactory.EStandardTuning(), 24, "Try TabComposer!", "Guest", "Here's your tab ground! Remember that your progress won't be saved. Consider creating an account!");
 
         for (let i = 0; i < 1; i++) {
             tab.addMeasure(100, 4, 4);

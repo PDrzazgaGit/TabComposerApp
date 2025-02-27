@@ -34,7 +34,7 @@ namespace TabComposerApp.Server.Controllers
         {
             try
             {
-                // Przetwarzanie dużego JSON-a
+        
                 if (request == null)
                 {
                     return BadRequest(new { Message = "Invalid tablature data." });
@@ -139,7 +139,7 @@ namespace TabComposerApp.Server.Controllers
                     var description = data.Description;
                     var author = data.Author;
 
-                    // Dodaj dane do słownika
+                   
                     response[id] = new
                     {
                         Author = author,
@@ -213,7 +213,7 @@ namespace TabComposerApp.Server.Controllers
                     var id = tab.Id;
 
                     var description = data.Description;
-                    // Dodaj dane do słownika
+                
                     response[id] = new
                     {
                         Title = title,
